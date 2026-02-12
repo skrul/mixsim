@@ -1,0 +1,17 @@
+{
+  "title": "Geometria Chicken - Chasque",
+  "stems": [
+    { "url": "/stems/GeometriaChicken_Chasque_Full/01_Kick.wav", "label": "Kick" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/02_SnareUp.wav", "label": "Snare Up" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/03_SnareDown.wav", "label": "Snare Dn" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/04_SidestickSample.wav", "label": "Sidestick" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/05_Tom.wav", "label": "Tom" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/06_Overheads.wav", "label": "Overheads" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/07_Bass.wav", "label": "Bass" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/08_ElecGtr1.wav", "label": "Gtr 1" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/09_ElecGtr2.wav", "label": "Gtr 2" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/10_ElecGtr3.wav", "label": "Gtr 3" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/11_ElecGtr4.wav", "label": "Gtr 4" },
+    { "url": "/stems/GeometriaChicken_Chasque_Full/12_LeadVox.wav", "label": "Lead Vox" }
+  ]
+}

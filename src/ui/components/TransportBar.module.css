@@ -1,0 +1,55 @@
+.transportBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #16162a;
+  border-bottom: 1px solid #333;
+}
+
+.transportBar button {
+  padding: 6px 16px;
+  background: #333;
+  color: #e0e0e0;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.transportBar button:hover:not(:disabled) {
+  background: #444;
+}
+
+.transportBar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.transportBar button:active:not(:disabled) {
+  background: #555;
+}
+
+.playButton {
+  background: #2a5a2a !important;
+  border-color: #3a7a3a !important;
+}
+
+.playButton:hover:not(:disabled) {
+  background: #3a7a3a !important;
+}
+
+.timeDisplay {
+  margin-left: auto;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: #8f8;
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #aaa;
+  margin-left: 16px;
+}

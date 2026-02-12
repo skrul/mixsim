@@ -1,0 +1,72 @@
+.faderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  user-select: none;
+  touch-action: none;
+}
+
+.label {
+  font-size: 10px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.track {
+  position: relative;
+  width: 40px;
+  height: 200px;
+  background: #222;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.trackFill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(100, 100, 255, 0.15);
+  border-radius: 0 0 3px 3px;
+  pointer-events: none;
+}
+
+.unityMark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+.unityLabel {
+  position: absolute;
+  right: -14px;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.thumb {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  height: 8px;
+  background: #ccc;
+  border-radius: 2px;
+  transform: translateY(50%);
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.dbReadout {
+  font-size: 10px;
+  color: #aaa;
+  font-variant-numeric: tabular-nums;
+  min-width: 48px;
+  text-align: center;
+}

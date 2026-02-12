@@ -1,0 +1,28 @@
+.strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  background: #1e1e30;
+  border-radius: 4px;
+  min-width: 64px;
+}
+
+.channelLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ccc;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+}
+
+.meterFaderRow {
+  display: flex;
+  gap: 4px;
+  align-items: stretch;
+  height: 200px;
+}

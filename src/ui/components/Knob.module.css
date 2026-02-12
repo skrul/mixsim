@@ -1,0 +1,45 @@
+.knobContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  user-select: none;
+  touch-action: none;
+}
+
+.label {
+  font-size: 9px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.knobBody {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #555, #2a2a2a);
+  border: 2px solid #444;
+  cursor: pointer;
+}
+
+.indicator {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 2px;
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 1px;
+  transform-origin: bottom center;
+  pointer-events: none;
+}
+
+.valueReadout {
+  font-size: 10px;
+  color: #aaa;
+  font-variant-numeric: tabular-nums;
+  min-width: 48px;
+  text-align: center;
+}

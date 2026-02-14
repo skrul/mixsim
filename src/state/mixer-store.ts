@@ -33,6 +33,7 @@ export interface ChannelState {
 }
 
 export type TransportState = 'stopped' | 'playing'
+export type SourceMode = 'stems' | 'tones'
 
 export interface MasterState {
   faderPosition: number
@@ -50,6 +51,10 @@ export interface MixerState {
   stemsLoaded: boolean
   loadingError: string | null
   soloActive: boolean
+  sourceMode: SourceMode
+
+  // Source mode
+  setSourceMode: (mode: SourceMode) => void
 
   // Channel actions
   setChannelGain: (channelId: number, gainDb: number) => void
@@ -133,7 +138,7 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     eqMidQ: 1.0,
     eqHighFreq: 5000,
     eqHighGain: 0,
-    sends: Array.from({ length: NUM_MIX_BUSES }, () => ({ level: 0, preFader: false })),
+    sends: Array.from({ length: NUM_MIX_BUSES }, () => ({ level: 0, preFader: true })),
     dcaGroups: [],
   }
 }
@@ -208,6 +213,10 @@ export const useMixerStore = create<MixerState>()(
     stemsLoaded: false,
     loadingError: null,
     soloActive: false,
+    sourceMode: 'stems',
+
+    // Source mode
+    setSourceMode: (mode) => set({ sourceMode: mode }),
 
     // Channel actions
     setChannelGain: (channelId, gainDb) =>

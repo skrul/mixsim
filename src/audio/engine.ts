@@ -3,6 +3,7 @@ import { faderPositionToGain, dbToGain } from '@/audio/fader-taper'
 import { createChannelChain, type ChannelChain } from '@/audio/channel'
 import { TransportManager } from '@/audio/transport'
 import { MeteringManager } from '@/audio/metering'
+import { ToneGenerator } from '@/audio/tone-generator'
 import { NUM_MIX_BUSES, type MonitorSource } from '@/state/mixer-model'
 
 export interface AudioEngine {
@@ -10,6 +11,7 @@ export interface AudioEngine {
   dispose: () => void
   getTransport: () => TransportManager | null
   getMetering: () => MeteringManager | null
+  getToneGenerator: () => ToneGenerator | null
 }
 
 interface MixBusChain {
@@ -33,6 +35,7 @@ export function createAudioEngine(): AudioEngine {
   let monitorLevel: GainNode | null = null
   let transport: TransportManager | null = null
   let metering: MeteringManager | null = null
+  let toneGenerator: ToneGenerator | null = null
   const unsubscribers: (() => void)[] = []
 
   function applyMonitorTaps(source: MonitorSource, soloActive: boolean): void {
@@ -122,6 +125,7 @@ export function createAudioEngine(): AudioEngine {
     subscribeToStore()
 
     transport = new TransportManager(context, channels)
+    toneGenerator = new ToneGenerator(context, channels)
     metering = new MeteringManager(
       channels.map((ch) => ch.analyser),
       channels.map((ch) => ch.preFaderAnalyser),
@@ -382,6 +386,7 @@ export function createAudioEngine(): AudioEngine {
 
   function dispose(): void {
     metering?.stop()
+    toneGenerator?.dispose()
     transport?.dispose()
     unsubscribers.forEach((unsub) => unsub())
     unsubscribers.length = 0
@@ -395,5 +400,6 @@ export function createAudioEngine(): AudioEngine {
     dispose,
     getTransport: () => transport,
     getMetering: () => metering,
+    getToneGenerator: () => toneGenerator,
   }
 }

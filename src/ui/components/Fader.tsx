@@ -1,5 +1,6 @@
 import { useRef, useCallback } from 'react'
 import { faderPositionToDb, formatDb } from '@/audio/fader-taper'
+import { useSurfaceStore } from '@/state/surface-store'
 import styles from './Fader.module.css'
 
 interface FaderProps {
@@ -7,9 +8,11 @@ interface FaderProps {
   onChange: (value: number) => void
   label?: string
   showDb?: boolean
+  helpText?: string
 }
 
-export function Fader({ value, onChange, label, showDb = true }: FaderProps) {
+export function Fader({ value, onChange, label, showDb = true, helpText }: FaderProps) {
+  const setHelpText = useSurfaceStore((s) => s.setHelpText)
   const trackRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
 
@@ -49,7 +52,11 @@ export function Fader({ value, onChange, label, showDb = true }: FaderProps) {
   const thumbPercent = value * 100
 
   return (
-    <div className={styles.faderContainer}>
+    <div
+      className={styles.faderContainer}
+      onMouseEnter={helpText ? () => setHelpText(helpText) : undefined}
+      onMouseLeave={helpText ? () => setHelpText('') : undefined}
+    >
       {label && <div className={styles.label}>{label}</div>}
       <div
         ref={trackRef}

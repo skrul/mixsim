@@ -7,6 +7,9 @@ dist/
 # Audio stems (large binary files, not suitable for git)
 public/stems/
 
+# Mixer manuals
+manuals/
+
 # Editor
 .vscode/
 *.swp

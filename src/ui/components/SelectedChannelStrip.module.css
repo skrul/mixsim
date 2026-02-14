@@ -1,0 +1,136 @@
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 220px;
+  min-width: 220px;
+  padding: 8px;
+  background: #1e1e30;
+  border-radius: 4px;
+  border-right: 2px solid #444;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #252540;
+  border-radius: 3px;
+}
+
+.channelNumber {
+  font-size: 14px;
+  font-weight: 700;
+  color: #888;
+  font-variant-numeric: tabular-nums;
+}
+
+.channelName {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.section {
+  padding: 8px;
+  background: #222238;
+  border-radius: 3px;
+  border: 1px solid #333;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.sectionHeader .sectionLabel {
+  margin-bottom: 0;
+}
+
+.knobRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.gainRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.gainMeter {
+  height: 60px;
+  width: 8px;
+}
+
+.eqBand {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #333;
+}
+
+.bandLabel {
+  font-size: 9px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.sendRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-top: 1px solid #333;
+}
+
+.sendRow:first-of-type {
+  border-top: none;
+}
+
+.sendLabel {
+  font-size: 9px;
+  font-weight: 600;
+  color: #888;
+  width: 40px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dcaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.placeholder {
+  opacity: 0.35;
+}
+
+.placeholderText {
+  font-size: 10px;
+  color: #666;
+  font-style: italic;
+}

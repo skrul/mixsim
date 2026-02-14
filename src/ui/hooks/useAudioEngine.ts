@@ -27,7 +27,8 @@ export function useAudioEngine() {
         // (engine reads channel count from store during init)
         useMixerStore.getState().initChannels(
           manifest.stems.length,
-          manifest.stems.map((s) => s.label)
+          manifest.stems.map((s) => s.label),
+          manifest.stems.map((s) => s.inputType ?? 'direct')
         )
 
         const engine = createAudioEngine()

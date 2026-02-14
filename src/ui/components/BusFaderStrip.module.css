@@ -2,27 +2,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 8px 4px;
   background: #1e1e30;
   border-radius: 4px;
   min-width: 64px;
+  border: 1px solid transparent;
 }
 
-.channelLabel {
-  font-size: 11px;
-  font-weight: 600;
-  color: #ccc;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 60px;
+.busNumber {
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
 }
 
 .meterFaderRow {
   display: flex;
   gap: 4px;
   align-items: stretch;
-  height: 200px;
+  height: 180px;
+}
+
+.buttons {
+  display: flex;
+  gap: 4px;
 }

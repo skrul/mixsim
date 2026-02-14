@@ -16,12 +16,6 @@
   align-items: stretch;
 }
 
-.channelStrips {
-  display: flex;
-  gap: 4px;
-  flex: 1;
-}
-
 .loading {
   display: flex;
   align-items: center;

@@ -1,4 +1,5 @@
 import { useMixerStore } from '@/state/mixer-store'
+import { useSurfaceStore } from '@/state/surface-store'
 import styles from './TransportBar.module.css'
 
 function formatTime(seconds: number): string {
@@ -15,16 +16,24 @@ export function TransportBar() {
   const play = useMixerStore((s) => s.play)
   const stop = useMixerStore((s) => s.stop)
   const rewind = useMixerStore((s) => s.rewind)
+  const setHelpText = useSurfaceStore((s) => s.setHelpText)
 
   return (
     <div className={styles.transportBar}>
-      <button onClick={rewind} disabled={!stemsLoaded}>
+      <button
+        onClick={rewind}
+        disabled={!stemsLoaded}
+        onMouseEnter={() => setHelpText("Return playback to the beginning of the track.")}
+        onMouseLeave={() => setHelpText('')}
+      >
         ⏮ Rewind
       </button>
       <button
         onClick={transportState === 'playing' ? stop : play}
         disabled={!stemsLoaded}
         className={transportState !== 'playing' ? styles.playButton : undefined}
+        onMouseEnter={() => setHelpText("Start or stop playback of the loaded audio stems. Each stem is routed to its own input channel on the mixer.")}
+        onMouseLeave={() => setHelpText('')}
       >
         {transportState === 'playing' ? '⏹ Stop' : '▶ Play'}
       </button>

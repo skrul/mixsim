@@ -8,6 +8,8 @@
 
 export interface MeterLevels {
   channels: Float32Array
+  preFaderChannels: Float32Array
+  mixBuses: Float32Array
   masterL: number
   masterR: number
 }
@@ -15,6 +17,8 @@ export interface MeterLevels {
 // Shared singleton — written by MeteringManager, read by Meter components
 export const meterLevels: MeterLevels = {
   channels: new Float32Array(8).fill(-Infinity),
+  preFaderChannels: new Float32Array(8).fill(-Infinity),
+  mixBuses: new Float32Array(6).fill(-Infinity),
   masterL: -Infinity,
   masterR: -Infinity,
 }
@@ -31,21 +35,40 @@ function computePeakDb(samples: Float32Array): number {
 
 export class MeteringManager {
   private channelAnalysers: AnalyserNode[]
+  private preFaderAnalysers: AnalyserNode[]
+  private mixBusAnalysers: AnalyserNode[]
   private masterAnalyser: AnalyserNode
   private rafId: number | null = null
-  private timeDomainBuffers: Float32Array[]
-  private masterBuffer: Float32Array
+  private timeDomainBuffers: Float32Array<ArrayBuffer>[]
+  private preFaderBuffers: Float32Array<ArrayBuffer>[]
+  private mixBusBuffers: Float32Array<ArrayBuffer>[]
+  private masterBuffer: Float32Array<ArrayBuffer>
 
-  constructor(channelAnalysers: AnalyserNode[], masterAnalyser: AnalyserNode) {
+  constructor(
+    channelAnalysers: AnalyserNode[],
+    preFaderAnalysers: AnalyserNode[],
+    mixBusAnalysers: AnalyserNode[],
+    masterAnalyser: AnalyserNode
+  ) {
     this.channelAnalysers = channelAnalysers
+    this.preFaderAnalysers = preFaderAnalysers
+    this.mixBusAnalysers = mixBusAnalysers
     this.masterAnalyser = masterAnalyser
 
     this.timeDomainBuffers = channelAnalysers.map(
       (a) => new Float32Array(a.fftSize)
     )
+    this.preFaderBuffers = preFaderAnalysers.map(
+      (a) => new Float32Array(a.fftSize)
+    )
+    this.mixBusBuffers = mixBusAnalysers.map(
+      (a) => new Float32Array(a.fftSize)
+    )
     this.masterBuffer = new Float32Array(masterAnalyser.fftSize)
 
     meterLevels.channels = new Float32Array(channelAnalysers.length).fill(-Infinity)
+    meterLevels.preFaderChannels = new Float32Array(preFaderAnalysers.length).fill(-Infinity)
+    meterLevels.mixBuses = new Float32Array(mixBusAnalysers.length).fill(-Infinity)
     meterLevels.masterL = -Infinity
     meterLevels.masterR = -Infinity
   }
@@ -64,6 +87,8 @@ export class MeteringManager {
       this.rafId = null
     }
     meterLevels.channels.fill(-Infinity)
+    meterLevels.preFaderChannels.fill(-Infinity)
+    meterLevels.mixBuses.fill(-Infinity)
     meterLevels.masterL = -Infinity
     meterLevels.masterR = -Infinity
   }
@@ -72,6 +97,16 @@ export class MeteringManager {
     for (let i = 0; i < this.channelAnalysers.length; i++) {
       this.channelAnalysers[i].getFloatTimeDomainData(this.timeDomainBuffers[i])
       meterLevels.channels[i] = computePeakDb(this.timeDomainBuffers[i])
+    }
+
+    for (let i = 0; i < this.preFaderAnalysers.length; i++) {
+      this.preFaderAnalysers[i].getFloatTimeDomainData(this.preFaderBuffers[i])
+      meterLevels.preFaderChannels[i] = computePeakDb(this.preFaderBuffers[i])
+    }
+
+    for (let i = 0; i < this.mixBusAnalysers.length; i++) {
+      this.mixBusAnalysers[i].getFloatTimeDomainData(this.mixBusBuffers[i])
+      meterLevels.mixBuses[i] = computePeakDb(this.mixBusBuffers[i])
     }
 
     this.masterAnalyser.getFloatTimeDomainData(this.masterBuffer)

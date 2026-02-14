@@ -155,46 +155,103 @@ Deliverables:
 - Basic peak metering using AnalyserNode (per-channel and master) with direct DOM updates (not React state)
 - Simple functional UI layout — no skinning yet, just usable controls in a row. Keep the UI/engine separation clean (state store as contract) but don't formalize a skin interface yet
 
-### Phase 1b — Core Mixing Controls
-**Goal:** The mixer is actually useful for mixing — you can shape a basic mix with these controls.
+### Phase 1b — Input Channel Banks + Selected Channel Strip
+**Goal:** Introduce the fundamental digital mixer paradigm: input channels are minimal (fader, mute, solo, select), and all detailed editing happens on a single shared channel strip that reflects whichever channel is currently selected. This is the defining UX pattern of the X32 and most digital mixers.
 
-Deliverables:
-- Pan per channel (StereoPannerNode)
-- Mute per channel
-- Solo (AFL) — this requires routing design: solo bus that taps post-fader without affecting the main bus. Design the monitoring signal flow before implementing
-- 3-band EQ per channel (low shelf, mid bell, high shelf) using BiquadFilterNode
+Refer to the X32 Compact manual (`manuals/behringer_x32c_manual.pdf`) for the physical layout reference — particularly pages 5–8 which cover the operational overview, channel strip sections, input channel banks, and group/bus channel banks.
+
+This phase restructures the Phase 1a UI from "one fat strip per channel" to the correct two-part layout:
+
+**Input Channel Bank (the fader section):**
+
+On the physical X32 Compact, this is the lower section of the console. It contains 8 motorized faders that represent whichever channels are assigned to the current layer. Each fader strip is minimal — no processing knobs. The input channel bank contains:
+
+- Each input channel shows: channel number, scribble strip (name + color), meter, solo button, mute button, **select button**, fader
+- No processing knobs on the input channels — those live on the selected channel strip
+- The currently selected channel is visually highlighted (on the X32, the select button illuminates)
+- Mute per channel (red button) — mutes the channel's contribution to the main bus
+- Solo per channel (yellow button, AFL mode) — taps post-fader to a solo/monitor bus without affecting the main bus output. Requires routing design: a separate solo bus node that Meter components can read from. When any channel is soloed, headphone output switches to the solo bus.
+- Layer buttons switch which channels are visible on the fader bank. On the X32 Compact, the layers are: Input Ch 1–8, 9–16, Aux In/USB/FX Rtn, Bus Masters. For Phase 1b we only need input channel layers (e.g., Ch 1–8, Ch 9–12 for the 12-stem demo), but the layer system should be extensible for bus masters in later phases.
+
+**Selected Channel Strip (single, shared panel):**
+
+On the physical X32 Compact, this is the top-left section of the console. It is divided into sub-sections, each with a small group of dedicated rotary encoders and a small LCD display showing parameter values. Pressing the select button on any input channel makes that channel's parameters appear on these shared encoders. The sub-sections on the X32 Compact are:
+
+1. **Config/Preamp** — input source selection, +48V phantom power, input gain, low cut (high-pass filter). For Phase 1b we implement: input gain knob, low cut on/off toggle and frequency knob.
+2. **Gate** — threshold, range, attack, hold, release, on/off. *(Phase 2)*
+3. **Dynamics** (compressor) — threshold, ratio, attack, release, knee, gain, on/off. *(Phase 2)*
+4. **EQ** — 4-band parametric on the X32. For Phase 1b: 3-band EQ (low shelf, mid bell, high shelf) using BiquadFilterNode, with frequency/gain/Q knobs per band. The EQ section also has an on/off button.
+5. **Bus Sends** — send levels to aux/bus outputs. *(Phase 2)*
+
+For Phase 1b, we implement sub-sections 1 (Config/Preamp) and 4 (EQ), plus pan:
+
+- Shows which channel is selected (name, number, color) at the top
+- **Config/Preamp section:** Input gain knob, low cut on/off + frequency knob
+- **Pan control** (StereoPannerNode)
+- **EQ section:** 3-band EQ with frequency/gain knobs per band, EQ on/off toggle
+- Placeholder labels/areas for Gate, Dynamics, and Bus Sends sections (grayed out, showing they exist but aren't yet implemented)
+- All knob changes apply to the currently selected channel
+- Selecting a different channel instantly updates all knobs/displays to show that channel's parameters
+
+**Other deliverables:**
+- `selectedChannel` state in the Zustand store
+- Per-channel state expanded: `pan`, `eqEnabled`, `eqLow{Freq,Gain}`, `eqMid{Freq,Gain,Q}`, `eqHigh{Freq,Gain}`, `hpfEnabled`, `hpfFreq`, `mute`, `solo`
+- Audio engine updates: StereoPannerNode, BiquadFilterNodes for EQ, highpass filter per channel, mute/solo routing
 - Loop selection in transport
-- Proper fader law (logarithmic audio taper, 0 dB at ~75% travel)
-- Value display on controls when adjusting (like the X32's LCD behavior)
+- Value display on controls when adjusting (like the X32's LCD behavior — each sub-section has a small display area showing the current value of the knob being turned)
 
-### Phase 1c — X32 Skin & Polish
-**Goal:** The mixer looks and feels like an X32, not just a row of generic sliders.
+### Phase 2 — Mix Buses, Monitoring, and DCA Groups ✅
+**Goal:** Introduce the mixer model abstraction layer, mix buses for monitor mixes, headphone monitoring with selectable source, and DCA groups. This enables the student to practice building monitor mixes and using DCA groups — essential live sound workflows.
+
+Architecture change: The Zustand store is split into two stores:
+- **Mixer store** (`mixer-store.ts`): All audio-relevant state (channels, mix buses, DCAs, monitor, master, transport). Console-agnostic. The audio engine subscribes to this.
+- **Surface store** (`surface-store.ts`): UI-specific state (`selectedChannel`, `activeLayer`, `faderBankMode`). Skin-specific.
+
+Types and constants live in `mixer-model.ts`.
 
 Deliverables:
-- X32-style layout: 8 channel strips visible at a time with layer buttons (this is UI chrome only — still 8 actual channels in Phase 1)
-- Visual design matching X32 conventions: scribble strips with color coding, channel name/number, gate/comp indicator placeholders, solo/mute button styling
-- Faders respond to click-and-drag with realistic feel
-- Knobs respond to click-and-drag (vertical or rotational)
+- Store split: mixer-model types, surface-store, mixer-store refactored
+- 6 mix buses with fader/mute/label per bus
+- Per-channel sends (6 slots): level knob (0–100%) + pre/post-fader toggle per send
+- Sends bypass channel mute (pre-fader taps from panner, post-fader taps from faderGain — both before muteGain)
+- Mix bus audio chains: summing → faderGain → muteGain → analyser
+- Bus send controls on SelectedChannelStrip (6 knobs + PRE toggles)
+- Fader bank mode buttons (Inputs / Buses / DCAs) on the channel bank
+- BusFaderStrip component (bus label, meter, fader, mute)
+- Monitor section: selectable source (Main, Mix 1–6), solo auto-override, headphone level knob
+- Monitor routing: single path to destination with selectable source taps (replaces old dual-output approach)
+- 8 DCA groups with fader/mute per group (no audio nodes — pure control-plane)
+- DCA-aware engine: effective gain = channel fader × Π(DCA faders), effective mute = channel mute OR any assigned DCA muted
+- DcaFaderStrip component (DCA label, fader, mute)
+- DCA assignment section on SelectedChannelStrip (8 toggle buttons)
+- Mix bus metering in MeteringManager
+- Meter component updated with `mixBus` source type
+
+### Phase 3 — X32 Visual Polish
+**Goal:** The mixer looks and feels like an X32, not just a functional prototype.
+
+Deliverables:
+- Visual design matching X32 conventions: dark console aesthetic, scribble strip color coding, button styling (solo = yellow, mute = red, select = white/green illumination)
+- Selected channel strip visual layout matching X32's top-left panel: sub-sections stacked vertically with labeled borders, rotary encoders styled as the X32's push-encoders
+- EQ frequency response curve visualization in the selected channel strip
+- Main display area (matching the X32's 7" screen position) showing overview info — channel name, meters, basic status
 - Master section on the right with master fader and L/R meters
 - Transport bar styling
 - Responsive layout that works well on a laptop screen
-- Performance profiling checkpoint: measure CPU usage with 8 channels of EQ + metering active, identify bottlenecks before Phase 2 adds heavier DSP
+- Performance profiling checkpoint
 
-### Phase 2 — Full Channel Strip
-**Goal:** Match X32c channel strip depth.
+### Phase 4 — Full Channel Strip Processing
+**Goal:** The selected channel strip matches X32 processing depth.
 
 Deliverables:
 - Upgrade EQ to 4-band parametric with interactive frequency response curve
-- Add high-pass filter per channel
 - Custom AudioWorklet: Gate with full controls and gain reduction metering
 - Custom AudioWorklet: Compressor with full controls and gain reduction metering
-- 6 aux sends per channel (pre/post selectable)
-- 6 aux bus outputs with faders
-- Selected Channel detail view with all processing visible
 - Drag-and-drop stem loading
 - MIDI controller support via Web MIDI API
+- **Input patching / configuration UI:** A setup screen where users can assign stems to input channels and configure per-channel input type (mic/line/direct)
 
-### Phase 3 — Virtual Venue
+### Phase 5 — Virtual Venue
 **Goal:** Headphone monitoring that simulates a real room.
 
 Deliverables:
@@ -204,19 +261,37 @@ Deliverables:
 - Custom IR loading
 - A/B toggle for venue on/off
 
-### Phase 4 — Advanced Features
+### Phase 6 — Advanced Features
 **Goal:** Full training tool with session management.
 
 Deliverables:
-- DCA groups (assign multiple channels to a group fader)
 - Scene/snapshot save and recall (save full mixer state to JSON)
 - Bus groups / subgroups
+- Matrix buses
 - Effects rack (at least: reverb send, delay send, chorus)
 - Undo/redo for all mixer changes
 - Guided tutorials / challenges (e.g., "EQ this vocal to sit in the mix")
 - Export mix to WAV
 
-### Phase 5 — Additional Console Skins
+### Phase 7 — Live Show Simulation
+**Goal:** Simulate the full workflow of mixing a live performance, from load-in to the last song.
+
+Deliverables:
+- **Scenario manifest format:** Extend stems.config.json (or a new format) to define a multi-phase scenario with timed events, multiple audio segments, and scripted problems
+- **Line check phase:** Pre-recorded one-at-a-time instrument hits and vocal "check check" per channel. Student practices gain staging each input individually before anything else plays.
+- **Sound check phase:** Musicians play together (a jam or run-through). Student dials in EQ, sets rough mix, configures monitors.
+- **Performance phase:** Full song(s) play with ambient crowd noise mixed in. Student maintains the mix in real time.
+- **Scripted problems:** Timed events that introduce realistic issues the student must diagnose and fix:
+  - Feedback buildup on a vocal mic (injected resonance on a channel)
+  - Mic cable failure (signal drops to silence or intermittent crackling)
+  - Vocalist moving off-axis (level/EQ change over time)
+  - Guitar amp volume creeping up (stem level gradually increases)
+  - Monitor bleed / stage volume issues
+  - Wireless mic dropout
+- **Scoring / feedback:** Optional post-show report
+- **Crowd noise ambience:** Background crowd audio that can vary
+
+### Phase 8 — Additional Console Skins
 **Goal:** Demonstrate the multi-console architecture and broaden the audience.
 
 Deliverables:
@@ -277,7 +352,9 @@ mixsim/
 │   │       ├── useAudioEngine.ts
 │   │       └── useMidiController.ts
 │   ├── state/
-│   │   └── mixer-store.ts      # Zustand or similar for mixer state (console-agnostic)
+│   │   ├── mixer-model.ts      # Types, constants, interfaces for the mixer model
+│   │   ├── mixer-store.ts      # Zustand store for mixer state (console-agnostic)
+│   │   └── surface-store.ts    # Zustand store for UI/surface state (skin-specific)
 │   ├── App.tsx
 │   └── main.tsx
 ├── package.json

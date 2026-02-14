@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react'
+import { useSurfaceStore } from '@/state/surface-store'
 import styles from './Knob.module.css'
 
 interface KnobProps {
@@ -9,6 +10,7 @@ interface KnobProps {
   onChange: (value: number) => void
   label?: string
   formatValue?: (v: number) => string
+  helpText?: string
 }
 
 // Knob sweep: 270 degrees (-135 to +135)
@@ -23,7 +25,9 @@ export function Knob({
   onChange,
   label,
   formatValue,
+  helpText,
 }: KnobProps) {
+  const setHelpText = useSurfaceStore((s) => s.setHelpText)
   const lastYRef = useRef(0)
   const isDragging = useRef(false)
   const valueRef = useRef(value)
@@ -70,7 +74,11 @@ export function Knob({
   const displayValue = formatValue ? formatValue(value) : value.toFixed(1)
 
   return (
-    <div className={styles.knobContainer}>
+    <div
+      className={styles.knobContainer}
+      onMouseEnter={helpText ? () => setHelpText(helpText) : undefined}
+      onMouseLeave={helpText ? () => setHelpText('') : undefined}
+    >
       {label && <div className={styles.label}>{label}</div>}
       <div
         className={styles.knobBody}

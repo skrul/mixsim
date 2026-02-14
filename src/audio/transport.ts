@@ -1,9 +1,12 @@
 import { useMixerStore } from '@/state/mixer-store'
 import type { ChannelChain } from '@/audio/channel'
 
+export type InputType = 'mic' | 'line' | 'direct'
+
 export interface StemConfig {
   url: string
   label: string
+  inputType?: InputType
 }
 
 export interface StemManifest {
@@ -47,7 +50,11 @@ export class TransportManager {
 
       const maxDuration = Math.max(...this.stems.map((s) => s.buffer.duration))
       store.setDuration(maxDuration)
-      store.initChannels(this.stems.length, this.stems.map((s) => s.label))
+      store.initChannels(
+        this.stems.length,
+        this.stems.map((s) => s.label),
+        manifest.stems.map((s) => s.inputType ?? 'direct')
+      )
       store.setStemsLoaded(true)
     } catch (error) {
       store.setLoadingError(

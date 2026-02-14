@@ -1,25 +1,35 @@
 import { useRef, useEffect } from 'react'
 import { meterLevels } from '@/audio/metering'
+import { useSurfaceStore } from '@/state/surface-store'
 import styles from './Meter.module.css'
 
 interface MeterProps {
   channelIndex: number // Index into meterLevels.channels, or -1 for master
+  source?: 'postFader' | 'preFader' | 'mixBus' // Default: postFader
+  helpText?: string
 }
 
 const MIN_DB = -60
 const MAX_DB = 6
 
-export function Meter({ channelIndex }: MeterProps) {
+export function Meter({ channelIndex, source = 'postFader', helpText }: MeterProps) {
+  const setHelpText = useSurfaceStore((s) => s.setHelpText)
   const barRef = useRef<HTMLDivElement>(null)
   const displayLevelRef = useRef(-Infinity)
   const rafIdRef = useRef<number | null>(null)
 
   useEffect(() => {
     const tick = () => {
-      const currentDb =
-        channelIndex === -1
-          ? meterLevels.masterL
-          : (meterLevels.channels[channelIndex] ?? -Infinity)
+      let currentDb: number
+      if (channelIndex === -1) {
+        currentDb = meterLevels.masterL
+      } else if (source === 'mixBus') {
+        currentDb = meterLevels.mixBuses[channelIndex] ?? -Infinity
+      } else if (source === 'preFader') {
+        currentDb = meterLevels.preFaderChannels[channelIndex] ?? -Infinity
+      } else {
+        currentDb = meterLevels.channels[channelIndex] ?? -Infinity
+      }
 
       let display = displayLevelRef.current
       if (currentDb > display) {
@@ -55,10 +65,14 @@ export function Meter({ channelIndex }: MeterProps) {
         cancelAnimationFrame(rafIdRef.current)
       }
     }
-  }, [channelIndex])
+  }, [channelIndex, source])
 
   return (
-    <div className={styles.meterContainer}>
+    <div
+      className={styles.meterContainer}
+      onMouseEnter={helpText ? () => setHelpText(helpText) : undefined}
+      onMouseLeave={helpText ? () => setHelpText('') : undefined}
+    >
       <div className={styles.meterTrack}>
         <div ref={barRef} className={styles.meterBar} />
       </div>

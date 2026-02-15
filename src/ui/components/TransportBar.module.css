@@ -75,22 +75,9 @@
   background: #333 !important;
 }
 
-.sourceModeButton.activeSourceMode {
-  background: #224 !important;
-  border-color: #44a !important;
-  color: #aaf !important;
-}
-
 .separator {
   width: 1px;
   height: 24px;
   background: #444;
   margin: 0 4px;
-}
-
-.tonesIndicator {
-  margin-left: auto;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fa4;
 }

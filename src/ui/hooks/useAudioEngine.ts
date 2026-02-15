@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { createAudioEngine, type AudioEngine } from '@/audio/engine'
 import type { StemManifest } from '@/audio/transport'
-import { getToneLabel } from '@/audio/tone-generator'
 import { useMixerStore } from '@/state/mixer-store'
+import { NUM_INPUT_CHANNELS } from '@/state/mixer-model'
 
 export function useAudioEngine() {
   const engineRef = useRef<AudioEngine | null>(null)
@@ -24,13 +24,16 @@ export function useAudioEngine() {
         }
         const manifest: StemManifest = await manifestResponse.json()
 
-        // Initialize channels in store before engine starts
-        // (engine reads channel count from store during init)
-        useMixerStore.getState().initChannels(
-          manifest.stems.length,
-          manifest.stems.map((s) => s.label),
-          manifest.stems.map((s) => s.inputType ?? 'direct')
+        // Initialize all 32 channels — stems fill the first N, rest get defaults
+        const stemLabels = manifest.stems.map((s) => s.label)
+        const stemInputTypes = manifest.stems.map((s) => s.inputType ?? 'direct')
+        const labels = Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
+          stemLabels[i] ?? `Ch ${i + 1}`
         )
+        const inputTypes = Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
+          stemInputTypes[i] ?? 'direct'
+        )
+        useMixerStore.getState().initChannels(NUM_INPUT_CHANNELS, labels, inputTypes)
 
         const engine = createAudioEngine()
         engineRef.current = engine
@@ -39,21 +42,49 @@ export function useAudioEngine() {
         // Load stems
         await engine.getTransport()!.loadStems(manifest)
 
+        // Feed stem buffers to SourceManager
+        const sm = engine.getSourceManager()!
+        sm.setStemBuffers(engine.getTransport()!.getStemBuffers())
+
+        // Populate available stems in store and apply stems preset as default
+        const store = useMixerStore.getState()
+        store.setAvailableStems(
+          manifest.stems.map((s, i) => ({ index: i, label: s.label }))
+        )
+        store.applyPresetStems()
+
+        // Enumerate live audio devices
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices()
+          const audioInputs = devices
+            .filter((d) => d.kind === 'audioinput')
+            .map((d) => ({ deviceId: d.deviceId, label: d.label || `Input ${d.deviceId.slice(0, 8)}` }))
+          store.setAvailableLiveDevices(audioInputs)
+        } catch {
+          // No mic permission or no devices — leave empty
+        }
+
         // Start metering
         engine.getMetering()!.start()
 
-        // Subscribe to transport state changes to drive the transport
-        // Only act when in stems mode
+        // Subscribe to transport state changes to drive transport + SourceManager
         const unsubTransport = useMixerStore.subscribe(
           (state) => state.transportState,
           (transportState) => {
             const transport = engine.getTransport()
             if (!transport) return
-            if (useMixerStore.getState().sourceMode !== 'stems') return
+            const channelSources = useMixerStore.getState().channels.map((ch) => ch.inputSource)
+            const hasStemChannels = channelSources.some((s) => s.type === 'stem')
             if (transportState === 'playing') {
-              transport.play()
+              if (hasStemChannels) {
+                transport.play()
+                sm.startStemSources(transport.getOffset(), channelSources)
+              }
             } else {
-              transport.stop()
+              if (transport.getIsPlaying()) {
+                transport.stop()
+              }
+              sm.stopStemSources()
             }
           }
         )
@@ -65,39 +96,9 @@ export function useAudioEngine() {
             const transport = engine.getTransport()
             const state = useMixerStore.getState()
             if (!transport) return
-            if (state.sourceMode !== 'stems') return
             // Rewind detected: time jumped to 0 while stopped
             if (currentTime === 0 && prevTime > 0 && state.transportState === 'stopped') {
               transport.rewind()
-            }
-          }
-        )
-
-        // Subscribe to source mode changes to switch between stems and tones
-        const stemLabels = manifest.stems.map((s) => s.label)
-        const unsubSourceMode = useMixerStore.subscribe(
-          (state) => state.sourceMode,
-          (sourceMode) => {
-            const transport = engine.getTransport()
-            const toneGen = engine.getToneGenerator()
-            const store = useMixerStore.getState()
-            if (sourceMode === 'tones') {
-              // Stop stems if playing, then start tones
-              if (transport && store.transportState === 'playing') {
-                transport.stop()
-                store.stop()
-              }
-              // Update scribble strip labels to show tone descriptions
-              for (let i = 0; i < store.channels.length; i++) {
-                store.setChannelLabel(i, getToneLabel(i))
-              }
-              toneGen?.start()
-            } else {
-              // Stop tones and restore original stem labels
-              toneGen?.stop()
-              for (let i = 0; i < store.channels.length; i++) {
-                store.setChannelLabel(i, stemLabels[i] ?? `Ch ${i + 1}`)
-              }
             }
           }
         )
@@ -110,7 +111,6 @@ export function useAudioEngine() {
           dispose: () => {
             unsubTransport()
             unsubRewind()
-            unsubSourceMode()
             engine.dispose()
           },
         }

@@ -1,3 +1,4 @@
+/* Inline text button (used in detail panel) */
 .toggleButton {
   display: flex;
   align-items: center;
@@ -18,6 +19,38 @@
 
 .toggleButton:hover {
   background: #333;
+}
+
+/* Square pad button (used on fader strips) */
+.squareWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  user-select: none;
+}
+
+.squareButton {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #444;
+  border-radius: 3px;
+  background: #2a2a2a;
+  cursor: pointer;
+}
+
+.squareButton:hover {
+  background: #333;
+}
+
+.squareLabel {
+  font-size: 7px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  line-height: 1;
 }
 
 /* Mute: red when active */

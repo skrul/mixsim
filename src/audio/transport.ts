@@ -1,5 +1,4 @@
 import { useMixerStore } from '@/state/mixer-store'
-import type { ChannelChain } from '@/audio/channel'
 
 export type InputType = 'mic' | 'line' | 'direct'
 
@@ -21,17 +20,15 @@ interface StemData {
 
 export class TransportManager {
   private context: AudioContext
-  private channels: ChannelChain[]
   private stems: StemData[] = []
-  private sourceNodes: AudioBufferSourceNode[] = []
   private isPlaying = false
   private startedAt = 0
   private pausedAt = 0
   private rafId: number | null = null
+  private duration = 0
 
-  constructor(context: AudioContext, channels: ChannelChain[]) {
+  constructor(context: AudioContext) {
     this.context = context
-    this.channels = channels
   }
 
   async loadStems(manifest: StemManifest): Promise<void> {
@@ -48,8 +45,8 @@ export class TransportManager {
 
       this.stems = await Promise.all(loadPromises)
 
-      const maxDuration = Math.max(...this.stems.map((s) => s.buffer.duration))
-      store.setDuration(maxDuration)
+      this.duration = Math.max(...this.stems.map((s) => s.buffer.duration))
+      store.setDuration(this.duration)
       store.initChannels(
         this.stems.length,
         this.stems.map((s) => s.label),
@@ -63,6 +60,16 @@ export class TransportManager {
     }
   }
 
+  /** Get loaded stem audio buffers for SourceManager to use. */
+  getStemBuffers(): AudioBuffer[] {
+    return this.stems.map((s) => s.buffer)
+  }
+
+  /** Get the current playback offset (for starting stem sources). */
+  getOffset(): number {
+    return this.pausedAt
+  }
+
   play(): void {
     if (this.isPlaying) return
 
@@ -70,34 +77,8 @@ export class TransportManager {
       this.context.resume()
     }
 
-    this.disposeSourceNodes()
-
-    const offset = this.pausedAt
-    const startTime = this.context.currentTime
-
-    this.sourceNodes = this.stems.map((stem, i) => {
-      const source = this.context.createBufferSource()
-      source.buffer = stem.buffer
-      source.connect(this.channels[i].inputNode)
-      source.start(startTime, offset)
-      return source
-    })
-
-    this.startedAt = startTime - offset
+    this.startedAt = this.context.currentTime - this.pausedAt
     this.isPlaying = true
-
-    // Detect natural end of playback
-    if (this.sourceNodes.length > 0) {
-      this.sourceNodes[0].onended = () => {
-        if (this.isPlaying) {
-          this.isPlaying = false
-          this.pausedAt = 0
-          useMixerStore.getState().stop()
-          useMixerStore.getState().setCurrentTime(0)
-        }
-      }
-    }
-
     this.startTimeUpdates()
   }
 
@@ -105,38 +86,38 @@ export class TransportManager {
     if (!this.isPlaying) return
     this.pausedAt = 0
     this.isPlaying = false
-    this.disposeSourceNodes()
     this.stopTimeUpdates()
   }
 
   rewind(): void {
-    if (this.isPlaying) {
-      this.disposeSourceNodes()
-      this.isPlaying = false
-    }
+    this.isPlaying = false
     this.pausedAt = 0
     this.stopTimeUpdates()
     useMixerStore.getState().setCurrentTime(0)
   }
 
-  dispose(): void {
-    this.disposeSourceNodes()
-    this.stopTimeUpdates()
-    this.stems = []
+  getIsPlaying(): boolean {
+    return this.isPlaying
   }
 
-  private disposeSourceNodes(): void {
-    this.sourceNodes.forEach((source) => {
-      try { source.stop() } catch { /* already stopped */ }
-      source.disconnect()
-    })
-    this.sourceNodes = []
+  dispose(): void {
+    this.stopTimeUpdates()
+    this.stems = []
   }
 
   private startTimeUpdates(): void {
     const update = () => {
       if (!this.isPlaying) return
       const elapsed = this.context.currentTime - this.startedAt
+      if (elapsed >= this.duration) {
+        // Natural end of playback
+        this.isPlaying = false
+        this.pausedAt = 0
+        this.stopTimeUpdates()
+        useMixerStore.getState().stop()
+        useMixerStore.getState().setCurrentTime(0)
+        return
+      }
       useMixerStore.getState().setCurrentTime(elapsed)
       this.rafId = requestAnimationFrame(update)
     }

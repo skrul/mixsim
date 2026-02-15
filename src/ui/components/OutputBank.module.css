@@ -13,11 +13,11 @@
 }
 
 .groupLabel {
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
   color: #aaa;
   text-align: center;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   padding-bottom: 2px;
 }
 
@@ -54,6 +54,11 @@
   border-color: #44a;
 }
 
+.layerButton.sendsActive .pad {
+  background: #2a4a1a;
+  border-color: #3a3;
+}
+
 .layerButtonLabel {
   font-size: 6px;
   font-weight: 700;
@@ -69,7 +74,11 @@
   color: #aaf;
 }
 
-.channels {
+.layerButton.sendsActive .layerButtonLabel {
+  color: #8f8;
+}
+
+.strips {
   display: flex;
   gap: 2px;
 }

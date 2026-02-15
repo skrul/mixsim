@@ -2,28 +2,34 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 8px 4px;
+  gap: 4px;
+  padding: 6px 4px;
   background: #1e1e30;
   border-radius: 4px;
-  min-width: 64px;
+  min-width: 58px;
   border: 1px solid transparent;
 }
 
-.dcaLabel {
-  font-size: 10px;
-  font-weight: 700;
-  color: #888;
+.spacer {
+  width: 8px;
+  height: 8px;
 }
 
-.faderRow {
-  display: flex;
-  gap: 4px;
-  align-items: stretch;
-  height: 180px;
+.scribbleStrip {
+  width: 100%;
+  padding: 3px 2px;
+  background: #111;
+  border-bottom: 3px solid #666;
+  text-align: center;
 }
 
-.buttons {
-  display: flex;
-  gap: 4px;
+.dcaName {
+  font-size: 9px;
+  font-weight: 600;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 52px;
 }

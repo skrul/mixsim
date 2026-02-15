@@ -16,23 +16,39 @@ export function DcaFaderStrip({ dcaIndex }: DcaFaderStripProps) {
 
   return (
     <div className={styles.strip}>
-      <div className={styles.dcaLabel}>{dca.label}</div>
-      <div className={styles.faderRow}>
-        <Fader
-          value={dca.faderPosition}
-          onChange={(v) => setFader(dcaIndex, v)}
-          helpText="Adjust the DCA group level. This proportionally scales the output of all assigned channels. At unity (0 dB), assigned channels play at their individual fader levels."
-        />
+      <ToggleButton
+        active={false}
+        onClick={() => {}}
+        label="SELECT"
+        variant="select"
+        square
+      />
+      <div className={styles.spacer} />
+      <div className={styles.spacer} />
+      <div className={styles.spacer} />
+      <ToggleButton
+        active={false}
+        onClick={() => {}}
+        label="SOLO"
+        variant="solo"
+        square
+      />
+      <div className={styles.scribbleStrip}>
+        <span className={styles.dcaName}>{dca.label}</span>
       </div>
-      <div className={styles.buttons}>
-        <ToggleButton
-          active={dca.mute}
-          onClick={() => toggleMute(dcaIndex)}
-          label="M"
-          variant="mute"
-          helpText="Mute all channels assigned to this DCA group. Individual channel mute states are preserved — when the DCA is unmuted, channels return to their previous mute states."
-        />
-      </div>
+      <ToggleButton
+        active={dca.mute}
+        onClick={() => toggleMute(dcaIndex)}
+        label="MUTE"
+        variant="mute"
+        square
+        helpText="Mute all channels assigned to this DCA group."
+      />
+      <Fader
+        value={dca.faderPosition}
+        onChange={(v) => setFader(dcaIndex, v)}
+        helpText="Adjust the DCA group level. This proportionally scales the output of all assigned channels."
+      />
     </div>
   )
 }

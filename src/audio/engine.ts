@@ -3,15 +3,15 @@ import { faderPositionToGain, dbToGain } from '@/audio/fader-taper'
 import { createChannelChain, type ChannelChain } from '@/audio/channel'
 import { TransportManager } from '@/audio/transport'
 import { MeteringManager } from '@/audio/metering'
-import { ToneGenerator } from '@/audio/tone-generator'
-import { NUM_MIX_BUSES, type MonitorSource } from '@/state/mixer-model'
+import { SourceManager } from '@/audio/source-manager'
+import { NUM_MIX_BUSES, INPUT_TYPE_CONFIG, type MonitorSource } from '@/state/mixer-model'
 
 export interface AudioEngine {
   init: () => Promise<void>
   dispose: () => void
   getTransport: () => TransportManager | null
   getMetering: () => MeteringManager | null
-  getToneGenerator: () => ToneGenerator | null
+  getSourceManager: () => SourceManager | null
 }
 
 interface MixBusChain {
@@ -35,7 +35,7 @@ export function createAudioEngine(): AudioEngine {
   let monitorLevel: GainNode | null = null
   let transport: TransportManager | null = null
   let metering: MeteringManager | null = null
-  let toneGenerator: ToneGenerator | null = null
+  let sourceManager: SourceManager | null = null
   const unsubscribers: (() => void)[] = []
 
   function applyMonitorTaps(source: MonitorSource, soloActive: boolean): void {
@@ -124,8 +124,8 @@ export function createAudioEngine(): AudioEngine {
 
     subscribeToStore()
 
-    transport = new TransportManager(context, channels)
-    toneGenerator = new ToneGenerator(context, channels)
+    transport = new TransportManager(context)
+    sourceManager = new SourceManager(context, channels)
     metering = new MeteringManager(
       channels.map((ch) => ch.analyser),
       channels.map((ch) => ch.preFaderAnalyser),
@@ -303,6 +303,33 @@ export function createAudioEngine(): AudioEngine {
         }
       )
       unsubscribers.push(unsubSends)
+
+      // Input source
+      const unsubInputSource = store.subscribe(
+        (state) => state.channels[i]?.inputSource,
+        (inputSource) => {
+          if (!inputSource || !sourceManager || !context) return
+          sourceManager.setChannelSource(i, inputSource)
+
+          // Adjust sourceAttenuation based on input type:
+          // - Stems use the channel's configured inputType attenuation (simulates mic/line level)
+          // - Tones have their own level control, so no attenuation needed
+          // - Live inputs are real mic-level signals, so no attenuation needed
+          // - None: reset to channel's configured inputType
+          const ch = useMixerStore.getState().channels[i]
+          let attenuationDb: number
+          if (inputSource.type === 'stem' || inputSource.type === 'none') {
+            attenuationDb = INPUT_TYPE_CONFIG[ch?.inputType ?? 'direct'].attenuation
+          } else {
+            attenuationDb = 0
+          }
+          chain.sourceAttenuation.gain.setValueAtTime(
+            dbToGain(attenuationDb),
+            context.currentTime
+          )
+        }
+      )
+      unsubscribers.push(unsubInputSource)
     }
 
     // Mix bus fader + mute
@@ -386,7 +413,7 @@ export function createAudioEngine(): AudioEngine {
 
   function dispose(): void {
     metering?.stop()
-    toneGenerator?.dispose()
+    sourceManager?.dispose()
     transport?.dispose()
     unsubscribers.forEach((unsub) => unsub())
     unsubscribers.length = 0
@@ -400,6 +427,6 @@ export function createAudioEngine(): AudioEngine {
     dispose,
     getTransport: () => transport,
     getMetering: () => metering,
-    getToneGenerator: () => toneGenerator,
+    getSourceManager: () => sourceManager,
   }
 }

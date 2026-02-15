@@ -1,10 +1,12 @@
 import { useMixerStore } from '@/state/mixer-store'
 import { useAudioEngine } from '@/ui/hooks/useAudioEngine'
 import { TransportBar } from '@/ui/components/TransportBar'
-import { SelectedChannelStrip } from '@/ui/components/SelectedChannelStrip'
+import { ChannelDetailPanel } from '@/ui/components/ChannelDetailPanel'
 import { InputChannelBank } from '@/ui/components/InputChannelBank'
+import { OutputBank } from '@/ui/components/OutputBank'
 import { MasterSection } from '@/ui/components/MasterSection'
 import { MonitorSection } from '@/ui/components/MonitorSection'
+import { ControlPanel } from '@/ui/components/ControlPanel'
 import { InfoBar } from '@/ui/components/InfoBar'
 import styles from './App.module.css'
 
@@ -23,11 +25,18 @@ function App() {
   return (
     <div className={styles.app}>
       <TransportBar />
+      <ChannelDetailPanel />
       <div className={styles.mixerSurface}>
-        <SelectedChannelStrip />
         <InputChannelBank />
+        <div className={styles.bankSeparator} />
+        <OutputBank />
+        <div className={styles.bankSeparator} />
         <MasterSection />
-        <MonitorSection />
+        <div className={styles.bankSeparator} />
+        <div className={styles.rightColumn}>
+          <MonitorSection />
+          <ControlPanel />
+        </div>
       </div>
       <InfoBar />
     </div>

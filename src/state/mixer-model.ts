@@ -12,10 +12,21 @@ export const INPUT_TYPE_CONFIG = {
   direct: { attenuation: 0 },
 } as const
 
-// ---- Mix bus / send constants ----
+// ---- Channel / bus / send constants ----
 
-export const NUM_MIX_BUSES = 6
+export const NUM_INPUT_CHANNELS = 32
+export const NUM_MIX_BUSES = 16
 export const NUM_DCA_GROUPS = 8
+
+// ---- Channel input source ----
+
+export type ChannelInputSource =
+  | { type: 'stem'; stemIndex: number }
+  | { type: 'tone'; toneIndex: number }
+  | { type: 'live'; deviceId: string }
+  | { type: 'none' }
+
+export const NUM_TONE_SLOTS = 8
 
 // ---- Types ----
 

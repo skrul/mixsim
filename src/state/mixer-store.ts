@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import type { InputType } from '@/audio/transport'
-import { GAIN_DEFAULT, NUM_MIX_BUSES, NUM_DCA_GROUPS, type SendState, type MixBusState, type DcaGroupState, type MonitorState, type MonitorSource } from '@/state/mixer-model'
+import { GAIN_DEFAULT, NUM_MIX_BUSES, NUM_DCA_GROUPS, NUM_TONE_SLOTS, type SendState, type MixBusState, type DcaGroupState, type MonitorState, type MonitorSource, type ChannelInputSource } from '@/state/mixer-model'
+import { getToneLabel } from '@/audio/source-manager'
 
 // Re-export constants from mixer-model for existing consumers
 export { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT, INPUT_TYPE_CONFIG } from '@/state/mixer-model'
@@ -28,12 +29,12 @@ export interface ChannelState {
   eqMidQ: number         // 0.1..10, default 1.0
   eqHighFreq: number     // 2000..16000 Hz, default 5000
   eqHighGain: number     // -15..+15 dB, default 0
+  inputSource: ChannelInputSource
   sends: SendState[]     // One per mix bus, length === NUM_MIX_BUSES
   dcaGroups: number[]    // Which DCA group IDs this channel belongs to
 }
 
 export type TransportState = 'stopped' | 'playing'
-export type SourceMode = 'stems' | 'tones'
 
 export interface MasterState {
   faderPosition: number
@@ -51,10 +52,15 @@ export interface MixerState {
   stemsLoaded: boolean
   loadingError: string | null
   soloActive: boolean
-  sourceMode: SourceMode
+  availableStems: { index: number; label: string }[]
+  availableLiveDevices: { deviceId: string; label: string }[]
 
-  // Source mode
-  setSourceMode: (mode: SourceMode) => void
+  // Input source actions
+  setChannelInputSource: (channelId: number, source: ChannelInputSource) => void
+  setAvailableStems: (stems: { index: number; label: string }[]) => void
+  setAvailableLiveDevices: (devices: { deviceId: string; label: string }[]) => void
+  applyPresetStems: () => void
+  applyPresetTones: () => void
 
   // Channel actions
   setChannelGain: (channelId: number, gainDb: number) => void
@@ -63,6 +69,7 @@ export interface MixerState {
   setChannelPan: (channelId: number, pan: number) => void
   toggleChannelMute: (channelId: number) => void
   toggleChannelSolo: (channelId: number) => void
+  clearAllSolos: () => void
   setChannelHpfEnabled: (channelId: number, enabled: boolean) => void
   setChannelHpfFreq: (channelId: number, freq: number) => void
   setChannelEqEnabled: (channelId: number, enabled: boolean) => void
@@ -138,6 +145,7 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     eqMidQ: 1.0,
     eqHighFreq: 5000,
     eqHighGain: 0,
+    inputSource: { type: 'none' },
     sends: Array.from({ length: NUM_MIX_BUSES }, () => ({ level: 0, preFader: true })),
     dcaGroups: [],
   }
@@ -213,10 +221,62 @@ export const useMixerStore = create<MixerState>()(
     stemsLoaded: false,
     loadingError: null,
     soloActive: false,
-    sourceMode: 'stems',
+    availableStems: [],
+    availableLiveDevices: [],
 
-    // Source mode
-    setSourceMode: (mode) => set({ sourceMode: mode }),
+    // Input source actions
+    setChannelInputSource: (channelId, source) =>
+      set((state) => {
+        let label: string | undefined
+        switch (source.type) {
+          case 'stem':
+            label = state.availableStems[source.stemIndex]?.label
+            break
+          case 'tone':
+            label = getToneLabel(source.toneIndex)
+            break
+          case 'live':
+            label = state.availableLiveDevices.find((d) => d.deviceId === source.deviceId)?.label
+            break
+          case 'none':
+            label = ''
+            break
+        }
+        return updateChannel(state, channelId, {
+          inputSource: source,
+          ...(label !== undefined ? { label } : {}),
+        })
+      }),
+
+    setAvailableStems: (stems) => set({ availableStems: stems }),
+
+    setAvailableLiveDevices: (devices) => set({ availableLiveDevices: devices }),
+
+    applyPresetStems: () =>
+      set((state) => ({
+        channels: state.channels.map((ch, i) => ({
+          ...ch,
+          inputSource: i < state.availableStems.length
+            ? { type: 'stem' as const, stemIndex: i }
+            : { type: 'none' as const },
+          label: i < state.availableStems.length
+            ? state.availableStems[i].label
+            : ch.label,
+        })),
+      })),
+
+    applyPresetTones: () =>
+      set((state) => ({
+        channels: state.channels.map((ch, i) => ({
+          ...ch,
+          inputSource: i < NUM_TONE_SLOTS
+            ? { type: 'tone' as const, toneIndex: i }
+            : { type: 'none' as const },
+          label: i < NUM_TONE_SLOTS
+            ? getToneLabel(i)
+            : '',
+        })),
+      })),
 
     // Channel actions
     setChannelGain: (channelId, gainDb) =>
@@ -250,6 +310,12 @@ export const useMixerStore = create<MixerState>()(
           soloActive: channels.some((c) => c.solo),
         }
       }),
+
+    clearAllSolos: () =>
+      set((state) => ({
+        channels: state.channels.map((c) => ({ ...c, solo: false })),
+        soloActive: false,
+      })),
 
     setChannelHpfEnabled: (channelId, enabled) =>
       set((state) => updateChannel(state, channelId, { hpfEnabled: enabled })),

@@ -1,0 +1,49 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  min-width: 72px;
+}
+
+.sectionBox {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
+  background: #222238;
+  border-radius: 3px;
+  border: 1px solid #333;
+}
+
+.sectionLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: #aaa;
+  text-align: center;
+  letter-spacing: 1px;
+  padding-bottom: 2px;
+}
+
+.buttonGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.placeholderButton {
+  padding: 4px 2px;
+  font-size: 7px;
+  font-weight: 700;
+  background: #2a2a2a;
+  color: #555;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  cursor: not-allowed;
+  text-align: center;
+  opacity: 0.5;
+}
+
+.wideButton {
+  grid-column: 1 / -1;
+}

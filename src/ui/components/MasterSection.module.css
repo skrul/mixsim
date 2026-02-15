@@ -2,24 +2,65 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 6px 8px;
   background: #252540;
   border-radius: 4px;
-  border-left: 2px solid #444;
-  min-width: 72px;
+  min-width: 68px;
+}
+
+.clearSoloWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.clearSoloButton {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #444;
+  border-radius: 3px;
+  background: #2a2a2a;
+  cursor: pointer;
+}
+
+.clearSoloButton:hover {
+  background: #333;
+}
+
+.clearSoloButton.soloWarning {
+  background: #443300;
+  border-color: #cc9900;
+}
+
+.clearSoloLabel {
+  font-size: 6px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.meterBox {
+  height: 60px;
+  width: 10px;
+}
+
+.scribbleStrip {
+  width: 100%;
+  padding: 3px 2px;
+  background: #111;
+  border-bottom: 3px solid #888;
+  text-align: center;
 }
 
 .label {
-  font-size: 12px;
+  font-size: 9px;
   font-weight: 700;
-  color: #e0e0e0;
-  letter-spacing: 1px;
-}
-
-.meterFaderRow {
-  display: flex;
-  gap: 4px;
-  align-items: stretch;
-  height: 200px;
+  color: #ccc;
+  white-space: nowrap;
 }

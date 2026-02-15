@@ -9,11 +9,17 @@
 .mixerSurface {
   display: flex;
   flex: 1;
-  padding: 12px;
-  gap: 8px;
+  padding: 8px;
+  gap: 4px;
   overflow-x: auto;
   overflow-y: hidden;
   align-items: stretch;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .loading {
@@ -34,4 +40,11 @@
   color: #ff6666;
   padding: 32px;
   text-align: center;
+}
+
+.bankSeparator {
+  width: 2px;
+  background: #444;
+  margin: 0 4px;
+  align-self: stretch;
 }

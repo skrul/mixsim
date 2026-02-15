@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import type { InputType } from '@/audio/transport'
-import { GAIN_DEFAULT, NUM_MIX_BUSES, NUM_DCA_GROUPS, NUM_TONE_SLOTS, type SendState, type MixBusState, type DcaGroupState, type MonitorState, type MonitorSource, type ChannelInputSource } from '@/state/mixer-model'
+import { GAIN_DEFAULT, NUM_INPUT_CHANNELS, NUM_MIX_BUSES, NUM_DCA_GROUPS, NUM_TONE_SLOTS, type SendState, type MixBusState, type DcaGroupState, type MonitorState, type MonitorSource, type ChannelInputSource } from '@/state/mixer-model'
 import { getToneLabel } from '@/audio/source-manager'
 
 // Re-export constants from mixer-model for existing consumers
@@ -210,7 +210,9 @@ function updateChannel(
 
 export const useMixerStore = create<MixerState>()(
   subscribeWithSelector((set) => ({
-    channels: [],
+    channels: Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
+      createDefaultChannel(i, `Ch ${i + 1}`)
+    ),
     mixBuses: Array.from({ length: NUM_MIX_BUSES }, (_, i) => createDefaultMixBus(i)),
     dcaGroups: Array.from({ length: NUM_DCA_GROUPS }, (_, i) => createDefaultDcaGroup(i)),
     master: { faderPosition: 0 },

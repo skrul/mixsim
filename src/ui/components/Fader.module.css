@@ -14,13 +14,18 @@
   letter-spacing: 0.5px;
 }
 
+.hitArea {
+  padding: 12px 0;
+  cursor: pointer;
+  outline: none;
+}
+
 .track {
   position: relative;
   width: 40px;
   height: 200px;
   background: #222;
   border-radius: 3px;
-  cursor: pointer;
   overflow: visible;
 }
 
@@ -33,6 +38,11 @@
   border-radius: 0 0 3px 3px;
   pointer-events: none;
   overflow: hidden;
+  transition: height 0.15s ease-out;
+}
+
+.dragging .trackFill {
+  transition: none;
 }
 
 .unityMark {
@@ -64,6 +74,11 @@
   transform: translateY(50%);
   pointer-events: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: bottom 0.15s ease-out;
+}
+
+.dragging .thumb {
+  transition: none;
 }
 
 .thumb::after {

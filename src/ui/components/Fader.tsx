@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState } from 'react'
 import { faderPositionToDb, formatDb } from '@/audio/fader-taper'
 import { useSurfaceStore } from '@/state/surface-store'
 import styles from './Fader.module.css'
@@ -15,6 +15,8 @@ export function Fader({ value, onChange, label, showDb = true, helpText }: Fader
   const setHelpText = useSurfaceStore((s) => s.setHelpText)
   const trackRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
+  const dragOffset = useRef(0)
+  const [dragging, setDragging] = useState(false)
 
   const positionToValue = useCallback(
     (clientY: number): number => {
@@ -30,26 +32,45 @@ export function Fader({ value, onChange, label, showDb = true, helpText }: Fader
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       isDragging.current = true
+      setDragging(true)
       ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-      onChange(positionToValue(e.clientY))
+
+      const track = trackRef.current
+      if (track) {
+        const rect = track.getBoundingClientRect()
+        // Current thumb center Y in screen coords
+        const thumbCenterY = rect.bottom - value * rect.height
+        const distFromThumb = Math.abs(e.clientY - thumbCenterY)
+
+        if (distFromThumb <= 12) {
+          // Clicked on/near the thumb — relative drag (no jump)
+          dragOffset.current = e.clientY - thumbCenterY
+        } else {
+          // Clicked on the track away from thumb — jump to position
+          dragOffset.current = 0
+          onChange(positionToValue(e.clientY))
+        }
+      }
     },
-    [onChange, positionToValue]
+    [value, onChange, positionToValue]
   )
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (!isDragging.current) return
-      onChange(positionToValue(e.clientY))
+      onChange(positionToValue(e.clientY - dragOffset.current))
     },
     [onChange, positionToValue]
   )
 
   const handlePointerUp = useCallback(() => {
     isDragging.current = false
+    setDragging(false)
   }, [])
 
   const db = faderPositionToDb(value)
   const thumbPercent = value * 100
+  const trackClass = `${styles.track} ${dragging ? styles.dragging : ''}`
 
   return (
     <div
@@ -59,17 +80,21 @@ export function Fader({ value, onChange, label, showDb = true, helpText }: Fader
     >
       {label && <div className={styles.label}>{label}</div>}
       <div
-        ref={trackRef}
-        className={styles.track}
+        className={styles.hitArea}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
       >
-        <div className={styles.trackFill} style={{ height: `${thumbPercent}%` }} />
-        <div className={styles.unityMark} style={{ bottom: '75%' }}>
-          <span className={styles.unityLabel}>U</span>
+        <div
+          ref={trackRef}
+          className={trackClass}
+        >
+          <div className={styles.trackFill} style={{ height: `${thumbPercent}%` }} />
+          <div className={styles.unityMark} style={{ bottom: '75%' }}>
+            <span className={styles.unityLabel}>U</span>
+          </div>
+          <div className={styles.thumb} style={{ bottom: `${thumbPercent}%` }} />
         </div>
-        <div className={styles.thumb} style={{ bottom: `${thumbPercent}%` }} />
       </div>
       {showDb && <div className={styles.dbReadout}>{formatDb(db)} dB</div>}
     </div>

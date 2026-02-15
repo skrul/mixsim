@@ -74,7 +74,7 @@ export function OutputBank() {
       <div className={styles.strips}>
         {outputBankLayer === 'buses' &&
           Array.from({ length: BUSES_PER_LAYER }, (_, i) => (
-            <BusFaderStrip key={busStartIndex + i} busIndex={busStartIndex + i} />
+            <BusFaderStrip key={i} busIndex={busStartIndex + i} />
           ))}
         {outputBankLayer === 'dcas' &&
           Array.from({ length: NUM_DCA_GROUPS }, (_, i) => (

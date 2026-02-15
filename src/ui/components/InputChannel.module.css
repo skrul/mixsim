@@ -11,7 +11,7 @@
 }
 
 .channel.selected {
-  border-color: #33aa33;
+  border-color: transparent;
 }
 
 .ledWrapper {

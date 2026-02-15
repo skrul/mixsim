@@ -58,9 +58,9 @@ export function InputChannelBank() {
         {Array.from({ length: CHANNELS_PER_LAYER }, (_, slotIdx) => {
           const idx = startIndex + slotIdx
           return idx < channelCount ? (
-            <InputChannel key={idx} channelIndex={idx} />
+            <InputChannel key={slotIdx} channelIndex={idx} />
           ) : (
-            <div key={`empty-${slotIdx}`} className={styles.emptySlot} />
+            <div key={slotIdx} className={styles.emptySlot} />
           )
         })}
       </div>

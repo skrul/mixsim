@@ -39,19 +39,31 @@ export function InputChannelBank() {
         ))}
         <button className={`${styles.layerButton}`} disabled>
           <div className={styles.pad} />
-          <span className={styles.layerButtonLabel}>AUX IN</span>
+          <span className={styles.layerButtonLabel}>
+            <span>AUX IN 1-6</span>
+            <span>USB REC</span>
+          </span>
         </button>
         <button className={`${styles.layerButton}`} disabled>
           <div className={styles.pad} />
-          <span className={styles.layerButtonLabel}>FX RTN</span>
+          <span className={styles.layerButtonLabel}>
+            <span>EFFECTS</span>
+            <span>RETURNS</span>
+          </span>
         </button>
         <button className={`${styles.layerButton}`} disabled>
           <div className={styles.pad} />
-          <span className={styles.layerButtonLabel}>BUS 1–8</span>
+          <span className={styles.layerButtonLabel}>
+            <span>BUS 1-8</span>
+            <span>MASTER</span>
+          </span>
         </button>
         <button className={`${styles.layerButton}`} disabled>
           <div className={styles.pad} />
-          <span className={styles.layerButtonLabel}>BUS 9–16</span>
+          <span className={styles.layerButtonLabel}>
+            <span>BUS 9-16</span>
+            <span>MASTER</span>
+          </span>
         </button>
       </div>
       <div className={styles.channels}>

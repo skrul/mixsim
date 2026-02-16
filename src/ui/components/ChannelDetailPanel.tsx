@@ -1,6 +1,6 @@
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
-import { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT, NUM_DCA_GROUPS, NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
+import { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT, NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
 import { getToneLabel } from '@/audio/source-manager'
 import { Knob } from './Knob'
 import { Meter } from './Meter'
@@ -43,19 +43,9 @@ export function ChannelDetailPanel() {
   const setEqMidQ = useMixerStore((s) => s.setChannelEqMidQ)
   const setEqHighFreq = useMixerStore((s) => s.setChannelEqHighFreq)
   const setEqHighGain = useMixerStore((s) => s.setChannelEqHighGain)
-  const dcaGroups = useMixerStore((s) => s.dcaGroups)
-  const assignChannelToDca = useMixerStore((s) => s.assignChannelToDca)
-  const unassignChannelFromDca = useMixerStore((s) => s.unassignChannelFromDca)
   const setChannelInputSource = useMixerStore((s) => s.setChannelInputSource)
   const availableStems = useMixerStore((s) => s.availableStems)
   const availableLiveDevices = useMixerStore((s) => s.availableLiveDevices)
-  const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
-  const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
-  const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
-  const toggleSendsOnFaderForSelectedChannel = useSurfaceStore((s) => s.toggleSendsOnFaderForSelectedChannel)
-
-  const isChannelSofActive = sendsOnFader && sendsOnFaderMode === 'channel'
-  const isBusSofActive = sendsOnFader && sendsOnFaderMode === 'bus'
 
   if (!channel) {
     return (
@@ -276,49 +266,6 @@ export function ChannelDetailPanel() {
           }}
           helpText="Set the stereo pan position."
         />
-      </div>
-
-      {/* Sends on Fader */}
-      <div className={styles.section}>
-        <div className={styles.sectionLabel}>SENDS ON FADER</div>
-        <div className={styles.sofControls}>
-          <ToggleButton
-            active={isChannelSofActive}
-            onClick={toggleSendsOnFaderForSelectedChannel}
-            label="CH MODE"
-            variant="select"
-            helpText="Toggle Sends on Fader in channel-send mode. When active, the bus faders control sends from this selected input channel."
-          />
-          <div className={styles.sofStatus}>
-            {isChannelSofActive && `Bus faders now control sends from ${channel.label}.`}
-            {isBusSofActive && `Input faders are controlling sends to Mix ${sendTargetBus + 1}.`}
-            {!sendsOnFader && 'Off. Use CH MODE for selected-input sends, or press SELECT on a bus strip for monitor-mix mode.'}
-          </div>
-        </div>
-      </div>
-
-      {/* DCA Assignment */}
-      <div className={styles.section}>
-        <div className={styles.sectionLabel}>DCA</div>
-        <div className={styles.dcaGrid}>
-          {Array.from({ length: NUM_DCA_GROUPS }, (_, d) => {
-            const assigned = channel.dcaGroups.includes(d)
-            return (
-              <ToggleButton
-                key={d}
-                active={assigned}
-                onClick={() =>
-                  assigned
-                    ? unassignChannelFromDca(id, d)
-                    : assignChannelToDca(id, d)
-                }
-                label={dcaGroups[d]?.label ?? `DCA ${d + 1}`}
-                variant="dca"
-                helpText="Assign this channel to a DCA group for grouped level/mute control."
-              />
-            )
-          })}
-        </div>
       </div>
     </div>
   )

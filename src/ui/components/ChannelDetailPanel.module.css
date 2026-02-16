@@ -105,28 +105,6 @@
   letter-spacing: 0.5px;
 }
 
-.sofControls {
-  display: flex;
-  gap: 4px;
-  flex-direction: column;
-  align-items: center;
-  min-width: 220px;
-}
-
-.sofStatus {
-  font-size: 10px;
-  color: #9aa0b3;
-  line-height: 1.25;
-  text-align: center;
-  max-width: 240px;
-}
-
-.dcaGrid {
-  display: flex;
-  gap: 3px;
-  flex-wrap: wrap;
-}
-
 .inputSelect {
   width: 100%;
   min-width: 100px;

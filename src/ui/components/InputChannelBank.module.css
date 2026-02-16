@@ -7,7 +7,7 @@
 .layerColumn {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 12px;
   min-width: 52px;
   padding: 4px;
 }
@@ -68,6 +68,10 @@
   text-align: center;
   line-height: 1;
   white-space: nowrap;
+}
+
+.layerButtonLabel > span {
+  display: block;
 }
 
 .layerButton.activeLayer .layerButtonLabel {

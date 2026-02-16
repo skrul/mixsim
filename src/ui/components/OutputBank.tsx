@@ -25,7 +25,10 @@ export function OutputBank() {
   return (
     <div className={styles.bank}>
       <div className={styles.layerColumn}>
-        <div className={styles.groupLabel}>BUSES / GROUPS</div>
+        <div className={styles.groupLabel}>
+          <span>BUSES /</span>
+          <span>GROUPS</span>
+        </div>
         <button
           className={`${styles.layerButton} ${sendsOnFader && sendsOnFaderMode === 'bus' ? styles.sendsActive : ''}`}
           onClick={handleSendsOnFader}
@@ -37,7 +40,10 @@ export function OutputBank() {
           onMouseLeave={() => setHelpText('')}
         >
           <div className={styles.pad} />
-          <span className={styles.layerButtonLabel}>SENDS ON FADER</span>
+          <span className={styles.layerButtonLabel}>
+            <span>SENDS ON</span>
+            <span>FADER</span>
+          </span>
         </button>
         <button
           className={`${styles.layerButton} ${outputBankLayer === 'dcas' ? styles.activeLayer : ''}`}
@@ -46,7 +52,10 @@ export function OutputBank() {
           onMouseLeave={() => setHelpText('')}
         >
           <div className={styles.pad} />
-          <span className={styles.layerButtonLabel}>GROUP DCA 1–8</span>
+          <span className={styles.layerButtonLabel}>
+            <span>GROUP</span>
+            <span>DCA 1–8</span>
+          </span>
         </button>
         <button
           className={`${styles.layerButton} ${outputBankLayer === 'buses' && activeBusLayer === 0 ? styles.activeLayer : ''}`}
@@ -68,7 +77,10 @@ export function OutputBank() {
         </button>
         <button className={`${styles.layerButton}`} disabled>
           <div className={styles.pad} />
-          <span className={styles.layerButtonLabel}>MTX MAIN C</span>
+          <span className={styles.layerButtonLabel}>
+            <span>MATRIX</span>
+            <span>MAIN C</span>
+          </span>
         </button>
       </div>
       <div className={styles.strips}>

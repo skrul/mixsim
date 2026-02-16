@@ -77,7 +77,8 @@ export function InputChannel({ channelIndex }: InputChannelProps) {
       <div className={styles.meterBox}>
         <Meter
           channelIndex={channelIndex}
-          helpText="Shows the post-fader signal level. Green is healthy, yellow is approaching the limit, red means clipping."
+          source="preFader"
+          helpText="Shows the pre-fader signal level for gain staging. Green is healthy, yellow is approaching the limit, red means clipping."
         />
       </div>
       <div className={styles.ledWrapper}>

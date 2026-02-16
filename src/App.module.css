@@ -6,6 +6,17 @@
   color: #e0e0e0;
 }
 
+.topSurface {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.detailPanelWrap {
+  flex: 1;
+  min-width: 0;
+}
+
 .mixerSurface {
   display: flex;
   flex: 1;

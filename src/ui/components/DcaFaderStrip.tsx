@@ -13,6 +13,7 @@ export function DcaFaderStrip({ dcaIndex }: DcaFaderStripProps) {
   const dca = useMixerStore((s) => s.dcaGroups[dcaIndex])
   const setFader = useMixerStore((s) => s.setDcaFader)
   const toggleMute = useMixerStore((s) => s.toggleDcaMute)
+  const toggleSolo = useMixerStore((s) => s.toggleDcaSolo)
   const dcaAssignArmedId = useSurfaceStore((s) => s.dcaAssignArmedId)
   const setDcaAssignArmedId = useSurfaceStore((s) => s.setDcaAssignArmedId)
   const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
@@ -94,11 +95,12 @@ export function DcaFaderStrip({ dcaIndex }: DcaFaderStripProps) {
         <span className={styles.ledLabel}>PRE</span>
       </div>
       <ToggleButton
-        active={false}
-        onClick={() => {}}
+        active={dca.solo}
+        onClick={() => toggleSolo(dcaIndex)}
         label="SOLO"
         variant="solo"
         square
+        helpText="Solo this DCA group's assigned channels to the monitor solo bus."
       />
       <div className={styles.scribbleStrip}>
         <span className={styles.dcaName}>{dca.label}</span>

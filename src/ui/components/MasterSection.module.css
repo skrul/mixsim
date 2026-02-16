@@ -29,9 +29,10 @@
   background: #333;
 }
 
-.clearSoloButton.soloWarning {
-  background: #443300;
-  border-color: #cc9900;
+.clearSoloButton:active {
+  background: #cc9900;
+  border-color: #eebb00;
+  box-shadow: 0 0 6px rgba(238, 187, 0, 0.55);
 }
 
 .clearSoloLabel {

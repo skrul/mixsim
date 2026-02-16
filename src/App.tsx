@@ -25,7 +25,12 @@ function App() {
   return (
     <div className={styles.app}>
       <TransportBar />
-      <ChannelDetailPanel />
+      <div className={styles.topSurface}>
+        <div className={styles.detailPanelWrap}>
+          <ChannelDetailPanel />
+        </div>
+        <ControlPanel />
+      </div>
       <div className={styles.mixerSurface}>
         <InputChannelBank />
         <div className={styles.bankSeparator} />
@@ -35,7 +40,6 @@ function App() {
         <div className={styles.bankSeparator} />
         <div className={styles.rightColumn}>
           <MonitorSection />
-          <ControlPanel />
         </div>
       </div>
       <InfoBar />

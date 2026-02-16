@@ -16,6 +16,7 @@ export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
   const setFader = useMixerStore((s) => s.setMixBusFader)
   const setChannelSendLevel = useMixerStore((s) => s.setChannelSendLevel)
   const toggleMute = useMixerStore((s) => s.toggleMixBusMute)
+  const toggleSolo = useMixerStore((s) => s.toggleMixBusSolo)
   const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
   const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
   const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
@@ -60,8 +61,8 @@ export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
         <span className={styles.ledLabel}>PRE</span>
       </div>
       <ToggleButton
-        active={false}
-        onClick={() => {}}
+        active={bus.solo}
+        onClick={() => toggleSolo(busIndex)}
         label="SOLO"
         variant="solo"
         square

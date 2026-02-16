@@ -99,7 +99,9 @@ export function createChannelChain(
   muteGain.connect(analyser)
   analyser.connect(mainBus)
 
-  muteGain.connect(soloGain)
+  // PFL solo tap: feed solo bus from pre-fader path so it is independent of
+  // channel fader and mute, which is useful for gain staging.
+  inputGain.connect(soloGain)
   soloGain.connect(soloBus)
 
   // Wire sends — default is post-fader (from faderGain, before muteGain)

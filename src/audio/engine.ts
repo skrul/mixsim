@@ -19,6 +19,7 @@ interface MixBusChain {
   faderGain: GainNode
   muteGain: GainNode
   analyser: AnalyserNode
+  soloGain: GainNode
 }
 
 export function createAudioEngine(): AudioEngine {
@@ -26,8 +27,11 @@ export function createAudioEngine(): AudioEngine {
   let channels: ChannelChain[] = []
   let mixBusChains: MixBusChain[] = []
   let masterGain: GainNode | null = null
-  let masterAnalyser: AnalyserNode | null = null
+  let masterLAnalyser: AnalyserNode | null = null
+  let masterRAnalyser: AnalyserNode | null = null
+  let mainSoloTapGain: GainNode | null = null
   let soloBusGain: GainNode | null = null
+  let soloAnalyser: AnalyserNode | null = null
   // Monitor routing: selectable source taps → monitorLevel → destination
   let monitorTapMain: GainNode | null = null
   let monitorTapSolo: GainNode | null = null
@@ -54,17 +58,34 @@ export function createAudioEngine(): AudioEngine {
 
   async function init(): Promise<void> {
     context = new AudioContext()
+    const store = useMixerStore.getState()
 
-    // Master bus: masterGain → masterAnalyser (metering only, no direct output)
+    // Master bus: masterGain feeds monitor and dedicated L/R meters
     masterGain = context.createGain()
-    masterAnalyser = context.createAnalyser()
-    masterAnalyser.fftSize = 2048
+    const masterSplitter = context.createChannelSplitter(2)
+    const masterMerger = context.createChannelMerger(2)
+    masterLAnalyser = context.createAnalyser()
+    masterRAnalyser = context.createAnalyser()
+    masterLAnalyser.fftSize = 2048
+    masterRAnalyser.fftSize = 2048
 
-    masterGain.connect(masterAnalyser)
+    masterGain.connect(masterSplitter)
+    masterSplitter.connect(masterLAnalyser, 0)
+    masterSplitter.connect(masterRAnalyser, 1)
+    masterSplitter.connect(masterMerger, 0, 0)
+    masterSplitter.connect(masterMerger, 1, 1)
 
     // Solo bus summing point (no direct output — routed via monitor)
     soloBusGain = context.createGain()
     soloBusGain.gain.value = 1
+    soloAnalyser = context.createAnalyser()
+    soloAnalyser.fftSize = 2048
+
+    // Optional tap from main bus into solo bus (for Main SOLO button)
+    mainSoloTapGain = context.createGain()
+    mainSoloTapGain.gain.value = store.master.solo ? 1 : 0
+    masterGain.connect(mainSoloTapGain)
+    mainSoloTapGain.connect(soloBusGain)
 
     // Monitor routing: each source has a tap GainNode (0 or 1)
     // All taps feed into monitorLevel → destination
@@ -74,14 +95,14 @@ export function createAudioEngine(): AudioEngine {
     monitorTapMain = context.createGain()
     monitorTapSolo = context.createGain()
 
-    masterAnalyser.connect(monitorTapMain)
+    masterMerger.connect(monitorTapMain)
     monitorTapMain.connect(monitorLevel)
 
-    soloBusGain.connect(monitorTapSolo)
+    soloBusGain.connect(soloAnalyser)
+    soloAnalyser.connect(monitorTapSolo)
     monitorTapSolo.connect(monitorLevel)
 
     // Mix bus chains: summing → faderGain → muteGain → analyser → monitorTap → monitorLevel
-    const store = useMixerStore.getState()
     mixBusChains = []
     monitorTapBuses = []
     for (let i = 0; i < NUM_MIX_BUSES; i++) {
@@ -93,17 +114,21 @@ export function createAudioEngine(): AudioEngine {
       muteGain.gain.value = store.mixBuses[i]?.mute ? 0 : 1
       const analyser = context.createAnalyser()
       analyser.fftSize = 1024
+      const soloGain = context.createGain()
+      soloGain.gain.value = store.mixBuses[i]?.solo ? 1 : 0
 
       summing.connect(faderGain)
       faderGain.connect(muteGain)
       muteGain.connect(analyser)
+      analyser.connect(soloGain)
+      soloGain.connect(soloBusGain)
 
       const busTap = context.createGain()
       analyser.connect(busTap)
       busTap.connect(monitorLevel)
       monitorTapBuses.push(busTap)
 
-      mixBusChains.push({ summing, faderGain, muteGain, analyser })
+      mixBusChains.push({ summing, faderGain, muteGain, analyser, soloGain })
     }
 
     // Set initial monitor state
@@ -130,7 +155,9 @@ export function createAudioEngine(): AudioEngine {
       channels.map((ch) => ch.analyser),
       channels.map((ch) => ch.preFaderAnalyser),
       mixBusChains.map((b) => b.analyser),
-      masterAnalyser
+      masterLAnalyser,
+      masterRAnalyser,
+      soloAnalyser
     )
   }
 
@@ -358,6 +385,16 @@ export function createAudioEngine(): AudioEngine {
         }
       )
       unsubscribers.push(unsubBusMute)
+
+      const unsubBusSolo = store.subscribe(
+        (state) => state.mixBuses[b]?.solo,
+        (solo) => {
+          if (solo !== undefined && context) {
+            busChain.soloGain.gain.setValueAtTime(solo ? 1 : 0, context.currentTime)
+          }
+        }
+      )
+      unsubscribers.push(unsubBusSolo)
     }
 
     // Master fader
@@ -374,14 +411,26 @@ export function createAudioEngine(): AudioEngine {
     )
     unsubscribers.push(unsubMaster)
 
+    // Main SOLO tap enable
+    const unsubMasterSolo = store.subscribe(
+      (state) => state.master.solo,
+      (solo) => {
+        if (!context || !mainSoloTapGain) return
+        mainSoloTapGain.gain.setValueAtTime(solo ? 1 : 0, context.currentTime)
+      }
+    )
+    unsubscribers.push(unsubMasterSolo)
+
     // Solo state (per-channel soloGain nodes)
     const unsubSoloChannels = store.subscribe(
-      (state) => state.channels.map((ch) => ch.solo),
-      (solos) => {
+      (state) => state.channels.map((ch) =>
+        ch.solo || ch.dcaGroups.some((dcaId) => state.dcaGroups[dcaId]?.solo)
+      ),
+      (effectiveSolos) => {
         if (!context) return
         const t = context.currentTime
         for (let j = 0; j < channels.length; j++) {
-          channels[j].soloGain.gain.setValueAtTime(solos[j] ? 1 : 0, t)
+          channels[j].soloGain.gain.setValueAtTime(effectiveSolos[j] ? 1 : 0, t)
         }
       },
       {

@@ -38,6 +38,7 @@ export type TransportState = 'stopped' | 'playing'
 
 export interface MasterState {
   faderPosition: number
+  solo: boolean
 }
 
 export interface MixerState {
@@ -86,11 +87,13 @@ export interface MixerState {
   // Mix bus actions
   setMixBusFader: (busIndex: number, position: number) => void
   toggleMixBusMute: (busIndex: number) => void
+  toggleMixBusSolo: (busIndex: number) => void
   setMixBusLabel: (busIndex: number, label: string) => void
 
   // DCA actions
   setDcaFader: (dcaId: number, position: number) => void
   toggleDcaMute: (dcaId: number) => void
+  toggleDcaSolo: (dcaId: number) => void
   setDcaLabel: (dcaId: number, label: string) => void
   assignChannelToDca: (channelId: number, dcaId: number) => void
   unassignChannelFromDca: (channelId: number, dcaId: number) => void
@@ -101,6 +104,7 @@ export interface MixerState {
 
   // Master actions
   setMasterFader: (position: number) => void
+  toggleMasterSolo: () => void
 
   // Transport actions
   play: () => void
@@ -157,6 +161,7 @@ function createDefaultDcaGroup(id: number): DcaGroupState {
     label: `DCA ${id + 1}`,
     faderPosition: 0.75,
     mute: false,
+    solo: false,
     assignedChannels: [],
   }
 }
@@ -179,7 +184,17 @@ function createDefaultMixBus(id: number): MixBusState {
     label: `Mix ${id + 1}`,
     faderPosition: 0,
     mute: false,
+    solo: false,
   }
+}
+
+function computeSoloActive(state: MixerState): boolean {
+  return (
+    state.channels.some((c) => c.solo) ||
+    state.mixBuses.some((b) => b.solo) ||
+    state.dcaGroups.some((d) => d.solo) ||
+    state.master.solo
+  )
 }
 
 function updateMixBus(
@@ -215,7 +230,7 @@ export const useMixerStore = create<MixerState>()(
     ),
     mixBuses: Array.from({ length: NUM_MIX_BUSES }, (_, i) => createDefaultMixBus(i)),
     dcaGroups: Array.from({ length: NUM_DCA_GROUPS }, (_, i) => createDefaultDcaGroup(i)),
-    master: { faderPosition: 0 },
+    master: { faderPosition: 0, solo: false },
     monitor: { source: 'main', level: 0.75 },
     transportState: 'stopped',
     currentTime: 0,
@@ -307,15 +322,19 @@ export const useMixerStore = create<MixerState>()(
         const channels = state.channels.map((c) =>
           c.id === channelId ? { ...c, solo: !c.solo } : c
         )
+        const nextState = { ...state, channels }
         return {
           channels,
-          soloActive: channels.some((c) => c.solo),
+          soloActive: computeSoloActive(nextState),
         }
       }),
 
     clearAllSolos: () =>
       set((state) => ({
         channels: state.channels.map((c) => ({ ...c, solo: false })),
+        mixBuses: state.mixBuses.map((b) => ({ ...b, solo: false })),
+        dcaGroups: state.dcaGroups.map((d) => ({ ...d, solo: false })),
+        master: { ...state.master, solo: false },
         soloActive: false,
       })),
 
@@ -380,6 +399,20 @@ export const useMixerStore = create<MixerState>()(
         return updateMixBus(state, busIndex, { mute: !bus.mute })
       }),
 
+    toggleMixBusSolo: (busIndex) =>
+      set((state) => {
+        const bus = state.mixBuses[busIndex]
+        if (!bus) return {}
+        const mixBuses = state.mixBuses.map((b, i) =>
+          i === busIndex ? { ...b, solo: !b.solo } : b
+        )
+        const nextState = { ...state, mixBuses }
+        return {
+          mixBuses,
+          soloActive: computeSoloActive(nextState),
+        }
+      }),
+
     setMixBusLabel: (busIndex, label) =>
       set((state) => updateMixBus(state, busIndex, { label })),
 
@@ -392,6 +425,20 @@ export const useMixerStore = create<MixerState>()(
         const dca = state.dcaGroups[dcaId]
         if (!dca) return {}
         return updateDcaGroup(state, dcaId, { mute: !dca.mute })
+      }),
+
+    toggleDcaSolo: (dcaId) =>
+      set((state) => {
+        const dca = state.dcaGroups[dcaId]
+        if (!dca) return {}
+        const dcaGroups = state.dcaGroups.map((d, i) =>
+          i === dcaId ? { ...d, solo: !d.solo } : d
+        )
+        const nextState = { ...state, dcaGroups }
+        return {
+          dcaGroups,
+          soloActive: computeSoloActive(nextState),
+        }
       }),
 
     setDcaLabel: (dcaId, label) =>
@@ -429,7 +476,17 @@ export const useMixerStore = create<MixerState>()(
 
     // Master
     setMasterFader: (position) =>
-      set({ master: { faderPosition: position } }),
+      set((state) => ({ master: { ...state.master, faderPosition: position } })),
+    toggleMasterSolo: () =>
+      set((state) => {
+        const masterSolo = !state.master.solo
+        const master = { ...state.master, solo: masterSolo }
+        const nextState = { ...state, master }
+        return {
+          master,
+          soloActive: computeSoloActive(nextState),
+        }
+      }),
 
     // Transport
     play: () => set({ transportState: 'playing' }),

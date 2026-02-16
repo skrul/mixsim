@@ -40,6 +40,7 @@ export interface MixBusState {
   label: string
   faderPosition: number  // 0..1, default 0 (-∞)
   mute: boolean
+  solo: boolean
 }
 
 export interface DcaGroupState {
@@ -47,6 +48,7 @@ export interface DcaGroupState {
   label: string
   faderPosition: number  // 0..1, default 0.75 (unity)
   mute: boolean
+  solo: boolean
   assignedChannels: number[]  // channel IDs
 }
 

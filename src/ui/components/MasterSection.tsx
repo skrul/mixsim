@@ -1,14 +1,13 @@
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
 import { Fader } from './Fader'
-import { Meter } from './Meter'
 import { ToggleButton } from './ToggleButton'
 import styles from './MasterSection.module.css'
 
 export function MasterSection() {
   const master = useMixerStore((s) => s.master)
-  const soloActive = useMixerStore((s) => s.soloActive)
   const setMasterFader = useMixerStore((s) => s.setMasterFader)
+  const toggleMasterSolo = useMixerStore((s) => s.toggleMasterSolo)
   const clearAllSolos = useMixerStore((s) => s.clearAllSolos)
   const setHelpText = useSurfaceStore((s) => s.setHelpText)
 
@@ -27,21 +26,19 @@ export function MasterSection() {
         onMouseLeave={() => setHelpText('')}
       >
         <button
-          className={`${styles.clearSoloButton} ${soloActive ? styles.soloWarning : ''}`}
+          className={styles.clearSoloButton}
           onClick={clearAllSolos}
         />
         <span className={styles.clearSoloLabel}>CLEAR SOLO</span>
       </div>
-      <div className={styles.meterBox}>
-        <Meter channelIndex={-1} helpText="Shows the main stereo output level." />
-      </div>
+      <div className={styles.meterBox} />
       <ToggleButton
-        active={soloActive}
-        onClick={() => {}}
+        active={master.solo}
+        onClick={toggleMasterSolo}
         label="SOLO"
         variant="solo"
         square
-        helpText="Indicates that one or more channels have solo active."
+        helpText="Solo the Main LR bus to the monitor solo bus."
       />
       <div className={styles.scribbleStrip}>
         <span className={styles.label}>Main LR</span>

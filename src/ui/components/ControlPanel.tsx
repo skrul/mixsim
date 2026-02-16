@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { meterLevels } from '@/audio/metering'
+import { DisplayHomeScreen } from './DisplayHomeScreen'
 import styles from './ControlPanel.module.css'
 
 const DISPLAY_MENU = [
@@ -11,7 +12,9 @@ const DISPLAY_MENU = [
   'EFFECTS',
   'MUTE GRP',
   'UTILITY',
-]
+] as const
+
+type DisplayMenuKey = typeof DISPLAY_MENU[number]
 
 const METER_MARKS = [
   'CLIP',
@@ -58,6 +61,7 @@ function dbToLitRows(db: number): number {
 }
 
 export function ControlPanel() {
+  const [activePage, setActivePage] = useState<DisplayMenuKey>('HOME')
   const [displayMeters, setDisplayMeters] = useState<DisplayMeterLevels>({
     mcSolo: 0,
     left: 0,
@@ -115,7 +119,16 @@ export function ControlPanel() {
       <div className={styles.displayPanel}>
         <div className={styles.displayTop}>
           <div className={styles.screenOuter}>
-            <div className={styles.screen} />
+            <div className={styles.screen}>
+              {activePage === 'HOME' ? (
+                <DisplayHomeScreen />
+              ) : (
+                <div className={styles.notImplementedScreen}>
+                  <div className={styles.notImplementedTitle}>{activePage}</div>
+                  <div className={styles.notImplementedBody}>Read-only HOME page is implemented first.</div>
+                </div>
+              )}
+            </div>
             <div className={styles.meterRail}>
               <div className={styles.meterBody}>
                 <div className={styles.meterColumn}>
@@ -160,7 +173,13 @@ export function ControlPanel() {
           <div className={styles.sideColumn}>
             <div className={styles.sideMenu}>
               {DISPLAY_MENU.map((label) => (
-                <button key={label} className={styles.menuButton} disabled>{label}</button>
+                <button
+                  key={label}
+                  className={`${styles.menuButton} ${activePage === label ? styles.menuButtonActive : ''}`}
+                  onClick={() => setActivePage(label)}
+                >
+                  {label}
+                </button>
               ))}
             </div>
             <div className={styles.navCluster}>

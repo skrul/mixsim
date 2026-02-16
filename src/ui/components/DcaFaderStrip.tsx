@@ -16,6 +16,7 @@ export function DcaFaderStrip({ dcaIndex }: DcaFaderStripProps) {
   const toggleSolo = useMixerStore((s) => s.toggleDcaSolo)
   const dcaAssignArmedId = useSurfaceStore((s) => s.dcaAssignArmedId)
   const setDcaAssignArmedId = useSurfaceStore((s) => s.setDcaAssignArmedId)
+  const selectedFocus = useSurfaceStore((s) => s.selectedFocus)
   const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
   const setSelectedOutputIndex = useSurfaceStore((s) => s.setSelectedOutputIndex)
 
@@ -25,7 +26,7 @@ export function DcaFaderStrip({ dcaIndex }: DcaFaderStripProps) {
   if (!dca) return null
 
   const isArmed = dcaAssignArmedId === dcaIndex
-  const isSelected = selectedOutputIndex === dcaIndex
+  const isSelected = selectedFocus === 'output' && selectedOutputIndex === dcaIndex
 
   const clearHoldTimer = () => {
     if (holdTimerRef.current !== null) {

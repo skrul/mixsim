@@ -75,9 +75,25 @@
   background: #333 !important;
 }
 
+.sessionButton {
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  background: #25333f !important;
+  border-color: #3b556a !important;
+}
+
+.sessionButton:hover:not(:disabled) {
+  background: #2f4352 !important;
+}
+
 .separator {
   width: 1px;
   height: 24px;
   background: #444;
   margin: 0 4px;
+}
+
+.hiddenFileInput {
+  display: none;
 }

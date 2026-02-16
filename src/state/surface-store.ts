@@ -2,8 +2,10 @@ import { create } from 'zustand'
 
 export type OutputBankLayer = 'dcas' | 'buses'
 export type SendsOnFaderMode = 'bus' | 'channel'
+export type SelectedFocus = 'input' | 'output'
 
 export interface SurfaceState {
+  selectedFocus: SelectedFocus
   selectedChannel: number
   dcaAssignArmedId: number | null
   busAssignArmedId: number | null
@@ -31,6 +33,7 @@ export interface SurfaceState {
 }
 
 export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
+  selectedFocus: 'input',
   selectedChannel: 0,
   dcaAssignArmedId: null,
   busAssignArmedId: null,
@@ -43,7 +46,7 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   selectedOutputIndex: -1,
   helpText: '',
 
-  setSelectedChannel: (channelId) => set({ selectedChannel: channelId }),
+  setSelectedChannel: (channelId) => set({ selectedFocus: 'input', selectedChannel: channelId, selectedOutputIndex: -1 }),
   setDcaAssignArmedId: (dcaId) => set({ dcaAssignArmedId: dcaId, busAssignArmedId: null }),
   setBusAssignArmedId: (busId) => set({ busAssignArmedId: busId, dcaAssignArmedId: null }),
   setActiveInputLayer: (layer) => set({ activeInputLayer: layer }),
@@ -56,6 +59,7 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
         sendsOnFader: false,
         sendsOnFaderMode: 'bus',
         selectedOutputIndex: -1,
+        selectedFocus: 'input',
         dcaAssignArmedId: null,
         busAssignArmedId: null,
       })
@@ -69,6 +73,7 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
     set({
       outputBankLayer: 'buses',
       sendTargetBus: busIndex,
+      selectedFocus: 'output',
       selectedOutputIndex: busIndex,
       // If SOF bus mode is active, retarget instantly. Otherwise only selection changes.
       ...(state.sendsOnFader && state.sendsOnFaderMode === 'bus'
@@ -82,6 +87,7 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
       set({
         sendsOnFader: false,
         sendsOnFaderMode: 'bus',
+        selectedFocus: 'output',
         selectedOutputIndex: state.sendTargetBus,
       })
       return
@@ -90,24 +96,26 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
       sendsOnFader: true,
       sendsOnFaderMode: 'bus',
       outputBankLayer: 'buses',
+      selectedFocus: 'output',
       selectedOutputIndex: state.sendTargetBus,
     })
   },
   toggleSendsOnFaderForSelectedChannel: () => {
     const state = get()
     if (state.sendsOnFader && state.sendsOnFaderMode === 'channel') {
-      set({ sendsOnFader: false, sendsOnFaderMode: 'bus', selectedOutputIndex: -1 })
+      set({ sendsOnFader: false, sendsOnFaderMode: 'bus', selectedFocus: 'input', selectedOutputIndex: -1 })
       return
     }
     set({
       sendsOnFader: true,
       sendsOnFaderMode: 'channel',
       outputBankLayer: 'buses',
+      selectedFocus: 'input',
       selectedOutputIndex: -1,
     })
   },
   disableSendsOnFader: () =>
     set({ sendsOnFader: false, sendsOnFaderMode: 'bus', selectedOutputIndex: -1 }),
-  setSelectedOutputIndex: (index) => set({ selectedOutputIndex: index }),
+  setSelectedOutputIndex: (index) => set({ selectedFocus: index >= 0 ? 'output' : 'input', selectedOutputIndex: index }),
   setHelpText: (text) => set({ helpText: text }),
 }))

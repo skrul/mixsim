@@ -88,8 +88,14 @@ export function InputChannelBank() {
           const scribbleLabel = activeInputLayer === EFFECTS_RETURNS_LAYER
             ? EFFECTS_RETURN_LABELS[slotIdx]
             : undefined
+          const stripType = activeInputLayer === EFFECTS_RETURNS_LAYER ? 'fxReturn' : 'input'
           return idx >= 0 && idx < channelCount ? (
-            <InputChannel key={`${activeInputLayer}-${slotIdx}`} channelIndex={idx} scribbleLabel={scribbleLabel} />
+            <InputChannel
+              key={`${activeInputLayer}-${slotIdx}`}
+              channelIndex={idx}
+              scribbleLabel={scribbleLabel}
+              stripType={stripType}
+            />
           ) : (
             <div key={slotIdx} className={styles.emptySlot} />
           )

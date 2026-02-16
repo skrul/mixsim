@@ -1,5 +1,7 @@
+import { useRef, type ChangeEvent } from 'react'
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
+import { exportSessionSnapshot, importSessionSnapshot } from '@/state/session-persistence'
 import styles from './TransportBar.module.css'
 
 function formatTime(seconds: number): string {
@@ -19,6 +21,33 @@ export function TransportBar() {
   const stop = useMixerStore((s) => s.stop)
   const rewind = useMixerStore((s) => s.rewind)
   const setHelpText = useSurfaceStore((s) => s.setHelpText)
+  const sessionFileInputRef = useRef<HTMLInputElement>(null)
+
+  const saveSession = () => {
+    const result = exportSessionSnapshot()
+    if (!result.ok) {
+      setHelpText(result.error)
+      return
+    }
+
+    const blob = new Blob([result.data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = result.fileName
+    link.click()
+    URL.revokeObjectURL(url)
+    setHelpText('Session file saved.')
+  }
+
+  const loadSession = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    const result = importSessionSnapshot(await file.text())
+    setHelpText(result.ok ? 'Session loaded.' : result.error)
+  }
 
   return (
     <div className={styles.transportBar}>
@@ -40,6 +69,24 @@ export function TransportBar() {
           Tones
         </button>
       </div>
+      <div className={styles.separator} />
+      <button
+        className={styles.sessionButton}
+        onClick={saveSession}
+        onMouseEnter={() => setHelpText('Save the full mixer + control surface state to a JSON file.')}
+        onMouseLeave={() => setHelpText('')}
+      >
+        Save File
+      </button>
+      <button
+        className={styles.sessionButton}
+        onClick={() => sessionFileInputRef.current?.click()}
+        onMouseEnter={() => setHelpText('Load mixer + control surface state from a saved JSON file.')}
+        onMouseLeave={() => setHelpText('')}
+      >
+        Load File
+      </button>
+      <input ref={sessionFileInputRef} type="file" accept=".json,application/json" className={styles.hiddenFileInput} onChange={loadSession} />
       <div className={styles.separator} />
       <button
         onClick={rewind}

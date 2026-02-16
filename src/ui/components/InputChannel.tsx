@@ -8,9 +8,10 @@ import styles from './InputChannel.module.css'
 interface InputChannelProps {
   channelIndex: number
   scribbleLabel?: string
+  stripType?: 'input' | 'fxReturn'
 }
 
-export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps) {
+export function InputChannel({ channelIndex, scribbleLabel, stripType = 'input' }: InputChannelProps) {
   const channel = useMixerStore((s) => s.channels[channelIndex])
   const setFader = useMixerStore((s) => s.setChannelFader)
   const setSendLevel = useMixerStore((s) => s.setChannelSendLevel)
@@ -19,6 +20,7 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
   const assignChannelToDca = useMixerStore((s) => s.assignChannelToDca)
   const unassignChannelFromDca = useMixerStore((s) => s.unassignChannelFromDca)
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
+  const selectedFocus = useSurfaceStore((s) => s.selectedFocus)
   const setSelectedChannel = useSurfaceStore((s) => s.setSelectedChannel)
   const dcaAssignArmedId = useSurfaceStore((s) => s.dcaAssignArmedId)
   const busAssignArmedId = useSurfaceStore((s) => s.busAssignArmedId)
@@ -27,12 +29,13 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
   const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
 
   if (!channel) return null
+  const isFxReturn = stripType === 'fxReturn'
 
   const isSelected = dcaAssignArmedId !== null
     ? channel.dcaGroups.includes(dcaAssignArmedId)
-    : busAssignArmedId !== null
+      : busAssignArmedId !== null
       ? (channel.sends[busAssignArmedId]?.level ?? 0) > 0.0001
-      : selectedChannel === channelIndex
+      : selectedFocus === 'input' && selectedChannel === channelIndex
 
   const faderInBusMode = sendsOnFader && sendsOnFaderMode === 'bus'
 
@@ -45,8 +48,10 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
     : (v: number) => setFader(channelIndex, v)
 
   const faderHelpText = faderInBusMode
-    ? `Adjust the send level from this channel to Mix ${sendTargetBus + 1}. This controls how much of this channel is sent to that bus.`
-    : 'Drag to adjust the channel volume level. Unity gain (0 dB) is marked with \'U\'. This controls how loud this channel is in the main mix.'
+    ? `Adjust the send level from this ${isFxReturn ? 'effects return' : 'channel'} to Mix ${sendTargetBus + 1}.`
+    : isFxReturn
+      ? 'Adjust this FX return level in the main mix. This controls how much processed (wet) signal you hear.'
+      : 'Drag to adjust the channel volume level. Unity gain (0 dB) is marked with \'U\'. This controls how loud this channel is in the main mix.'
 
   const handleSelectClick = () => {
     if (dcaAssignArmedId !== null) {
@@ -69,7 +74,9 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
     ? `DCA assign mode active. Click to ${channel.dcaGroups.includes(dcaAssignArmedId) ? 'remove this channel from' : 'assign this channel to'} DCA ${dcaAssignArmedId + 1}.`
     : busAssignArmedId !== null
       ? `Bus send assign mode active. Click to ${(channel.sends[busAssignArmedId]?.level ?? 0) > 0.0001 ? 'remove from' : 'send to'} ${`Mix ${busAssignArmedId + 1}`}.`
-      : 'Select this channel to view and edit its full settings in the detail panel above.'
+      : isFxReturn
+        ? 'Select this FX return to view and edit its settings in the detail panel above.'
+        : 'Select this channel to view and edit its full settings in the detail panel above.'
 
   return (
     <div className={`${styles.channel} ${isSelected ? styles.selected : ''}`}>
@@ -89,7 +96,11 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
         <Meter
           channelIndex={channelIndex}
           source="preFader"
-          helpText="Shows the pre-fader signal level for gain staging. Green is healthy, yellow is approaching the limit, red means clipping."
+          helpText={
+            isFxReturn
+              ? 'Shows the pre-fader level of this FX return signal.'
+              : 'Shows the pre-fader signal level for gain staging. Green is healthy, yellow is approaching the limit, red means clipping.'
+          }
         />
       </div>
       <div className={styles.ledWrapper}>
@@ -102,7 +113,9 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
         label="SOLO"
         variant="solo"
         square
-        helpText="Solo this channel to hear it in isolation through the monitor headphones."
+        helpText={isFxReturn
+          ? 'Solo this FX return to hear only the processed effect return.'
+          : 'Solo this channel to hear it in isolation through the monitor headphones.'}
       />
       <div className={styles.scribbleStrip} style={{ borderColor: channel.color }}>
         <span className={styles.channelName}>{scribbleLabel ?? channel.label}</span>
@@ -113,7 +126,9 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
         label="MUTE"
         variant="mute"
         square
-        helpText="Mute this channel to silence it in the main mix."
+        helpText={isFxReturn
+          ? 'Mute this FX return to remove that effect from the mix.'
+          : 'Mute this channel to silence it in the main mix.'}
       />
       <Fader
         value={faderValue}

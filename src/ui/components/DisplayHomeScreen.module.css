@@ -1,0 +1,388 @@
+.screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #2c3341;
+  color: #e6ebf2;
+  font-family: 'Trebuchet MS', 'Verdana', sans-serif;
+}
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #202734;
+  border-bottom: 1px solid #4f5870;
+  padding: 2px 7px;
+  min-height: 20px;
+  box-sizing: border-box;
+}
+
+.leftStatus {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.headerId {
+  font-size: 11px;
+  font-weight: 800;
+  color: #9fc2ff;
+}
+
+.headerLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffd678;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.centerStatus {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #aeb6ca;
+}
+
+.topTabs {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  padding: 2px 5px;
+  background: #232a38;
+  border-bottom: 1px solid #4b556d;
+}
+
+.tab {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: #9aa5bb;
+  padding: 3px 0 2px;
+  border-radius: 1px;
+  background: #2a3345;
+}
+
+.activeTab {
+  background: #dce6ff;
+  color: #1f293c;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 102px;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  padding: 4px;
+}
+
+.channelGrid {
+  display: grid;
+  grid-template-columns: 68px 78px 44px 84px 82px 56px 36px;
+  gap: 2px;
+  min-height: 0;
+}
+
+.tile,
+.tileNarrow,
+.tileOut,
+.tileAuto,
+.busSendsTile,
+.nonChannelPanel {
+  display: flex;
+  flex-direction: column;
+  background: #364055;
+  border: 1px solid #5a6681;
+  min-height: 0;
+}
+
+.sectionTitle {
+  font-size: 9px;
+  font-weight: 800;
+  color: #d6ddee;
+  border-bottom: 1px solid #5a6681;
+  padding: 2px 5px;
+}
+
+.tileTitle {
+  font-size: 9px;
+  font-weight: 800;
+  color: #dbe2f2;
+  border-bottom: 1px solid #5a6681;
+  padding: 2px 4px;
+  text-transform: uppercase;
+}
+
+.inRows,
+.outRows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px 4px;
+  flex: 1;
+}
+
+.inRow,
+.outRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  font-weight: 700;
+  color: #d0d8ea;
+}
+
+.graph {
+  margin: 3px;
+  border: 1px solid #5a6681;
+  background: #2b3343;
+  flex: 1;
+  min-height: 0;
+}
+
+.graphGate {
+  background:
+    linear-gradient(135deg, transparent 46%, #f69a3f 47% 51%, transparent 52%),
+    linear-gradient(#2b3343, #2b3343);
+}
+
+.graphEq {
+  background:
+    linear-gradient(180deg, #2b3343 58%, transparent 59%),
+    radial-gradient(circle at 35% 60%, #f6ca53 0 8%, transparent 9%),
+    radial-gradient(circle at 68% 54%, #f6ca53 0 8%, transparent 9%),
+    linear-gradient(#2b3343, #2b3343);
+}
+
+.graphDyn {
+  background:
+    linear-gradient(140deg, transparent 40%, #f69a3f 41% 44%, transparent 45%),
+    linear-gradient(#2b3343, #2b3343);
+}
+
+.insertFlow {
+  display: grid;
+  gap: 4px;
+  padding: 8px 4px 6px;
+  align-content: start;
+}
+
+.flowNode {
+  text-align: center;
+  font-size: 8px;
+  font-weight: 800;
+  color: #bfc8da;
+  border: 1px solid #65718c;
+  background: #2a3243;
+  padding: 2px 0;
+}
+
+.activeNode {
+  color: #261f12;
+  background: #f4be63;
+  border-color: #f4be63;
+}
+
+.autoRows {
+  display: grid;
+  gap: 2px;
+  padding: 3px;
+}
+
+.autoKey {
+  font-size: 8px;
+  font-weight: 800;
+  text-align: center;
+  color: #c7d0e3;
+  border: 1px solid #66728d;
+  background: #2a3344;
+  padding: 2px 0;
+}
+
+.tileFooter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 2px;
+  padding: 2px 2px 3px;
+  border-top: 1px solid #5a6681;
+}
+
+.badge {
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 6px;
+  background: #f0d358;
+  color: #282f41;
+  border-radius: 2px;
+}
+
+.value {
+  font-size: 8px;
+  font-weight: 700;
+  color: #eaf0ff;
+}
+
+.knob {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #d9dee9;
+  background: radial-gradient(circle at 35% 30%, #f9fbff 0%, #bfc6d7 65%, #7d8598 100%);
+}
+
+.busSendsTile {
+  overflow: hidden;
+}
+
+.busSendsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px 4px;
+  overflow: hidden;
+}
+
+.busSendRow {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  align-items: center;
+  gap: 4px;
+}
+
+.busSendLabel {
+  font-size: 8px;
+  color: #d8dff0;
+  font-weight: 700;
+  text-align: right;
+}
+
+.sendBar {
+  height: 6px;
+  border: 1px solid #4f5a73;
+  background: #262d3c;
+}
+
+.sendFill {
+  height: 100%;
+  background: #ffd14a;
+}
+
+.valueList {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
+  overflow: hidden;
+}
+
+.valueRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 9px;
+}
+
+.valueLabel {
+  color: #b9c2d4;
+  font-weight: 700;
+}
+
+.valueValue {
+  color: #eff3ff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nonChannelBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  min-height: 0;
+  flex: 1;
+}
+
+.sendsList {
+  flex: 1;
+  min-height: 0;
+  padding: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sendRow {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+}
+
+.sendLabel {
+  font-size: 8px;
+  color: #d3dbeb;
+  font-weight: 700;
+}
+
+.encoderStrip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  background: #202733;
+  border-top: 1px solid #4c566f;
+  padding: 3px 4px;
+}
+
+.encoderCell {
+  background: #313b4f;
+  border: 1px solid #5d6985;
+  text-align: center;
+  padding: 2px 3px;
+  min-height: 30px;
+}
+
+.encoderValue {
+  font-size: 9px;
+  font-weight: 700;
+  color: #f8fbff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.encoderLabel {
+  margin-top: 2px;
+  font-size: 8px;
+  font-weight: 800;
+  color: #aeb7c9;
+  text-transform: uppercase;
+}
+
+.encoderSub {
+  font-size: 7px;
+  color: #8e9ab2;
+  text-transform: uppercase;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c8cfdf;
+  font-size: 12px;
+  font-weight: 700;
+  background: #2b3140;
+}

@@ -20,6 +20,7 @@ export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
   const toggleSolo = useMixerStore((s) => s.toggleMixBusSolo)
   const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
   const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
+  const selectedFocus = useSurfaceStore((s) => s.selectedFocus)
   const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
   const busAssignArmedId = useSurfaceStore((s) => s.busAssignArmedId)
   const setBusAssignArmedId = useSurfaceStore((s) => s.setBusAssignArmedId)
@@ -31,7 +32,7 @@ export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
   if (!bus) return null
 
   const isBusAssignArmed = busAssignArmedId === busIndex
-  const isBusTargetSelected = selectedOutputIndex === busIndex
+  const isBusTargetSelected = selectedFocus === 'output' && selectedOutputIndex === busIndex
 
   const isChannelMode = sendsOnFader && sendsOnFaderMode === 'channel'
   const faderValue = isChannelMode

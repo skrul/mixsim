@@ -15,36 +15,60 @@ export function InputChannel({ channelIndex }: InputChannelProps) {
   const setSendLevel = useMixerStore((s) => s.setChannelSendLevel)
   const toggleMute = useMixerStore((s) => s.toggleChannelMute)
   const toggleSolo = useMixerStore((s) => s.toggleChannelSolo)
+  const assignChannelToDca = useMixerStore((s) => s.assignChannelToDca)
+  const unassignChannelFromDca = useMixerStore((s) => s.unassignChannelFromDca)
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
   const setSelectedChannel = useSurfaceStore((s) => s.setSelectedChannel)
+  const dcaAssignArmedId = useSurfaceStore((s) => s.dcaAssignArmedId)
   const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
+  const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
   const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
 
   if (!channel) return null
 
-  const isSelected = selectedChannel === channelIndex
+  const isSelected = dcaAssignArmedId !== null
+    ? channel.dcaGroups.includes(dcaAssignArmedId)
+    : selectedChannel === channelIndex
 
-  const faderValue = sendsOnFader
+  const faderInBusMode = sendsOnFader && sendsOnFaderMode === 'bus'
+
+  const faderValue = faderInBusMode
     ? (channel.sends[sendTargetBus]?.level ?? 0)
     : channel.faderPosition
 
-  const handleFaderChange = sendsOnFader
+  const handleFaderChange = faderInBusMode
     ? (v: number) => setSendLevel(channelIndex, sendTargetBus, v)
     : (v: number) => setFader(channelIndex, v)
 
-  const faderHelpText = sendsOnFader
+  const faderHelpText = faderInBusMode
     ? `Adjust the send level from this channel to Mix ${sendTargetBus + 1}. This controls how much of this channel is sent to that bus.`
     : 'Drag to adjust the channel volume level. Unity gain (0 dB) is marked with \'U\'. This controls how loud this channel is in the main mix.'
+
+  const handleSelectClick = () => {
+    if (dcaAssignArmedId !== null) {
+      if (channel.dcaGroups.includes(dcaAssignArmedId)) {
+        unassignChannelFromDca(channelIndex, dcaAssignArmedId)
+      } else {
+        assignChannelToDca(channelIndex, dcaAssignArmedId)
+      }
+      return
+    }
+    setSelectedChannel(channelIndex)
+  }
+
+  const selectHelpText = dcaAssignArmedId !== null
+    ? `DCA assign mode active. Click to ${channel.dcaGroups.includes(dcaAssignArmedId) ? 'remove this channel from' : 'assign this channel to'} DCA ${dcaAssignArmedId + 1}.`
+    : 'Select this channel to view and edit its full settings in the detail panel above.'
 
   return (
     <div className={`${styles.channel} ${isSelected ? styles.selected : ''}`}>
       <ToggleButton
         active={isSelected}
-        onClick={() => setSelectedChannel(channelIndex)}
+        onClick={handleSelectClick}
         label="SELECT"
         variant="select"
         square
-        helpText="Select this channel to view and edit its full settings in the detail panel above."
+        helpText={selectHelpText}
       />
       <div className={styles.ledWrapper}>
         <div className={styles.led} />

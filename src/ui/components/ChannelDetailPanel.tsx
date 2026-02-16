@@ -1,6 +1,6 @@
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
-import { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT, NUM_MIX_BUSES, NUM_DCA_GROUPS, NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
+import { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT, NUM_DCA_GROUPS, NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
 import { getToneLabel } from '@/audio/source-manager'
 import { Knob } from './Knob'
 import { Meter } from './Meter'
@@ -43,15 +43,19 @@ export function ChannelDetailPanel() {
   const setEqMidQ = useMixerStore((s) => s.setChannelEqMidQ)
   const setEqHighFreq = useMixerStore((s) => s.setChannelEqHighFreq)
   const setEqHighGain = useMixerStore((s) => s.setChannelEqHighGain)
-  const setSendLevel = useMixerStore((s) => s.setChannelSendLevel)
-  const setSendPreFader = useMixerStore((s) => s.setChannelSendPreFader)
-  const mixBuses = useMixerStore((s) => s.mixBuses)
   const dcaGroups = useMixerStore((s) => s.dcaGroups)
   const assignChannelToDca = useMixerStore((s) => s.assignChannelToDca)
   const unassignChannelFromDca = useMixerStore((s) => s.unassignChannelFromDca)
   const setChannelInputSource = useMixerStore((s) => s.setChannelInputSource)
   const availableStems = useMixerStore((s) => s.availableStems)
   const availableLiveDevices = useMixerStore((s) => s.availableLiveDevices)
+  const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
+  const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
+  const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
+  const toggleSendsOnFaderForSelectedChannel = useSurfaceStore((s) => s.toggleSendsOnFaderForSelectedChannel)
+
+  const isChannelSofActive = sendsOnFader && sendsOnFaderMode === 'channel'
+  const isBusSofActive = sendsOnFader && sendsOnFaderMode === 'bus'
 
   if (!channel) {
     return (
@@ -274,32 +278,22 @@ export function ChannelDetailPanel() {
         />
       </div>
 
-      {/* Bus Sends */}
+      {/* Sends on Fader */}
       <div className={styles.section}>
-        <div className={styles.sectionLabel}>SENDS</div>
-        <div className={styles.sendsGrid}>
-          {Array.from({ length: NUM_MIX_BUSES }, (_, b) => (
-            <div key={b} className={styles.sendRow}>
-              <span className={styles.sendLabel}>{mixBuses[b]?.label ?? `Mix ${b + 1}`}</span>
-              <ToggleButton
-                active={channel.sends[b]?.preFader ?? false}
-                onClick={() => setSendPreFader(id, b, !channel.sends[b]?.preFader)}
-                label="PRE"
-                variant="pre"
-                helpText="Toggle pre/post-fader send. Pre-fader sends are independent of the channel fader."
-              />
-              <Knob
-                value={channel.sends[b]?.level ?? 0}
-                min={0}
-                max={1}
-                defaultValue={0}
-                onChange={(v) => setSendLevel(id, b, v)}
-                label=""
-                formatValue={(v) => `${Math.round(v * 100)}%`}
-                helpText={`Send level to ${mixBuses[b]?.label ?? `Mix ${b + 1}`}.`}
-              />
-            </div>
-          ))}
+        <div className={styles.sectionLabel}>SENDS ON FADER</div>
+        <div className={styles.sofControls}>
+          <ToggleButton
+            active={isChannelSofActive}
+            onClick={toggleSendsOnFaderForSelectedChannel}
+            label="CH MODE"
+            variant="select"
+            helpText="Toggle Sends on Fader in channel-send mode. When active, the bus faders control sends from this selected input channel."
+          />
+          <div className={styles.sofStatus}>
+            {isChannelSofActive && `Bus faders now control sends from ${channel.label}.`}
+            {isBusSofActive && `Input faders are controlling sends to Mix ${sendTargetBus + 1}.`}
+            {!sendsOnFader && 'Off. Use CH MODE for selected-input sends, or press SELECT on a bus strip for monitor-mix mode.'}
+          </div>
         </div>
       </div>
 

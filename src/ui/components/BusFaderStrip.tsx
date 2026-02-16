@@ -11,25 +11,42 @@ interface BusFaderStripProps {
 
 export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
   const bus = useMixerStore((s) => s.mixBuses[busIndex])
+  const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
+  const selectedChannelState = useMixerStore((s) => s.channels[selectedChannel])
   const setFader = useMixerStore((s) => s.setMixBusFader)
+  const setChannelSendLevel = useMixerStore((s) => s.setChannelSendLevel)
   const toggleMute = useMixerStore((s) => s.toggleMixBusMute)
   const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
-  const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
-  const toggleSendsOnFader = useSurfaceStore((s) => s.toggleSendsOnFader)
+  const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
+  const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
+  const selectBusForSendsOnFader = useSurfaceStore((s) => s.selectBusForSendsOnFader)
 
   if (!bus) return null
 
-  const isSelected = sendsOnFader && sendTargetBus === busIndex
+  const isBusTargetSelected = selectedOutputIndex === busIndex
+
+  const isChannelMode = sendsOnFader && sendsOnFaderMode === 'channel'
+  const faderValue = isChannelMode
+    ? (selectedChannelState?.sends[busIndex]?.level ?? 0)
+    : bus.faderPosition
+
+  const handleFaderChange = isChannelMode
+    ? (v: number) => setChannelSendLevel(selectedChannel, busIndex, v)
+    : (v: number) => setFader(busIndex, v)
+
+  const faderHelpText = isChannelMode
+    ? `Adjust the send level from ${selectedChannelState?.label || `Ch ${selectedChannel + 1}`} to ${bus.label}.`
+    : 'Adjust the output level of this mix bus.'
 
   return (
-    <div className={`${styles.strip} ${isSelected ? styles.selected : ''}`}>
+    <div className={`${styles.strip} ${isBusTargetSelected ? styles.selected : ''}`}>
       <ToggleButton
-        active={isSelected}
-        onClick={() => toggleSendsOnFader(busIndex)}
+        active={isBusTargetSelected}
+        onClick={() => selectBusForSendsOnFader(busIndex)}
         label="SELECT"
         variant="select"
         square
-        helpText="Select this bus to activate Sends on Fader mode. The input faders will then control send levels to this bus."
+        helpText="Select this bus as the Sends on Fader target. Then press the Sends on Fader button to control this bus from the input faders."
       />
       <div className={styles.ledWrapper}>
         <div className={styles.led} />
@@ -62,9 +79,9 @@ export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
         helpText="Mute this mix bus output."
       />
       <Fader
-        value={bus.faderPosition}
-        onChange={(v) => setFader(busIndex, v)}
-        helpText="Adjust the output level of this mix bus."
+        value={faderValue}
+        onChange={handleFaderChange}
+        helpText={faderHelpText}
       />
     </div>
   )

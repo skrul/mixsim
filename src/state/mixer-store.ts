@@ -177,7 +177,7 @@ function createDefaultMixBus(id: number): MixBusState {
   return {
     id,
     label: `Mix ${id + 1}`,
-    faderPosition: 0.75,
+    faderPosition: 0,
     mute: false,
   }
 }
@@ -440,9 +440,9 @@ export const useMixerStore = create<MixerState>()(
     setStemsLoaded: (loaded) => set({ stemsLoaded: loaded }),
     setLoadingError: (error) => set({ loadingError: error }),
 
-    initChannels: (count, labels, inputTypes) =>
+    initChannels: (_count, labels, inputTypes) =>
       set({
-        channels: Array.from({ length: count }, (_, i) =>
+        channels: Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
           createDefaultChannel(i, labels[i] ?? `Ch ${i + 1}`, inputTypes?.[i] ?? 'direct')
         ),
       }),

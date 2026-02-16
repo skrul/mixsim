@@ -12,16 +12,12 @@ export function OutputBank() {
   const setOutputBankLayer = useSurfaceStore((s) => s.setOutputBankLayer)
   const setActiveBusLayer = useSurfaceStore((s) => s.setActiveBusLayer)
   const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
-  const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
-  const toggleSendsOnFader = useSurfaceStore((s) => s.toggleSendsOnFader)
+  const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
+  const toggleSendsOnFaderForSelectedBus = useSurfaceStore((s) => s.toggleSendsOnFaderForSelectedBus)
   const setHelpText = useSurfaceStore((s) => s.setHelpText)
 
   const handleSendsOnFader = () => {
-    if (sendsOnFader) {
-      toggleSendsOnFader(sendTargetBus)
-    } else {
-      toggleSendsOnFader(0)
-    }
+    toggleSendsOnFaderForSelectedBus()
   }
 
   const busStartIndex = activeBusLayer * BUSES_PER_LAYER
@@ -31,9 +27,13 @@ export function OutputBank() {
       <div className={styles.layerColumn}>
         <div className={styles.groupLabel}>BUSES / GROUPS</div>
         <button
-          className={`${styles.layerButton} ${sendsOnFader ? styles.sendsActive : ''}`}
+          className={`${styles.layerButton} ${sendsOnFader && sendsOnFaderMode === 'bus' ? styles.sendsActive : ''}`}
           onClick={handleSendsOnFader}
-          onMouseEnter={() => setHelpText('Toggle Sends on Fader mode. When active, the input faders control send levels to the selected bus.')}
+          onMouseEnter={() => setHelpText(
+            sendsOnFaderMode === 'bus'
+              ? 'Sends on Fader is active in monitor-mix mode: input faders control sends to the selected mix bus.'
+              : 'Sends on Fader is active in channel-send mode: bus faders control sends from the selected input channel.'
+          )}
           onMouseLeave={() => setHelpText('')}
         >
           <div className={styles.pad} />

@@ -38,7 +38,7 @@ export interface SendState {
 export interface MixBusState {
   id: number
   label: string
-  faderPosition: number  // 0..1, default 0.75 (unity)
+  faderPosition: number  // 0..1, default 0 (-∞)
   mute: boolean
 }
 

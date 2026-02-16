@@ -1,4 +1,5 @@
 import { useMixerStore } from '@/state/mixer-store'
+import { NUM_INPUT_CHANNELS } from '@/state/mixer-model'
 
 export type InputType = 'mic' | 'line' | 'direct'
 
@@ -47,11 +48,16 @@ export class TransportManager {
 
       this.duration = Math.max(...this.stems.map((s) => s.buffer.duration))
       store.setDuration(this.duration)
-      store.initChannels(
-        this.stems.length,
-        this.stems.map((s) => s.label),
-        manifest.stems.map((s) => s.inputType ?? 'direct')
+      const stemLabels = this.stems.map((s) => s.label)
+      const stemInputTypes = manifest.stems.map((s) => s.inputType ?? 'direct')
+      const labels = Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
+        stemLabels[i] ?? `Ch ${i + 1}`
       )
+      const inputTypes = Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
+        stemInputTypes[i] ?? 'direct'
+      )
+
+      store.initChannels(NUM_INPUT_CHANNELS, labels, inputTypes)
       store.setStemsLoaded(true)
     } catch (error) {
       store.setLoadingError(

@@ -50,8 +50,13 @@
 }
 
 .layerButton.activeLayer .pad {
-  background: #224;
-  border-color: #44a;
+  background: #228822;
+  border-color: #33aa33;
+}
+
+.layerButton.activeLayer:hover:not(:disabled) .pad {
+  background: #228822;
+  border-color: #33aa33;
 }
 
 .layerButtonLabel {
@@ -66,7 +71,7 @@
 }
 
 .layerButton.activeLayer .layerButtonLabel {
-  color: #aaf;
+  color: #d9f3d9;
 }
 
 .channels {
@@ -75,7 +80,11 @@
 }
 
 .emptySlot {
+  width: 58px;
   min-width: 58px;
+  max-width: 58px;
+  flex: 0 0 58px;
+  box-sizing: border-box;
   background: #161625;
   border-radius: 4px;
   opacity: 0.4;

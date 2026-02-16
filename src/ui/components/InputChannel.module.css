@@ -6,7 +6,11 @@
   padding: 6px 4px;
   background: #1e1e30;
   border-radius: 4px;
+  width: 58px;
   min-width: 58px;
+  max-width: 58px;
+  flex: 0 0 58px;
+  box-sizing: border-box;
   border: 1px solid transparent;
 }
 
@@ -44,15 +48,21 @@
 
 .scribbleStrip {
   width: 100%;
+  min-height: 16px;
   padding: 3px 2px;
   background: #111;
   border-bottom: 3px solid #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
 .channelName {
   font-size: 9px;
   font-weight: 600;
+  line-height: 1;
+  min-height: 9px;
   color: #ccc;
   white-space: nowrap;
   overflow: hidden;

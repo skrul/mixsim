@@ -105,27 +105,20 @@
   letter-spacing: 0.5px;
 }
 
-.sendRow {
+.sofControls {
   display: flex;
+  gap: 4px;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  min-width: 220px;
 }
 
-.sendLabel {
-  font-size: 8px;
-  font-weight: 600;
-  color: #888;
-  width: 36px;
-  flex-shrink: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sendsGrid {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+.sofStatus {
+  font-size: 10px;
+  color: #9aa0b3;
+  line-height: 1.25;
+  text-align: center;
+  max-width: 240px;
 }
 
 .dcaGrid {

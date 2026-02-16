@@ -43,6 +43,10 @@
   background: #333;
 }
 
+.squareButton.ring {
+  box-shadow: 0 0 0 2px rgba(90, 220, 90, 0.85);
+}
+
 .squareLabel {
   font-size: 7px;
   font-weight: 700;

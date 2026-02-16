@@ -50,13 +50,19 @@
 }
 
 .layerButton.activeLayer .pad {
-  background: #224;
-  border-color: #44a;
+  background: #228822;
+  border-color: #33aa33;
+}
+
+.layerButton.activeLayer:hover:not(:disabled) .pad {
+  background: #228822;
+  border-color: #33aa33;
 }
 
 .layerButton.sendsActive .pad {
-  background: #2a4a1a;
-  border-color: #3a3;
+  animation: sofBlink 1.4s steps(1, end) infinite;
+  background: #7a1818;
+  border-color: #d43b3b;
 }
 
 .layerButtonLabel {
@@ -71,11 +77,26 @@
 }
 
 .layerButton.activeLayer .layerButtonLabel {
-  color: #aaf;
+  color: #d9f3d9;
 }
 
 .layerButton.sendsActive .layerButtonLabel {
-  color: #8f8;
+  color: #ff9c9c;
+}
+
+@keyframes sofBlink {
+  0%,
+  49% {
+    background: #7a1818;
+    border-color: #d43b3b;
+    box-shadow: 0 0 0 rgba(212, 59, 59, 0);
+  }
+  50%,
+  100% {
+    background: #c72525;
+    border-color: #ff6767;
+    box-shadow: 0 0 8px rgba(255, 103, 103, 0.45);
+  }
 }
 
 .strips {

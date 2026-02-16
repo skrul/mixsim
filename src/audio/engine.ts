@@ -22,6 +22,169 @@ interface MixBusChain {
   soloGain: GainNode
 }
 
+interface FxRuntime {
+  input: GainNode
+  output: AudioNode
+  dispose: () => void
+}
+
+function createDecayImpulseResponse(
+  context: AudioContext,
+  durationSec: number,
+  decay: number,
+  highCutHz: number
+): AudioBuffer {
+  const length = Math.floor(context.sampleRate * durationSec)
+  const ir = context.createBuffer(2, length, context.sampleRate)
+  for (let ch = 0; ch < 2; ch++) {
+    const data = ir.getChannelData(ch)
+    let lp = 0
+    const alpha = Math.min(0.99, highCutHz / context.sampleRate)
+    for (let i = 0; i < length; i++) {
+      const t = i / length
+      const env = Math.pow(1 - t, decay)
+      const white = Math.random() * 2 - 1
+      lp += alpha * (white - lp)
+      data[i] = lp * env
+    }
+  }
+  return ir
+}
+
+function createReverbFx(
+  context: AudioContext,
+  opts: { durationSec: number; decay: number; preDelaySec: number; highCutHz: number; wet: number }
+): FxRuntime {
+  const input = context.createGain()
+  const preDelay = context.createDelay()
+  preDelay.delayTime.value = opts.preDelaySec
+  const convolver = context.createConvolver()
+  convolver.buffer = createDecayImpulseResponse(context, opts.durationSec, opts.decay, opts.highCutHz)
+  const tone = context.createBiquadFilter()
+  tone.type = 'lowpass'
+  tone.frequency.value = opts.highCutHz
+  const wet = context.createGain()
+  wet.gain.value = opts.wet
+
+  input.connect(preDelay)
+  preDelay.connect(convolver)
+  convolver.connect(tone)
+  tone.connect(wet)
+
+  return {
+    input,
+    output: wet,
+    dispose: () => {
+      convolver.disconnect()
+      wet.disconnect()
+      input.disconnect()
+    },
+  }
+}
+
+function createStereoDelayFx(context: AudioContext): FxRuntime {
+  const input = context.createGain()
+  const splitter = context.createChannelSplitter(2)
+  const merger = context.createChannelMerger(2)
+
+  const delayL = context.createDelay()
+  const delayR = context.createDelay()
+  delayL.delayTime.value = 0.28
+  delayR.delayTime.value = 0.42
+
+  const fbL = context.createGain()
+  const fbR = context.createGain()
+  fbL.gain.value = 0.35
+  fbR.gain.value = 0.35
+
+  const toneL = context.createBiquadFilter()
+  const toneR = context.createBiquadFilter()
+  toneL.type = 'lowpass'
+  toneR.type = 'lowpass'
+  toneL.frequency.value = 4500
+  toneR.frequency.value = 4500
+
+  input.connect(splitter)
+
+  splitter.connect(delayL, 0)
+  splitter.connect(delayR, 1)
+
+  delayL.connect(toneL)
+  toneL.connect(fbL)
+  fbL.connect(delayL)
+  delayL.connect(merger, 0, 0)
+
+  delayR.connect(toneR)
+  toneR.connect(fbR)
+  fbR.connect(delayR)
+  delayR.connect(merger, 0, 1)
+
+  return {
+    input,
+    output: merger,
+    dispose: () => {
+      input.disconnect()
+      merger.disconnect()
+      delayL.disconnect()
+      delayR.disconnect()
+    },
+  }
+}
+
+function createStereoChorusFx(context: AudioContext): FxRuntime {
+  const input = context.createGain()
+  const splitter = context.createChannelSplitter(2)
+  const merger = context.createChannelMerger(2)
+
+  const delayL = context.createDelay()
+  const delayR = context.createDelay()
+  delayL.delayTime.value = 0.012
+  delayR.delayTime.value = 0.014
+
+  const lfoL = context.createOscillator()
+  const lfoR = context.createOscillator()
+  lfoL.type = 'sine'
+  lfoR.type = 'sine'
+  lfoL.frequency.value = 0.35
+  lfoR.frequency.value = 0.41
+
+  const depthL = context.createGain()
+  const depthR = context.createGain()
+  depthL.gain.value = 0.004
+  depthR.gain.value = 0.004
+
+  const wet = context.createGain()
+  wet.gain.value = 0.9
+
+  lfoL.connect(depthL)
+  depthL.connect(delayL.delayTime)
+  lfoR.connect(depthR)
+  depthR.connect(delayR.delayTime)
+  lfoL.start()
+  lfoR.start()
+
+  input.connect(splitter)
+  splitter.connect(delayL, 0)
+  splitter.connect(delayR, 1)
+
+  delayL.connect(merger, 0, 0)
+  delayR.connect(merger, 0, 1)
+  merger.connect(wet)
+
+  return {
+    input,
+    output: wet,
+    dispose: () => {
+      lfoL.stop()
+      lfoR.stop()
+      lfoL.disconnect()
+      lfoR.disconnect()
+      input.disconnect()
+      wet.disconnect()
+    },
+  }
+}
+
 export function createAudioEngine(): AudioEngine {
   let context: AudioContext | null = null
   let channels: ChannelChain[] = []
@@ -40,6 +203,7 @@ export function createAudioEngine(): AudioEngine {
   let transport: TransportManager | null = null
   let metering: MeteringManager | null = null
   let sourceManager: SourceManager | null = null
+  const fxDisposers: (() => void)[] = []
   const unsubscribers: (() => void)[] = []
 
   function applyMonitorTaps(source: MonitorSource, soloActive: boolean): void {
@@ -145,6 +309,45 @@ export function createAudioEngine(): AudioEngine {
       const ch = store.channels[i]
       const chain = createChannelChain(context, masterGain, soloBusGain, ch, mixBusSummingNodes)
       channels.push(chain)
+    }
+
+    // Default X32-style FX sends/returns:
+    // Bus 13-16 feed FX1-4, returned on FX1L/R .. FX4L/R (channels 25-32).
+    const fxMap = [
+      { busIndex: 12, returnL: 24, returnR: 25, type: 'room' as const },
+      { busIndex: 13, returnL: 26, returnR: 27, type: 'plate' as const },
+      { busIndex: 14, returnL: 28, returnR: 29, type: 'delay' as const },
+      { busIndex: 15, returnL: 30, returnR: 31, type: 'chorus' as const },
+    ]
+
+    for (const slot of fxMap) {
+      const bus = mixBusChains[slot.busIndex]
+      const retL = channels[slot.returnL]
+      const retR = channels[slot.returnR]
+      if (!bus || !retL || !retR) continue
+
+      const fx =
+        slot.type === 'room'
+          ? createReverbFx(context, { durationSec: 1.2, decay: 2.2, preDelaySec: 0.012, highCutHz: 6000, wet: 1 })
+          : slot.type === 'plate'
+            ? createReverbFx(context, { durationSec: 1.8, decay: 2.8, preDelaySec: 0.02, highCutHz: 9000, wet: 1 })
+            : slot.type === 'delay'
+              ? createStereoDelayFx(context)
+              : createStereoChorusFx(context)
+
+      bus.muteGain.connect(fx.input)
+      const split = context.createChannelSplitter(2)
+      fx.output.connect(split)
+      split.connect(retL.inputNode, 0)
+      split.connect(retR.inputNode, 1)
+
+      fxDisposers.push(() => {
+        try { bus.muteGain.disconnect(fx.input) } catch { /* already disconnected */ }
+        try { fx.output.disconnect(split) } catch { /* already disconnected */ }
+        try { split.disconnect(retL.inputNode) } catch { /* already disconnected */ }
+        try { split.disconnect(retR.inputNode) } catch { /* already disconnected */ }
+        fx.dispose()
+      })
     }
 
     subscribeToStore()
@@ -464,6 +667,8 @@ export function createAudioEngine(): AudioEngine {
     metering?.stop()
     sourceManager?.dispose()
     transport?.dispose()
+    fxDisposers.forEach((disposeFx) => disposeFx())
+    fxDisposers.length = 0
     unsubscribers.forEach((unsub) => unsub())
     unsubscribers.length = 0
     context?.close()

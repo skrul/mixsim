@@ -21,6 +21,7 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
   const setSelectedChannel = useSurfaceStore((s) => s.setSelectedChannel)
   const dcaAssignArmedId = useSurfaceStore((s) => s.dcaAssignArmedId)
+  const busAssignArmedId = useSurfaceStore((s) => s.busAssignArmedId)
   const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
   const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
   const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
@@ -29,7 +30,9 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
 
   const isSelected = dcaAssignArmedId !== null
     ? channel.dcaGroups.includes(dcaAssignArmedId)
-    : selectedChannel === channelIndex
+    : busAssignArmedId !== null
+      ? (channel.sends[busAssignArmedId]?.level ?? 0) > 0.0001
+      : selectedChannel === channelIndex
 
   const faderInBusMode = sendsOnFader && sendsOnFaderMode === 'bus'
 
@@ -54,12 +57,19 @@ export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps)
       }
       return
     }
+    if (busAssignArmedId !== null) {
+      const current = channel.sends[busAssignArmedId]?.level ?? 0
+      setSendLevel(channelIndex, busAssignArmedId, current > 0.0001 ? 0 : 0.5)
+      return
+    }
     setSelectedChannel(channelIndex)
   }
 
   const selectHelpText = dcaAssignArmedId !== null
     ? `DCA assign mode active. Click to ${channel.dcaGroups.includes(dcaAssignArmedId) ? 'remove this channel from' : 'assign this channel to'} DCA ${dcaAssignArmedId + 1}.`
-    : 'Select this channel to view and edit its full settings in the detail panel above.'
+    : busAssignArmedId !== null
+      ? `Bus send assign mode active. Click to ${(channel.sends[busAssignArmedId]?.level ?? 0) > 0.0001 ? 'remove from' : 'send to'} ${`Mix ${busAssignArmedId + 1}`}.`
+      : 'Select this channel to view and edit its full settings in the detail panel above.'
 
   return (
     <div className={`${styles.channel} ${isSelected ? styles.selected : ''}`}>

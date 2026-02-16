@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
 import { Fader } from './Fader'
@@ -20,10 +21,16 @@ export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
   const sendsOnFader = useSurfaceStore((s) => s.sendsOnFader)
   const sendsOnFaderMode = useSurfaceStore((s) => s.sendsOnFaderMode)
   const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
+  const busAssignArmedId = useSurfaceStore((s) => s.busAssignArmedId)
+  const setBusAssignArmedId = useSurfaceStore((s) => s.setBusAssignArmedId)
   const selectBusForSendsOnFader = useSurfaceStore((s) => s.selectBusForSendsOnFader)
+
+  const holdTimerRef = useRef<number | null>(null)
+  const longPressTriggeredRef = useRef(false)
 
   if (!bus) return null
 
+  const isBusAssignArmed = busAssignArmedId === busIndex
   const isBusTargetSelected = selectedOutputIndex === busIndex
 
   const isChannelMode = sendsOnFader && sendsOnFaderMode === 'channel'
@@ -39,15 +46,61 @@ export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
     ? `Adjust the send level from ${selectedChannelState?.label || `Ch ${selectedChannel + 1}`} to ${bus.label}.`
     : 'Adjust the output level of this mix bus.'
 
+  const clearHoldTimer = () => {
+    if (holdTimerRef.current !== null) {
+      window.clearTimeout(holdTimerRef.current)
+      holdTimerRef.current = null
+    }
+  }
+
+  const handlePressStart = () => {
+    if (isBusAssignArmed) return
+    longPressTriggeredRef.current = false
+    clearHoldTimer()
+    holdTimerRef.current = window.setTimeout(() => {
+      longPressTriggeredRef.current = true
+      selectBusForSendsOnFader(busIndex)
+      setBusAssignArmedId(busIndex)
+    }, 500)
+  }
+
+  const handlePressEnd = () => {
+    clearHoldTimer()
+  }
+
+  const handleSelectClick = () => {
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false
+      return
+    }
+    if (isBusAssignArmed) {
+      setBusAssignArmedId(null)
+      return
+    }
+    selectBusForSendsOnFader(busIndex)
+  }
+
+  useEffect(() => clearHoldTimer, [])
+
   return (
     <div className={`${styles.strip} ${isBusTargetSelected ? styles.selected : ''}`}>
       <ToggleButton
-        active={isBusTargetSelected}
-        onClick={() => selectBusForSendsOnFader(busIndex)}
+        active={isBusTargetSelected || isBusAssignArmed}
+        ring={isBusAssignArmed}
+        onClick={handleSelectClick}
+        onMouseDown={handlePressStart}
+        onMouseUp={handlePressEnd}
+        onMouseLeave={handlePressEnd}
+        onTouchStart={handlePressStart}
+        onTouchEnd={handlePressEnd}
         label="SELECT"
         variant="select"
         square
-        helpText="Select this bus as the Sends on Fader target. Then press the Sends on Fader button to control this bus from the input faders."
+        helpText={
+          isBusAssignArmed
+            ? 'Bus assign mode active. Click input SELECT buttons to toggle sends to this bus. Click this bus SELECT again to exit.'
+            : 'Click to select this bus. Press and hold for 0.5s to arm send assignment mode for this bus.'
+        }
       />
       <div className={styles.ledWrapper}>
         <div className={styles.led} />

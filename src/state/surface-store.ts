@@ -6,6 +6,7 @@ export type SendsOnFaderMode = 'bus' | 'channel'
 export interface SurfaceState {
   selectedChannel: number
   dcaAssignArmedId: number | null
+  busAssignArmedId: number | null
   activeInputLayer: number
   outputBankLayer: OutputBankLayer
   activeBusLayer: number          // 0 = Bus 1-8, 1 = Bus 9-16
@@ -17,6 +18,7 @@ export interface SurfaceState {
 
   setSelectedChannel: (channelId: number) => void
   setDcaAssignArmedId: (dcaId: number | null) => void
+  setBusAssignArmedId: (busId: number | null) => void
   setActiveInputLayer: (layer: number) => void
   setOutputBankLayer: (layer: OutputBankLayer) => void
   setActiveBusLayer: (layer: number) => void
@@ -31,6 +33,7 @@ export interface SurfaceState {
 export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   selectedChannel: 0,
   dcaAssignArmedId: null,
+  busAssignArmedId: null,
   activeInputLayer: 0,
   outputBankLayer: 'buses',
   activeBusLayer: 0,
@@ -41,7 +44,8 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   helpText: '',
 
   setSelectedChannel: (channelId) => set({ selectedChannel: channelId }),
-  setDcaAssignArmedId: (dcaId) => set({ dcaAssignArmedId: dcaId }),
+  setDcaAssignArmedId: (dcaId) => set({ dcaAssignArmedId: dcaId, busAssignArmedId: null }),
+  setBusAssignArmedId: (busId) => set({ busAssignArmedId: busId, dcaAssignArmedId: null }),
   setActiveInputLayer: (layer) => set({ activeInputLayer: layer }),
   setOutputBankLayer: (layer) => {
     // Moving to DCA layer exits Sends-on-Fader and DCA assign mode.
@@ -53,10 +57,11 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
         sendsOnFaderMode: 'bus',
         selectedOutputIndex: -1,
         dcaAssignArmedId: null,
+        busAssignArmedId: null,
       })
       return
     }
-    set({ outputBankLayer: layer, dcaAssignArmedId: null })
+    set({ outputBankLayer: layer, dcaAssignArmedId: null, busAssignArmedId: null })
   },
   setActiveBusLayer: (layer) => set({ activeBusLayer: layer }),
   selectBusForSendsOnFader: (busIndex) => {

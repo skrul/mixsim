@@ -129,6 +129,8 @@ const DEFAULT_COLORS = [
 ]
 
 function createDefaultChannel(id: number, label: string, inputType: InputType = 'direct'): ChannelState {
+  const isFxReturn = id >= 24 && id <= 31
+  const defaultPan = isFxReturn ? (id % 2 === 0 ? -1 : 1) : 0
   return {
     id,
     label,
@@ -136,7 +138,7 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     inputType,
     gain: GAIN_DEFAULT,
     faderPosition: 0,
-    pan: 0,
+    pan: defaultPan,
     mute: false,
     solo: false,
     hpfEnabled: false,

@@ -179,9 +179,10 @@ function updateDcaGroup(
 }
 
 function createDefaultMixBus(id: number): MixBusState {
+  const isFxSendBus = id >= 12 && id <= 15
   return {
     id,
-    label: `Mix ${id + 1}`,
+    label: isFxSendBus ? `FX ${id - 11}` : `Mix ${id + 1}`,
     faderPosition: 0,
     mute: false,
     solo: false,

@@ -7,9 +7,10 @@ import styles from './InputChannel.module.css'
 
 interface InputChannelProps {
   channelIndex: number
+  scribbleLabel?: string
 }
 
-export function InputChannel({ channelIndex }: InputChannelProps) {
+export function InputChannel({ channelIndex, scribbleLabel }: InputChannelProps) {
   const channel = useMixerStore((s) => s.channels[channelIndex])
   const setFader = useMixerStore((s) => s.setChannelFader)
   const setSendLevel = useMixerStore((s) => s.setChannelSendLevel)
@@ -94,7 +95,7 @@ export function InputChannel({ channelIndex }: InputChannelProps) {
         helpText="Solo this channel to hear it in isolation through the monitor headphones."
       />
       <div className={styles.scribbleStrip} style={{ borderColor: channel.color }}>
-        <span className={styles.channelName}>{channel.label}</span>
+        <span className={styles.channelName}>{scribbleLabel ?? channel.label}</span>
       </div>
       <ToggleButton
         active={channel.mute}

@@ -44,14 +44,19 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   setDcaAssignArmedId: (dcaId) => set({ dcaAssignArmedId: dcaId }),
   setActiveInputLayer: (layer) => set({ activeInputLayer: layer }),
   setOutputBankLayer: (layer) => {
-    // Switching output bank layer deactivates sends-on-fader
-    set({
-      outputBankLayer: layer,
-      sendsOnFader: false,
-      sendsOnFaderMode: 'bus',
-      selectedOutputIndex: -1,
-      dcaAssignArmedId: null,
-    })
+    // Moving to DCA layer exits Sends-on-Fader and DCA assign mode.
+    // Staying/returning on bus layers should preserve current SOF state.
+    if (layer === 'dcas') {
+      set({
+        outputBankLayer: layer,
+        sendsOnFader: false,
+        sendsOnFaderMode: 'bus',
+        selectedOutputIndex: -1,
+        dcaAssignArmedId: null,
+      })
+      return
+    }
+    set({ outputBankLayer: layer, dcaAssignArmedId: null })
   },
   setActiveBusLayer: (layer) => set({ activeBusLayer: layer }),
   selectBusForSendsOnFader: (busIndex) => {

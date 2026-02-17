@@ -1,10 +1,14 @@
 import { faderPositionToGain, dbToGain } from '@/audio/fader-taper'
 import { INPUT_TYPE_CONFIG, type ChannelState } from '@/state/mixer-store'
+import { GAIN_MIN } from '@/state/mixer-model'
 
 export interface ChannelChain {
   sourceAttenuation: GainNode
   inputGain: GainNode
   preFaderAnalyser: AnalyserNode
+  gateGain: GainNode
+  gateDetector: AnalyserNode
+  compressor: DynamicsCompressorNode
   hpf: BiquadFilterNode
   eqLow: BiquadFilterNode
   eqMid: BiquadFilterNode
@@ -25,9 +29,14 @@ export function createChannelChain(
   initialState: ChannelState,
   mixBusSummingNodes: AudioNode[]
 ): ChannelChain {
+  const preampDbToGain = (gainDb: number): number => (gainDb <= GAIN_MIN ? 0 : dbToGain(gainDb))
+
   const sourceAttenuation = context.createGain()
   const inputGain = context.createGain()
   const preFaderAnalyser = context.createAnalyser()
+  const gateGain = context.createGain()
+  const gateDetector = context.createAnalyser()
+  const compressor = context.createDynamicsCompressor()
   const hpf = context.createBiquadFilter()
   const eqLow = context.createBiquadFilter()
   const eqMid = context.createBiquadFilter()
@@ -39,6 +48,7 @@ export function createChannelChain(
   const soloGain = context.createGain()
 
   preFaderAnalyser.fftSize = 1024
+  gateDetector.fftSize = 1024
   analyser.fftSize = 1024
 
   // Source attenuation simulates mic/line level input
@@ -46,7 +56,13 @@ export function createChannelChain(
   sourceAttenuation.gain.value = dbToGain(typeConfig.attenuation)
 
   // Initial values
-  inputGain.gain.value = dbToGain(initialState.gain)
+  inputGain.gain.value = preampDbToGain(initialState.gain)
+  gateGain.gain.value = initialState.gateEnabled ? 0 : 1
+  compressor.threshold.value = initialState.compEnabled ? initialState.compThreshold : 0
+  compressor.ratio.value = initialState.compEnabled ? 4 : 1
+  compressor.attack.value = 0.01
+  compressor.release.value = 0.12
+  compressor.knee.value = 6
 
   hpf.type = 'highpass'
   hpf.frequency.value = initialState.hpfEnabled ? initialState.hpfFreq : 10
@@ -86,12 +102,15 @@ export function createChannelChain(
 
   // Pre-fader meter tap (after gain, before processing)
   inputGain.connect(preFaderAnalyser)
+  inputGain.connect(gateDetector)
 
   inputGain
+    .connect(gateGain)
     .connect(hpf)
     .connect(eqLow)
     .connect(eqMid)
     .connect(eqHigh)
+    .connect(compressor)
     .connect(panner)
     .connect(faderGain)
     .connect(muteGain)
@@ -115,6 +134,9 @@ export function createChannelChain(
     sourceAttenuation,
     inputGain,
     preFaderAnalyser,
+    gateGain,
+    gateDetector,
+    compressor,
     hpf,
     eqLow,
     eqMid,

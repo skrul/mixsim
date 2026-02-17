@@ -11,6 +11,8 @@ interface MeterProps {
 
 const MIN_DB = -60
 const MAX_DB = 6
+const GREEN_MAX_DB = -21
+const CLIP_DB = 0
 
 export function Meter({ channelIndex, source = 'postFader', helpText }: MeterProps) {
   const setHelpText = useSurfaceStore((s) => s.setHelpText)
@@ -46,12 +48,12 @@ export function Meter({ channelIndex, source = 'postFader', helpText }: MeterPro
       if (barRef.current) {
         barRef.current.style.height = `${percent}%`
 
-        if (clamped > 0) {
-          barRef.current.style.backgroundColor = '#ff3333'
-        } else if (clamped > -12) {
-          barRef.current.style.backgroundColor = '#ffcc00'
+        if (clamped >= CLIP_DB) {
+          barRef.current.style.backgroundColor = '#ff4747'
+        } else if (clamped > GREEN_MAX_DB) {
+          barRef.current.style.backgroundColor = '#ffb03a'
         } else {
-          barRef.current.style.backgroundColor = '#33cc33'
+          barRef.current.style.backgroundColor = '#45ff70'
         }
       }
 

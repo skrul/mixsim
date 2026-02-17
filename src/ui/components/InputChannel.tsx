@@ -89,8 +89,8 @@ export function InputChannel({ channelIndex, scribbleLabel, stripType = 'input' 
         helpText={selectHelpText}
       />
       <div className={styles.ledWrapper}>
-        <div className={styles.led} />
-        <span className={styles.ledLabel}>COMP</span>
+        <div className={`${styles.led} ${channel.compEnabled ? styles.compLedActive : ''}`} />
+        <span className={`${styles.ledLabel} ${channel.compEnabled ? styles.ledLabelActive : ''}`}>COMP</span>
       </div>
       <div className={styles.meterBox}>
         <Meter
@@ -104,8 +104,8 @@ export function InputChannel({ channelIndex, scribbleLabel, stripType = 'input' 
         />
       </div>
       <div className={styles.ledWrapper}>
-        <div className={styles.led} />
-        <span className={styles.ledLabel}>GATE</span>
+        <div className={`${styles.led} ${channel.gateEnabled ? styles.gateLedActive : ''}`} />
+        <span className={`${styles.ledLabel} ${channel.gateEnabled ? styles.ledLabelActive : ''}`}>GATE</span>
       </div>
       <ToggleButton
         active={channel.solo}

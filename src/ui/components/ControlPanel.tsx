@@ -33,16 +33,21 @@ const METER_MARKS = [
   '-27',
   '-30',
   '-33',
+  '-36',
   '-39',
+  '-42',
   '-45',
+  '-48',
   '-51',
+  '-54',
   '-57',
 ]
 
 const METER_ROWS = METER_MARKS.length
-const METER_WARM_ROWS = 15
+const CLIP_LED_THRESHOLD_DB = -1
+const DISPLAY_METER_TRIM_DB = 4
 const METER_THRESHOLDS = METER_MARKS.map((mark) =>
-  mark === 'CLIP' ? 0 : Number.parseFloat(mark)
+  mark === 'CLIP' ? CLIP_LED_THRESHOLD_DB : Number.parseFloat(mark)
 )
 
 interface DisplayMeterLevels {
@@ -60,6 +65,13 @@ function dbToLitRows(db: number): number {
   return lit
 }
 
+function ledToneClass(index: number): string {
+  if (index === 0) return styles.clip
+  const db = METER_THRESHOLDS[index]
+  if (db > -21) return styles.warm
+  return styles.cool
+}
+
 export function ControlPanel() {
   const [activePage, setActivePage] = useState<DisplayMenuKey>('HOME')
   const [displayMeters, setDisplayMeters] = useState<DisplayMeterLevels>({
@@ -72,9 +84,9 @@ export function ControlPanel() {
 
   useEffect(() => {
     const tick = () => {
-      const targetSolo = meterLevels.solo
-      const targetL = meterLevels.masterL
-      const targetR = meterLevels.masterR
+      const targetSolo = meterLevels.solo + DISPLAY_METER_TRIM_DB
+      const targetL = meterLevels.masterL + DISPLAY_METER_TRIM_DB
+      const targetR = meterLevels.masterR + DISPLAY_METER_TRIM_DB
 
       const next = { ...displayDbRef.current }
 
@@ -135,7 +147,7 @@ export function ControlPanel() {
                   {Array.from({ length: METER_ROWS }, (_, i) => (
                     <div
                       key={`mc-${i}`}
-                      className={`${styles.meterLed} ${i < METER_WARM_ROWS ? styles.warm : styles.cool} ${i < METER_ROWS - displayMeters.mcSolo ? styles.off : ''}`}
+                      className={`${styles.meterLed} ${ledToneClass(i)} ${i < METER_ROWS - displayMeters.mcSolo ? styles.off : ''}`}
                     />
                   ))}
                 </div>
@@ -148,7 +160,7 @@ export function ControlPanel() {
                   {Array.from({ length: METER_ROWS }, (_, i) => (
                     <div
                       key={`l-${i}`}
-                      className={`${styles.meterLed} ${i < METER_WARM_ROWS ? styles.warm : styles.cool} ${i < METER_ROWS - displayMeters.left ? styles.off : ''}`}
+                      className={`${styles.meterLed} ${ledToneClass(i)} ${i < METER_ROWS - displayMeters.left ? styles.off : ''}`}
                     />
                   ))}
                 </div>
@@ -156,7 +168,7 @@ export function ControlPanel() {
                   {Array.from({ length: METER_ROWS }, (_, i) => (
                     <div
                       key={`r-${i}`}
-                      className={`${styles.meterLed} ${i < METER_WARM_ROWS ? styles.warm : styles.cool} ${i < METER_ROWS - displayMeters.right ? styles.off : ''}`}
+                      className={`${styles.meterLed} ${ledToneClass(i)} ${i < METER_ROWS - displayMeters.right ? styles.off : ''}`}
                     />
                   ))}
                 </div>

@@ -33,12 +33,28 @@
   border: 1px solid #555;
 }
 
+.compLedActive {
+  background: #ffb03a;
+  border-color: #ffd277;
+  box-shadow: 0 0 6px rgba(255, 176, 58, 0.8);
+}
+
+.gateLedActive {
+  background: #45ff70;
+  border-color: #94ffad;
+  box-shadow: 0 0 6px rgba(69, 255, 112, 0.8);
+}
+
 .ledLabel {
   font-size: 6px;
   font-weight: 700;
   color: #666;
   text-transform: uppercase;
   line-height: 1;
+}
+
+.ledLabelActive {
+  color: #d7dde9;
 }
 
 .meterBox {

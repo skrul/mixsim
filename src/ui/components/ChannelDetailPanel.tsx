@@ -1,30 +1,40 @@
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
-import { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT, NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
-import { getToneLabel } from '@/audio/source-manager'
+import { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT } from '@/state/mixer-model'
 import { Knob } from './Knob'
 import { Meter } from './Meter'
-import { ToggleButton } from './ToggleButton'
 import styles from './ChannelDetailPanel.module.css'
 
-function sourceToValue(source: ChannelInputSource): string {
-  switch (source.type) {
-    case 'stem': return `stem:${source.stemIndex}`
-    case 'tone': return `tone:${source.toneIndex}`
-    case 'live': return `live:${source.deviceId}`
-    case 'none': return 'none'
-  }
+const EQ_MODES = [
+  { key: 'hcut', label: 'HCUT' },
+  { key: 'hshv', label: 'HSHV' },
+  { key: 'veq', label: 'VEQ' },
+  { key: 'peq', label: 'PEQ' },
+  { key: 'lshv', label: 'LSHV' },
+  { key: 'lcut', label: 'LCUT' },
+] as const
+
+interface StripButtonProps {
+  label: string
+  active?: boolean
+  onClick?: () => void
+  view?: boolean
+  disabled?: boolean
+  sideLabel?: boolean
 }
 
-function valueToSource(value: string): ChannelInputSource {
-  if (value === 'none') return { type: 'none' }
-  const [type, rest] = value.split(':')
-  switch (type) {
-    case 'stem': return { type: 'stem', stemIndex: parseInt(rest, 10) }
-    case 'tone': return { type: 'tone', toneIndex: parseInt(rest, 10) }
-    case 'live': return { type: 'live', deviceId: rest }
-    default: return { type: 'none' }
-  }
+function StripButton({ label, active = false, onClick, view = false, disabled = false, sideLabel = false }: StripButtonProps) {
+  return (
+    <div className={`${styles.stripControl} ${view ? styles.viewControl : ''} ${sideLabel ? styles.sideLabelControl : ''} ${disabled ? styles.stripControlDisabled : ''}`}>
+      {view ? <span className={styles.viewLabel}>{label}</span> : null}
+      <button
+        className={`${styles.stripButton} ${view ? styles.viewButton : ''} ${active && !disabled ? styles.stripButtonActive : ''}`}
+        onClick={onClick}
+        disabled={disabled}
+      />
+      {!view ? <span className={styles.stripLabel}>{label}</span> : null}
+    </div>
+  )
 }
 
 export function ChannelDetailPanel() {
@@ -33,6 +43,10 @@ export function ChannelDetailPanel() {
 
   const setGain = useMixerStore((s) => s.setChannelGain)
   const setPan = useMixerStore((s) => s.setChannelPan)
+  const setGateEnabled = useMixerStore((s) => s.setChannelGateEnabled)
+  const setGateThreshold = useMixerStore((s) => s.setChannelGateThreshold)
+  const setCompEnabled = useMixerStore((s) => s.setChannelCompEnabled)
+  const setCompThreshold = useMixerStore((s) => s.setChannelCompThreshold)
   const setHpfEnabled = useMixerStore((s) => s.setChannelHpfEnabled)
   const setHpfFreq = useMixerStore((s) => s.setChannelHpfFreq)
   const setEqEnabled = useMixerStore((s) => s.setChannelEqEnabled)
@@ -43,9 +57,10 @@ export function ChannelDetailPanel() {
   const setEqMidQ = useMixerStore((s) => s.setChannelEqMidQ)
   const setEqHighFreq = useMixerStore((s) => s.setChannelEqHighFreq)
   const setEqHighGain = useMixerStore((s) => s.setChannelEqHighGain)
-  const setChannelInputSource = useMixerStore((s) => s.setChannelInputSource)
-  const availableStems = useMixerStore((s) => s.availableStems)
-  const availableLiveDevices = useMixerStore((s) => s.availableLiveDevices)
+  const setEqBand = useMixerStore((s) => s.setChannelEqSelectedBand)
+  const cycleEqMode = useMixerStore((s) => s.cycleChannelEqMode)
+  const setChannelSendLevel = useMixerStore((s) => s.setChannelSendLevel)
+  const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
 
   if (!channel) {
     return (
@@ -56,217 +71,278 @@ export function ChannelDetailPanel() {
   }
 
   const id = selectedChannel
+  const selectedBand = channel.eqSelectedBand
+  const selectedBandFreq = selectedBand === 'high'
+    ? channel.eqHighFreq
+    : selectedBand === 'low'
+      ? channel.eqLowFreq
+      : channel.eqMidFreq
+  const selectedBandGain = selectedBand === 'high'
+    ? channel.eqHighGain
+    : selectedBand === 'low'
+      ? channel.eqLowGain
+      : channel.eqMidGain
+
+  const setSelectedBandFreq = (value: number) => {
+    if (selectedBand === 'high') {
+      setEqHighFreq(id, value)
+      return
+    }
+    if (selectedBand === 'low') {
+      setEqLowFreq(id, value)
+      return
+    }
+    setEqMidFreq(id, value)
+  }
+
+  const setSelectedBandGain = (value: number) => {
+    if (selectedBand === 'high') {
+      setEqHighGain(id, value)
+      return
+    }
+    if (selectedBand === 'low') {
+      setEqLowGain(id, value)
+      return
+    }
+    setEqMidGain(id, value)
+  }
 
   return (
     <div className={styles.panel}>
-      {/* Header */}
-      <div className={styles.header}>
-        <span className={styles.channelNumber}>{String(id + 1).padStart(2, '0')}</span>
-        <span className={styles.channelName} style={{ color: channel.color }}>
-          {channel.label}
-        </span>
-      </div>
-
-      {/* Input Source */}
-      <div className={styles.section}>
-        <div className={styles.sectionLabel}>INPUT</div>
-        <select
-          className={styles.inputSelect}
-          value={sourceToValue(channel.inputSource)}
-          onChange={(e) => setChannelInputSource(id, valueToSource(e.target.value))}
-        >
-          <option value="none">None</option>
-          {availableStems.length > 0 && (
-            <optgroup label="Stems">
-              {availableStems.map((s) => (
-                <option key={`stem:${s.index}`} value={`stem:${s.index}`}>
-                  {s.label}
-                </option>
-              ))}
-            </optgroup>
-          )}
-          <optgroup label="Tones">
-            {Array.from({ length: NUM_TONE_SLOTS }, (_, i) => (
-              <option key={`tone:${i}`} value={`tone:${i}`}>
-                {getToneLabel(i)}
-              </option>
-            ))}
-          </optgroup>
-          {availableLiveDevices.length > 0 && (
-            <optgroup label="Live Input">
-              {availableLiveDevices.map((d) => (
-                <option key={`live:${d.deviceId}`} value={`live:${d.deviceId}`}>
-                  {d.label}
-                </option>
-              ))}
-            </optgroup>
-          )}
-        </select>
-      </div>
-
-      {/* Config / Preamp */}
-      <div className={styles.section}>
-        <div className={styles.sectionLabel}>CONFIG</div>
-        <div className={styles.gainRow}>
-          <Knob
-            value={channel.gain}
-            min={GAIN_MIN}
-            max={GAIN_MAX}
-            defaultValue={GAIN_DEFAULT}
-            onChange={(v) => setGain(id, v)}
-            label="Gain"
-            formatValue={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}`}
-            helpText="Adjust the input gain (preamp level). Set this so the pre-fader meter shows a healthy signal without clipping."
-          />
-          <div className={styles.gainMeter}>
-            <Meter channelIndex={id} source="preFader" helpText="Shows the signal level before the fader, after gain and EQ processing." />
-          </div>
-        </div>
-        <div className={styles.knobRow}>
-          <ToggleButton
-            active={channel.hpfEnabled}
-            onClick={() => setHpfEnabled(id, !channel.hpfEnabled)}
-            label="HPF"
-            variant="hpf"
-            helpText="Enable the high pass filter (low cut) to remove unwanted low-frequency rumble."
-          />
-          <Knob
-            value={channel.hpfFreq}
-            min={20}
-            max={500}
-            defaultValue={80}
-            onChange={(v) => setHpfFreq(id, v)}
-            label="Freq"
-            formatValue={(v) => `${Math.round(v)} Hz`}
-            helpText="Set the high pass filter cutoff frequency (20–500 Hz)."
-          />
-        </div>
-      </div>
-
-      {/* EQ */}
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionLabel}>EQ</span>
-          <ToggleButton
-            active={channel.eqEnabled}
-            onClick={() => setEqEnabled(id, !channel.eqEnabled)}
-            label="ON"
-            variant="eq"
-            helpText="Enable or bypass the equalizer."
-          />
-        </div>
-        <div className={styles.eqBands}>
-          <div className={styles.eqBand}>
-            <div className={styles.bandLabel}>LOW</div>
+      <div className={styles.leftColumn}>
+        <section className={`${styles.block} ${styles.preampBlock}`}>
+          <h3 className={styles.blockTitle}>CONFIG / PREAMP</h3>
+          <div className={styles.preampRow}>
             <Knob
-              value={channel.eqLowFreq}
-              min={40}
+              value={channel.gain}
+              min={GAIN_MIN}
+              max={GAIN_MAX}
+              defaultValue={GAIN_DEFAULT}
+              onChange={(v) => setGain(id, v)}
+              label="Gain"
+              formatValue={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)} dB`}
+              helpText="Adjust input gain."
+              showValue={false}
+            />
+            <div className={styles.verticalMeterGroup}>
+              <Meter channelIndex={id} source="preFader" helpText="Pre-fader level meter." />
+              <span className={styles.meterLabel}>LEVEL / dB</span>
+            </div>
+            <Knob
+              value={channel.hpfFreq}
+              min={20}
               max={500}
-              defaultValue={200}
-              onChange={(v) => setEqLowFreq(id, v)}
-              label="Freq"
-              formatValue={(v) => `${Math.round(v)}`}
-              helpText="Low EQ frequency (40–500 Hz)."
-            />
-            <Knob
-              value={channel.eqLowGain}
-              min={-15}
-              max={15}
-              defaultValue={0}
-              onChange={(v) => setEqLowGain(id, v)}
-              label="Gain"
-              formatValue={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}`}
-              helpText="Low EQ gain (±15 dB). Boost to add warmth, cut to reduce muddiness."
+              defaultValue={80}
+              onChange={(v) => setHpfFreq(id, v)}
+              label="Frequency"
+              formatValue={(v) => `${Math.round(v)} Hz`}
+              available={channel.hpfEnabled}
+              helpText="Low cut frequency."
+              showValue={false}
             />
           </div>
-          <div className={styles.eqBand}>
-            <div className={styles.bandLabel}>MID</div>
-            <Knob
-              value={channel.eqMidFreq}
-              min={200}
-              max={8000}
-              defaultValue={1000}
-              onChange={(v) => setEqMidFreq(id, v)}
-              label="Freq"
-              formatValue={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${Math.round(v)}`}
-              helpText="Mid EQ frequency (200 Hz–8 kHz)."
-            />
-            <Knob
-              value={channel.eqMidGain}
-              min={-15}
-              max={15}
-              defaultValue={0}
-              onChange={(v) => setEqMidGain(id, v)}
-              label="Gain"
-              formatValue={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}`}
-              helpText="Mid EQ gain (±15 dB)."
-            />
+          <div className={styles.preampSwitchLayout}>
+            <div className={styles.preampGainSwitches}>
+              <StripButton label="48V" />
+              <StripButton label="Ø" />
+            </div>
+            <div className={styles.preampFreqSwitches}>
+              <StripButton label="LOW CUT" active={channel.hpfEnabled} onClick={() => setHpfEnabled(id, !channel.hpfEnabled)} />
+              <div className={styles.preampViewCorner}>
+                <StripButton label="VIEW" view />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className={`${styles.block} ${styles.gateDynBlock}`}>
+          <div className={styles.gateDynTopTitles}>
+            <h3 className={styles.blockTitle}>GATE</h3>
+            <h3 className={styles.blockTitle}>DYNAMICS</h3>
+          </div>
+
+          <div className={styles.gateDynRow}>
+            <div className={styles.gateDynKnobCol}>
+              <Knob
+                value={channel.gateThreshold}
+                min={-80}
+                max={0}
+                defaultValue={-80}
+                onChange={(v) => setGateThreshold(id, v)}
+                label="Threshold"
+                formatValue={(v) => `${v.toFixed(1)} dB`}
+                available={channel.gateEnabled}
+                showValue={false}
+              />
+            </div>
+
+            <div className={styles.grMeterStack}>
+              <div className={styles.grScale}>
+                <span>COMP</span>
+                <span>2</span>
+                <span>4</span>
+                <span>6</span>
+                <span>10</span>
+                <span>18</span>
+                <span>30</span>
+              </div>
+              <div className={styles.verticalMeterGroup}>
+                <Meter channelIndex={id} source="preFader" helpText="Gain reduction style indicator." />
+                <span className={styles.meterLabel}>GR / dB</span>
+              </div>
+            </div>
+
+            <div className={styles.gateDynKnobCol}>
+              <Knob
+                value={channel.compThreshold}
+                min={-60}
+                max={0}
+                defaultValue={-25.5}
+                onChange={(v) => setCompThreshold(id, v)}
+                label="Threshold"
+                formatValue={(v) => `${v.toFixed(1)} dB`}
+                available={channel.compEnabled}
+                showValue={false}
+              />
+            </div>
+          </div>
+
+          <div className={styles.gateDynSwitches}>
+            <div className={styles.knobCornerSwitch}>
+              <StripButton label="GATE" active={channel.gateEnabled} onClick={() => setGateEnabled(id, !channel.gateEnabled)} />
+              <StripButton label="VIEW" view />
+            </div>
+            <div className={styles.knobCornerSwitch}>
+              <StripButton label="COMPRESSOR" active={channel.compEnabled} onClick={() => setCompEnabled(id, !channel.compEnabled)} />
+              <StripButton label="VIEW" view />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section className={styles.eqBlock}>
+        <h3 className={styles.blockTitle}>EQUALIZER</h3>
+        <div className={styles.eqCanvas}>
+          <div className={styles.eqTypeStrip}>
+            {EQ_MODES.map((mode, index) => (
+              <div
+                key={mode.key}
+                className={`${styles.eqTypeRow} ${channel.eqEnabled && channel.eqModeIndex === index ? styles.eqTypeRowActive : ''}`}
+              >
+                <span className={styles.eqTypeText}>{mode.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.eqTop}>
             <Knob
               value={channel.eqMidQ}
               min={0.1}
               max={10}
-              defaultValue={1.0}
+              defaultValue={1}
               onChange={(v) => setEqMidQ(id, v)}
               label="Q"
-              formatValue={(v) => v.toFixed(1)}
-              helpText="Mid EQ bandwidth (Q factor). Low Q = broad, high Q = narrow."
+              formatValue={(v) => v.toFixed(2)}
+              available={channel.eqEnabled}
+              showValue={false}
             />
           </div>
-          <div className={styles.eqBand}>
-            <div className={styles.bandLabel}>HIGH</div>
+
+          <div className={styles.eqCenter}>
+            <div className={styles.eqCenterWrap}>
+              <Knob
+                value={selectedBandFreq}
+                min={selectedBand === 'high' ? 2000 : selectedBand === 'low' ? 40 : 200}
+                max={selectedBand === 'high' ? 16000 : selectedBand === 'low' ? 500 : 8000}
+                defaultValue={selectedBand === 'high' ? 5000 : selectedBand === 'low' ? 200 : 1000}
+                onChange={setSelectedBandFreq}
+                label="Freq"
+                formatValue={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${Math.round(v)}`)}
+                available={channel.eqEnabled}
+                showValue={false}
+              />
+              <span className={`${styles.eqFreqMark} ${styles.eqFreq40}`}>40</span>
+              <span className={`${styles.eqFreqMark} ${styles.eqFreq120}`}>120</span>
+              <span className={`${styles.eqFreqMark} ${styles.eqFreq340}`}>340</span>
+              <span className={`${styles.eqFreqMark} ${styles.eqFreq1k}`}>1k</span>
+              <span className={`${styles.eqFreqMark} ${styles.eqFreq3k3}`}>3k3</span>
+              <span className={`${styles.eqFreqMark} ${styles.eqFreq10k}`}>10k</span>
+            </div>
+          </div>
+
+          <div className={styles.eqBottom}>
             <Knob
-              value={channel.eqHighFreq}
-              min={2000}
-              max={16000}
-              defaultValue={5000}
-              onChange={(v) => setEqHighFreq(id, v)}
-              label="Freq"
-              formatValue={(v) => `${(v / 1000).toFixed(1)}k`}
-              helpText="High EQ frequency (2–16 kHz)."
-            />
-            <Knob
-              value={channel.eqHighGain}
+              value={selectedBandGain}
               min={-15}
               max={15}
               defaultValue={0}
-              onChange={(v) => setEqHighGain(id, v)}
+              onChange={setSelectedBandGain}
               label="Gain"
-              formatValue={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}`}
-              helpText="High EQ gain (±15 dB). Boost for brilliance, cut to tame harshness."
+              formatValue={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)} dB`}
+              available={channel.eqEnabled}
+              showValue={false}
             />
           </div>
+
+          <div className={styles.eqBandButtons}>
+            <StripButton label="HIGH" active={channel.eqEnabled && selectedBand === 'high'} onClick={() => setEqBand(id, 'high')} disabled={!channel.eqEnabled} />
+            <StripButton label="HIGH MID" active={channel.eqEnabled && selectedBand === 'highMid'} onClick={() => setEqBand(id, 'highMid')} disabled={!channel.eqEnabled} />
+            <StripButton label="LOW MID" active={channel.eqEnabled && selectedBand === 'lowMid'} onClick={() => setEqBand(id, 'lowMid')} disabled={!channel.eqEnabled} />
+            <StripButton label="LOW" active={channel.eqEnabled && selectedBand === 'low'} onClick={() => setEqBand(id, 'low')} disabled={!channel.eqEnabled} />
+          </div>
         </div>
-      </div>
 
-      {/* Gate Placeholder */}
-      <div className={`${styles.section} ${styles.placeholder}`}>
-        <div className={styles.sectionLabel}>GATE</div>
-        <div className={styles.placeholderText}>Phase 3</div>
-      </div>
+        <div className={styles.eqBottomControls}>
+          <div className={styles.eqCenterButtons}>
+            <StripButton label="EQ" active={channel.eqEnabled} onClick={() => setEqEnabled(id, !channel.eqEnabled)} />
+            <StripButton label="MODE" onClick={() => cycleEqMode(id)} />
+          </div>
+          <div className={styles.eqViewCorner}>
+            <StripButton label="VIEW" view />
+          </div>
+        </div>
+      </section>
 
-      {/* Dynamics Placeholder */}
-      <div className={`${styles.section} ${styles.placeholder}`}>
-        <div className={styles.sectionLabel}>DYN</div>
-        <div className={styles.placeholderText}>Phase 3</div>
-      </div>
-
-      {/* Pan */}
-      <div className={styles.section}>
-        <div className={styles.sectionLabel}>PAN</div>
+      <section className={styles.busBlock}>
+        <h3 className={styles.blockTitle}>BUS MIXES</h3>
+        <div className={styles.mixBusHeader}>
+          <span>MIX BUS SENDS</span>
+          <StripButton label="VIEW" view />
+        </div>
         <Knob
-          value={channel.pan}
-          min={-1}
+          value={channel.sends[sendTargetBus]?.level ?? 0}
+          min={0}
           max={1}
           defaultValue={0}
-          onChange={(v) => setPan(id, v)}
-          label="Pan"
-          formatValue={(v) => {
-            if (Math.abs(v) < 0.01) return 'C'
-            return v < 0 ? `L${Math.round(Math.abs(v) * 100)}` : `R${Math.round(v * 100)}`
-          }}
-          helpText="Set the stereo pan position."
+          onChange={(v) => setChannelSendLevel(id, sendTargetBus, v)}
+          label="Level"
+          formatValue={(v) => `${Math.round(v * 100)}%`}
+          showValue={false}
         />
-      </div>
+        <div className={styles.monoBusRow}>
+          <StripButton label="MONO BUS" sideLabel />
+        </div>
+        <div className={styles.panBalRow}>
+          <Knob
+            value={channel.pan}
+            min={-1}
+            max={1}
+            defaultValue={0}
+            onChange={(v) => setPan(id, v)}
+            label="Pan / Bal"
+            formatValue={(v) => {
+              if (Math.abs(v) < 0.01) return 'C'
+              return v < 0 ? `L${Math.round(Math.abs(v) * 100)}` : `R${Math.round(v * 100)}`
+            }}
+            helpText="Set stereo pan."
+            showValue={false}
+          />
+        </div>
+        <div className={styles.switchRow}>
+          <StripButton label="MAIN LR BUS" />
+          <StripButton label="VIEW" view />
+        </div>
+      </section>
     </div>
   )
 }

@@ -29,6 +29,7 @@ export interface SurfaceState {
   toggleSendsOnFaderForSelectedChannel: () => void
   disableSendsOnFader: () => void
   setSelectedOutputIndex: (index: number) => void
+  resetSurfaceState: () => void
   setHelpText: (text: string) => void
 }
 
@@ -117,5 +118,20 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   disableSendsOnFader: () =>
     set({ sendsOnFader: false, sendsOnFaderMode: 'bus', selectedOutputIndex: -1 }),
   setSelectedOutputIndex: (index) => set({ selectedFocus: index >= 0 ? 'output' : 'input', selectedOutputIndex: index }),
+  resetSurfaceState: () =>
+    set({
+      selectedFocus: 'input',
+      selectedChannel: 0,
+      dcaAssignArmedId: null,
+      busAssignArmedId: null,
+      activeInputLayer: 0,
+      outputBankLayer: 'buses',
+      activeBusLayer: 0,
+      sendsOnFader: false,
+      sendsOnFaderMode: 'bus',
+      sendTargetBus: 0,
+      selectedOutputIndex: -1,
+      helpText: '',
+    }),
   setHelpText: (text) => set({ helpText: text }),
 }))

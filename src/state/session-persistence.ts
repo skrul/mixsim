@@ -3,6 +3,7 @@ import { useSurfaceStore, type OutputBankLayer, type SelectedFocus, type SendsOn
 import type { DcaGroupState, MixBusState, MonitorState } from '@/state/mixer-model'
 
 const SESSION_VERSION = 1
+const SESSION_STORAGE_KEY = 'mixsim.session.v1'
 
 interface SavedMixerState {
   channels: ChannelState[]
@@ -85,18 +86,33 @@ function inferSelectedFocus(surface: SavedSurfaceState): SelectedFocus {
   return surface.selectedOutputIndex >= 0 ? 'output' : 'input'
 }
 
+function normalizeSavedChannels(channels: ChannelState[]): ChannelState[] {
+  const defaults = useMixerStore.getState().channels
+  return defaults.map((base, i) => {
+    const saved = channels[i]
+    if (!saved) return base
+    return {
+      ...base,
+      ...saved,
+      sends: saved.sends ?? base.sends,
+      dcaGroups: saved.dcaGroups ?? base.dcaGroups,
+    }
+  })
+}
+
 function applySnapshot(snapshot: SessionSnapshot): void {
   const mixer = snapshot.mixer
   const surface = snapshot.surface
+  const normalizedChannels = normalizeSavedChannels(mixer.channels)
 
   useMixerStore.setState({
-    channels: mixer.channels,
+    channels: normalizedChannels,
     mixBuses: mixer.mixBuses,
     dcaGroups: mixer.dcaGroups,
     master: mixer.master,
     monitor: mixer.monitor,
     transportState: 'stopped',
-    soloActive: computeSoloActive(mixer),
+    soloActive: computeSoloActive({ ...mixer, channels: normalizedChannels }),
   } as Partial<MixerState>)
 
   useSurfaceStore.setState({
@@ -139,5 +155,34 @@ export function importSessionSnapshot(raw: string): { ok: true } | { ok: false; 
     return { ok: true }
   } catch {
     return { ok: false, error: 'Failed to load session snapshot file.' }
+  }
+}
+
+export function saveSessionSnapshotToLocalStorage(): { ok: true } | { ok: false; error: string } {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return { ok: false, error: 'Local storage is not available.' }
+  }
+  try {
+    const snapshot = createSnapshot()
+    window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(snapshot))
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Failed to persist session locally.' }
+  }
+}
+
+export function loadSessionSnapshotFromLocalStorage(): { ok: true } | { ok: false; error: string } {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return { ok: false, error: 'Local storage is not available.' }
+  }
+  try {
+    const raw = window.localStorage.getItem(SESSION_STORAGE_KEY)
+    if (!raw) return { ok: false, error: 'No saved local session.' }
+    const parsed: unknown = JSON.parse(raw)
+    if (!isSessionSnapshot(parsed)) return { ok: false, error: 'Saved local session format is invalid.' }
+    applySnapshot(parsed)
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Failed to load local session.' }
   }
 }

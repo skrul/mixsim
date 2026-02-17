@@ -7,6 +7,16 @@
   border-bottom: 1px solid #333;
 }
 
+.compact {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px;
+  background: #252540;
+  border: 1px solid #3a3a58;
+  border-radius: 4px;
+}
+
 .transportBar button {
   padding: 6px 16px;
   background: #333;
@@ -47,6 +57,13 @@
   font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
 }
 
+.compact .timeDisplay {
+  margin-left: 0;
+  text-align: center;
+  font-size: 12px;
+  color: #b5f1b5;
+}
+
 .title {
   font-size: 14px;
   font-weight: 600;
@@ -75,6 +92,50 @@
   background: #333 !important;
 }
 
+.compactHeader {
+  font-size: 10px;
+  font-weight: 700;
+  color: #b8b8c8;
+  letter-spacing: 0.8px;
+  text-align: center;
+}
+
+.inputPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.inputPickerLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: #aeb6ca;
+  text-align: center;
+  letter-spacing: 0.4px;
+}
+
+.inputSelect {
+  width: 100%;
+  padding: 5px 6px;
+  background: #1d2231;
+  color: #e0e6f4;
+  border: 1px solid #47516b;
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: inherit;
+}
+
+.inputSelect:focus {
+  outline: none;
+  border-color: #6b86b5;
+}
+
+.compactGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
 .sessionButton {
   padding: 4px 12px !important;
   font-size: 11px !important;
@@ -87,6 +148,17 @@
   background: #2f4352 !important;
 }
 
+.dangerButton {
+  background: #4a2525 !important;
+  border-color: #7a3a3a !important;
+  color: #ffd9d9 !important;
+  font-weight: 700 !important;
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: #5a2d2d !important;
+}
+
 .separator {
   width: 1px;
   height: 24px;
@@ -96,4 +168,16 @@
 
 .hiddenFileInput {
   display: none;
+}
+
+.compact button {
+  width: 100%;
+  padding: 5px 8px;
+  font-size: 11px;
+}
+
+.compact .sourceModeButton,
+.compact .sessionButton {
+  padding: 5px 8px !important;
+  font-size: 10px !important;
 }

@@ -1,140 +1,420 @@
 .panel {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 6px 8px;
   background: #1e1e30;
   border-bottom: 1px solid #333;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
   overflow-x: auto;
-  min-height: 120px;
 }
 
-.header {
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 268px;
+  flex: 0 0 268px;
+}
+
+.block,
+.eqBlock,
+.busBlock {
+  background: #222238;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 6px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.blockTitle {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  color: #d4d8e2;
+  text-transform: uppercase;
+}
+
+.preampRow {
+  display: grid;
+  grid-template-columns: 1fr 20px 1fr;
+  align-items: center;
+  gap: 1px;
+}
+
+.verticalMeterGroup {
+  height: 74px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.verticalMeterGroup :global(.meterContainer) {
+  height: 58px;
+}
+
+.verticalMeterGroup :global(.meterTrack) {
+  width: 7px;
+}
+
+.meterLabel {
+  font-size: 8px;
+  color: #8f97ab;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.switchRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.preampBlock {
+  padding: 4px 3px;
   gap: 4px;
-  padding: 6px 8px;
-  background: #252540;
-  border-radius: 3px;
-  min-width: 60px;
-  align-self: stretch;
+}
+
+.preampSwitchLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.preampGainSwitches {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  min-width: 50px;
+}
+
+.preampFreqSwitches {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: end;
+  justify-content: center;
+  column-gap: 4px;
+  min-width: 50px;
+}
+
+.preampViewCorner {
+  align-self: end;
+  transform: translateY(3px);
+}
+
+.gateDynBlock {
+  gap: 4px;
+}
+
+.gateDynTopTitles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+
+.gateDynRow {
+  display: grid;
+  grid-template-columns: 1fr 54px 1fr;
+  align-items: center;
+  gap: 1px;
+}
+
+.gateDynKnobCol {
+  display: flex;
   justify-content: center;
 }
 
-.channelNumber {
-  font-size: 16px;
-  font-weight: 700;
-  color: #888;
-  font-variant-numeric: tabular-nums;
+.grMeterStack {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: center;
+  gap: 0;
+  height: 80px;
 }
 
-.channelName {
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 60px;
-  text-align: center;
-}
-
-.section {
-  padding: 6px 8px;
-  background: #222238;
-  border-radius: 3px;
-  border: 1px solid #333;
+.grScale {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  align-self: stretch;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  font-size: 8px;
+  line-height: 1.1;
+  color: #9aa3b8;
+  font-weight: 700;
+  margin-right: -1px;
 }
 
-.sectionLabel {
+.gateDynSwitches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.knobCornerSwitch {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  align-items: end;
+  column-gap: 6px;
+}
+
+.knobCornerSwitch .viewControl {
+  align-self: end;
+  transform: translateY(3px);
+}
+
+.eqBlock {
+  width: auto;
+  flex: 0 0 auto;
+  padding-right: 0;
+}
+
+.eqCanvas {
+  display: grid;
+  grid-template-columns: 45px 90px 44px;
+  grid-template-rows: 72px 60px 60px;
+  gap: 2px 6px;
+  align-items: start;
+  min-height: 220px;
+  position: relative;
+}
+
+.eqTop {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: start;
+  transform: translateX(10px);
+}
+
+.eqCenter {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: center;
+}
+
+.eqCenterWrap {
+  position: relative;
+}
+
+.eqFreqMark {
+  position: absolute;
+  font-size: 8px;
+  color: #9ca6bb;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.eqFreq40 { left: -14px; top: 38px; }
+.eqFreq120 { left: -20px; top: 10px; }
+.eqFreq340 { left: -6px; top: -10px; }
+.eqFreq1k { right: 0px; top: -10px; }
+.eqFreq3k3 { right: -20px; top: 10px; }
+.eqFreq10k { right: -14px; top: 38px; }
+
+.eqBottom {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: start;
+  transform: translateX(-10px);
+}
+
+.eqTypeStrip {
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 2px;
+  align-self: start;
+  margin-top: 30px;
+  justify-items: start;
+  width: max-content;
+}
+
+.eqTypeRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1px solid #3b4150;
+  border-radius: 4px;
+  background: #232938;
+  color: #93a0b8;
+  padding: 2px 7px;
+  width: 100%;
+  cursor: default;
+  user-select: none;
+}
+
+.eqTypeRowActive {
+  color: #f0d764;
+  border-color: #665936;
+  box-shadow: inset 0 0 0 1px #514629;
+}
+
+.eqTypeText {
   font-size: 9px;
   font-weight: 700;
-  color: #888;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  text-align: center;
 }
 
-.sectionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.knobRow {
-  display: flex;
-  gap: 6px;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.gainRow {
-  display: flex;
+.eqBandButtons {
+  grid-column: 3;
+  grid-row: 1 / span 3;
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
   gap: 8px;
-  align-items: center;
-  justify-content: center;
+  align-self: stretch;
+  align-content: center;
 }
 
-.gainMeter {
-  height: 50px;
-  width: 8px;
+.eqBandButtons .stripControl {
+  justify-self: center;
 }
 
-.eqBands {
+.eqBottomControls {
+  position: relative;
+  min-height: 34px;
+}
+
+.eqCenterButtons {
+  position: absolute;
+  left: 25px;
+  bottom: 0;
   display: flex;
   gap: 8px;
 }
 
-.eqBand {
+.eqViewCorner {
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+}
+
+.busBlock {
+  width: 125px;
+  flex: 0 0 125px;
+}
+
+.mixBusHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #3f4555;
+  border-radius: 6px;
+  padding: 4px;
+}
+
+.mixBusHeader span {
+  font-size: 8px;
+  color: #aeb6c9;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.monoBusRow {
+  margin-bottom: 16px;
+}
+
+.panBalRow {
+  margin-bottom: 10px;
+}
+
+.stripControl {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  min-width: 30px;
 }
 
-.bandLabel {
-  font-size: 8px;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.viewControl {
+  justify-content: flex-end;
 }
 
-.inputSelect {
-  width: 100%;
-  min-width: 100px;
-  padding: 4px 6px;
-  background: #1a1a2e;
-  color: #e0e0e0;
-  border: 1px solid #444;
+.sideLabelControl {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sideLabelControl .stripLabel {
+  text-align: left;
+  line-height: 1.1;
+}
+
+.stripButton {
+  width: 24px;
+  height: 24px;
   border-radius: 3px;
-  font-size: 11px;
-  font-family: inherit;
+  border: 1px solid #666d80;
+  background: #2d3240;
+  box-shadow: inset 0 0 0 1px #4d5669;
   cursor: pointer;
 }
 
-.inputSelect:hover {
-  border-color: #666;
+.stripButton:disabled {
+  cursor: default;
 }
 
-.inputSelect:focus {
-  outline: none;
-  border-color: #44a;
+.viewButton {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
 }
 
-.placeholder {
-  opacity: 0.35;
+.stripButton:hover {
+  filter: brightness(1.08);
 }
 
-.placeholderText {
-  font-size: 9px;
-  color: #666;
-  font-style: italic;
+.stripButtonActive {
+  background: #f0d764;
+  border-color: #f6e08a;
+  box-shadow: 0 0 8px rgba(240, 215, 100, 0.5), inset 0 0 0 1px #6a5a2f;
+}
+
+.stripControlDisabled .stripButton {
+  background: #252b39;
+  border-color: #495267;
+  box-shadow: inset 0 0 0 1px #3a4357;
+}
+
+.stripControlDisabled .stripLabel {
+  color: #6f788d;
+}
+
+.stripLabel {
+  font-size: 7px;
+  line-height: 1;
+  color: #b4bccd;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.viewLabel {
+  font-size: 7px;
+  line-height: 1;
+  color: #b4bccd;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
 }
 
 .noSelection {
@@ -142,7 +422,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  color: #555;
+  color: #777f91;
   font-size: 12px;
   font-style: italic;
 }

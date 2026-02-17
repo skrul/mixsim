@@ -1,9 +1,10 @@
 .panel {
+  --display-screen-width: 480px;
   padding: 6px;
   background: #1d1d2b;
   border: 1px solid #2e2e40;
   border-radius: 7px;
-  min-width: 760px;
+  min-width: 860px;
   box-sizing: border-box;
 }
 
@@ -20,26 +21,26 @@
 }
 
 .screenOuter {
-  flex: 0 0 528px;
+  flex: 0 0 626px;
   display: flex;
-  height: 256px;
-  padding: 8px;
+  height: 304px;
+  padding: 0;
   box-sizing: border-box;
   border-radius: 0;
-  border: 3px solid #b9bcc2;
-  background: #121216;
+  border: 0;
+  background: transparent;
   overflow: hidden;
 }
 
 .screen {
-  flex: 0 0 400px;
+  flex: 0 0 var(--display-screen-width);
   background: linear-gradient(135deg, #80848b 0%, #969aa1 100%);
   border-right: 2px solid #20222a;
   overflow: hidden;
 }
 
 .meterRail {
-  width: 112px;
+  width: 130px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -68,6 +69,11 @@
 .meterLed {
   height: 6px;
   border-radius: 4px;
+}
+
+.meterLed.clip {
+  background: #ff4747;
+  box-shadow: 0 0 7px rgba(255, 71, 71, 0.75);
 }
 
 .meterLed.warm {
@@ -154,17 +160,22 @@
 
 .displayBottom {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
-  gap: 10px;
+  width: var(--display-screen-width);
 }
 
 .encoders {
-  display: flex;
-  gap: 10px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  padding: 3px 4px;
+  box-sizing: border-box;
 }
 
 .encoder {
+  justify-self: center;
   width: 30px;
   height: 30px;
   border-radius: 50%;

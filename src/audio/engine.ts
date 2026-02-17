@@ -4,7 +4,7 @@ import { createChannelChain, type ChannelChain } from '@/audio/channel'
 import { TransportManager } from '@/audio/transport'
 import { MeteringManager } from '@/audio/metering'
 import { SourceManager } from '@/audio/source-manager'
-import { NUM_MIX_BUSES, INPUT_TYPE_CONFIG, type MonitorSource } from '@/state/mixer-model'
+import { NUM_MIX_BUSES, INPUT_TYPE_CONFIG, GAIN_MIN, type MonitorSource } from '@/state/mixer-model'
 
 export interface AudioEngine {
   init: () => Promise<void>
@@ -26,6 +26,13 @@ interface FxRuntime {
   input: GainNode
   output: AudioNode
   dispose: () => void
+}
+
+interface GateRuntime {
+  enabled: boolean
+  thresholdDb: number
+  envelope: number
+  detectorBuffer: Float32Array<ArrayBuffer>
 }
 
 function createDecayImpulseResponse(
@@ -203,6 +210,8 @@ export function createAudioEngine(): AudioEngine {
   let transport: TransportManager | null = null
   let metering: MeteringManager | null = null
   let sourceManager: SourceManager | null = null
+  let gateRuntimes: GateRuntime[] = []
+  let gateRafId: number | null = null
   const fxDisposers: (() => void)[] = []
   const unsubscribers: (() => void)[] = []
 
@@ -218,6 +227,43 @@ export function createAudioEngine(): AudioEngine {
     for (let i = 0; i < monitorTapBuses.length; i++) {
       monitorTapBuses[i].gain.setValueAtTime(effectiveSource === `bus-${i}` ? 1 : 0, t)
     }
+  }
+
+  function updateGates(): void {
+    if (!context) return
+    const t = context.currentTime
+
+    for (let i = 0; i < channels.length; i++) {
+      const chain = channels[i]
+      const runtime = gateRuntimes[i]
+      if (!chain || !runtime) continue
+
+      if (!runtime.enabled) {
+        runtime.envelope = 1
+        chain.gateGain.gain.setValueAtTime(1, t)
+        continue
+      }
+
+      chain.gateDetector.getFloatTimeDomainData(runtime.detectorBuffer)
+
+      let peak = 0
+      for (let j = 0; j < runtime.detectorBuffer.length; j++) {
+        const sample = Math.abs(runtime.detectorBuffer[j])
+        if (sample > peak) peak = sample
+      }
+      const peakDb = peak > 0 ? 20 * Math.log10(peak) : -Infinity
+      const target = peakDb >= runtime.thresholdDb ? 1 : 0
+
+      // Basic envelope follower for gate opening/closing.
+      const attack = 0.28
+      const release = 0.04
+      runtime.envelope += (target - runtime.envelope) * (target > runtime.envelope ? attack : release)
+      if (runtime.envelope < 0.0001) runtime.envelope = 0
+
+      chain.gateGain.gain.setValueAtTime(runtime.envelope, t)
+    }
+
+    gateRafId = requestAnimationFrame(updateGates)
   }
 
   async function init(): Promise<void> {
@@ -310,6 +356,15 @@ export function createAudioEngine(): AudioEngine {
       const chain = createChannelChain(context, masterGain, soloBusGain, ch, mixBusSummingNodes)
       channels.push(chain)
     }
+    gateRuntimes = channels.map((chain, i) => {
+      const ch = store.channels[i]
+      return {
+        enabled: ch?.gateEnabled ?? false,
+        thresholdDb: ch?.gateThreshold ?? -58,
+        envelope: ch?.gateEnabled ? 0 : 1,
+        detectorBuffer: new Float32Array(chain.gateDetector.fftSize),
+      }
+    })
 
     // Default X32-style FX sends/returns:
     // Bus 13-16 feed FX1-4, returned on FX1L/R .. FX4L/R (channels 25-32).
@@ -350,10 +405,9 @@ export function createAudioEngine(): AudioEngine {
       })
     }
 
-    subscribeToStore()
-
     transport = new TransportManager(context)
     sourceManager = new SourceManager(context, channels)
+    subscribeToStore()
     metering = new MeteringManager(
       channels.map((ch) => ch.analyser),
       channels.map((ch) => ch.preFaderAnalyser),
@@ -362,6 +416,7 @@ export function createAudioEngine(): AudioEngine {
       masterRAnalyser,
       soloAnalyser
     )
+    gateRafId = requestAnimationFrame(updateGates)
   }
 
   function subscribeToStore(): void {
@@ -376,13 +431,71 @@ export function createAudioEngine(): AudioEngine {
         (gainDb) => {
           if (gainDb !== undefined && context) {
             chain.inputGain.gain.setValueAtTime(
-              dbToGain(gainDb),
+              gainDb <= GAIN_MIN ? 0 : dbToGain(gainDb),
               context.currentTime
             )
           }
         }
       )
       unsubscribers.push(unsubGain)
+
+      // Gate (enabled + threshold)
+      const unsubGate = store.subscribe(
+        (state) => {
+          const ch = state.channels[i]
+          if (!ch) return null
+          return { enabled: ch.gateEnabled, threshold: ch.gateThreshold }
+        },
+        (gate) => {
+          if (!gate || !context) return
+          const runtime = gateRuntimes[i]
+          if (!runtime) return
+          runtime.enabled = gate.enabled
+          runtime.thresholdDb = gate.threshold
+          if (!gate.enabled) {
+            runtime.envelope = 1
+            channels[i].gateGain.gain.setValueAtTime(1, context.currentTime)
+          }
+        },
+        {
+          fireImmediately: true,
+          equalityFn: (a, b) => a?.enabled === b?.enabled && a?.threshold === b?.threshold,
+        }
+      )
+      unsubscribers.push(unsubGate)
+
+      // Compressor (enabled + threshold)
+      const unsubCompressor = store.subscribe(
+        (state) => {
+          const ch = state.channels[i]
+          if (!ch) return null
+          return { enabled: ch.compEnabled, threshold: ch.compThreshold }
+        },
+        (comp) => {
+          if (!comp || !context) return
+          const t = context.currentTime
+          const compressor = channels[i].compressor
+          if (comp.enabled) {
+            compressor.threshold.setValueAtTime(comp.threshold, t)
+            compressor.ratio.setValueAtTime(4, t)
+            compressor.knee.setValueAtTime(6, t)
+            compressor.attack.setValueAtTime(0.01, t)
+            compressor.release.setValueAtTime(0.12, t)
+          } else {
+            // Near-bypass behavior while keeping a stable node graph.
+            compressor.threshold.setValueAtTime(0, t)
+            compressor.ratio.setValueAtTime(1, t)
+            compressor.knee.setValueAtTime(0, t)
+            compressor.attack.setValueAtTime(0.003, t)
+            compressor.release.setValueAtTime(0.05, t)
+          }
+        },
+        {
+          fireImmediately: true,
+          equalityFn: (a, b) => a?.enabled === b?.enabled && a?.threshold === b?.threshold,
+        }
+      )
+      unsubscribers.push(unsubCompressor)
 
       // Fader (DCA-aware: effective gain = channel fader × Π(DCA faders))
       const unsubFader = store.subscribe(
@@ -557,7 +670,8 @@ export function createAudioEngine(): AudioEngine {
             dbToGain(attenuationDb),
             context.currentTime
           )
-        }
+        },
+        { fireImmediately: true }
       )
       unsubscribers.push(unsubInputSource)
     }
@@ -637,6 +751,7 @@ export function createAudioEngine(): AudioEngine {
         }
       },
       {
+        fireImmediately: true,
         equalityFn: (a, b) =>
           a.length === b.length && a.every((s, i) => s === b[i]),
       }
@@ -669,11 +784,16 @@ export function createAudioEngine(): AudioEngine {
     transport?.dispose()
     fxDisposers.forEach((disposeFx) => disposeFx())
     fxDisposers.length = 0
+    if (gateRafId !== null) {
+      cancelAnimationFrame(gateRafId)
+      gateRafId = null
+    }
     unsubscribers.forEach((unsub) => unsub())
     unsubscribers.length = 0
     context?.close()
     context = null
     channels = []
+    gateRuntimes = []
   }
 
   return {

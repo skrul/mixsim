@@ -3,6 +3,7 @@ import { createAudioEngine, type AudioEngine } from '@/audio/engine'
 import type { StemManifest } from '@/audio/transport'
 import { useMixerStore } from '@/state/mixer-store'
 import { NUM_INPUT_CHANNELS } from '@/state/mixer-model'
+import { loadSessionSnapshotFromLocalStorage } from '@/state/session-persistence'
 
 export function useAudioEngine() {
   const engineRef = useRef<AudioEngine | null>(null)
@@ -17,6 +18,8 @@ export function useAudioEngine() {
 
     async function start() {
       try {
+        const restoredFromLocalSession = loadSessionSnapshotFromLocalStorage().ok
+
         // Load stem manifest
         const manifestResponse = await fetch('/stems.config.json')
         if (!manifestResponse.ok) {
@@ -33,7 +36,9 @@ export function useAudioEngine() {
         const inputTypes = Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
           stemInputTypes[i] ?? 'direct'
         )
-        useMixerStore.getState().initChannels(NUM_INPUT_CHANNELS, labels, inputTypes)
+        if (!restoredFromLocalSession) {
+          useMixerStore.getState().initChannels(NUM_INPUT_CHANNELS, labels, inputTypes)
+        }
 
         const engine = createAudioEngine()
         engineRef.current = engine
@@ -51,7 +56,9 @@ export function useAudioEngine() {
         store.setAvailableStems(
           manifest.stems.map((s, i) => ({ index: i, label: s.label }))
         )
-        store.applyPresetStems()
+        if (!restoredFromLocalSession) {
+          store.applyPresetStems()
+        }
 
         // Enumerate live audio devices
         try {

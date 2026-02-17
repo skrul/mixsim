@@ -118,10 +118,10 @@ export function DisplayHomeScreen() {
       busSends,
       encoderValues: [
         formatDb(channel.gain),
-        '-58.0',
+        channel.gateEnabled ? channel.gateThreshold.toFixed(1) : 'OFF',
         'POST',
-        'POST',
-        '-25.5',
+        channel.compEnabled ? 'ON' : 'OFF',
+        channel.compEnabled ? channel.compThreshold.toFixed(1) : 'OFF',
         formatPan(channel.pan),
       ],
     }
@@ -176,7 +176,7 @@ export function DisplayHomeScreen() {
                 <div className={`${styles.graph} ${styles.graphGate}`} />
                 <div className={styles.tileFooter}>
                   <div className={styles.badge}>GATE</div>
-                  <div className={styles.value}>-58.0</div>
+                  <div className={styles.value}>{summary.channel.gateEnabled ? summary.channel.gateThreshold.toFixed(1) : 'OFF'}</div>
                   <div className={styles.knob} />
                 </div>
               </div>
@@ -210,7 +210,7 @@ export function DisplayHomeScreen() {
                 <div className={`${styles.graph} ${styles.graphDyn}`} />
                 <div className={styles.tileFooter}>
                   <div className={styles.badge}>COMP</div>
-                  <div className={styles.value}>0.0</div>
+                  <div className={styles.value}>{summary.channel.compEnabled ? summary.channel.compThreshold.toFixed(1) : 'OFF'}</div>
                   <div className={styles.knob} />
                 </div>
               </div>

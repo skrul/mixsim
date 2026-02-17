@@ -19,6 +19,10 @@ export interface ChannelState {
   pan: number            // -1 (full left) to +1 (full right), default 0
   mute: boolean
   solo: boolean
+  gateEnabled: boolean
+  gateThreshold: number  // -80..0 dB
+  compEnabled: boolean
+  compThreshold: number  // -60..0 dB
   hpfEnabled: boolean
   hpfFreq: number        // 20..500 Hz, default 80
   eqEnabled: boolean
@@ -29,6 +33,8 @@ export interface ChannelState {
   eqMidQ: number         // 0.1..10, default 1.0
   eqHighFreq: number     // 2000..16000 Hz, default 5000
   eqHighGain: number     // -15..+15 dB, default 0
+  eqSelectedBand: 'high' | 'highMid' | 'lowMid' | 'low'
+  eqModeIndex: number    // 0..5, EQ mode selector shown in UI strip
   inputSource: ChannelInputSource
   sends: SendState[]     // One per mix bus, length === NUM_MIX_BUSES
   dcaGroups: number[]    // Which DCA group IDs this channel belongs to
@@ -71,6 +77,10 @@ export interface MixerState {
   toggleChannelMute: (channelId: number) => void
   toggleChannelSolo: (channelId: number) => void
   clearAllSolos: () => void
+  setChannelGateEnabled: (channelId: number, enabled: boolean) => void
+  setChannelGateThreshold: (channelId: number, thresholdDb: number) => void
+  setChannelCompEnabled: (channelId: number, enabled: boolean) => void
+  setChannelCompThreshold: (channelId: number, thresholdDb: number) => void
   setChannelHpfEnabled: (channelId: number, enabled: boolean) => void
   setChannelHpfFreq: (channelId: number, freq: number) => void
   setChannelEqEnabled: (channelId: number, enabled: boolean) => void
@@ -81,6 +91,9 @@ export interface MixerState {
   setChannelEqMidQ: (channelId: number, q: number) => void
   setChannelEqHighFreq: (channelId: number, freq: number) => void
   setChannelEqHighGain: (channelId: number, gain: number) => void
+  setChannelEqSelectedBand: (channelId: number, band: 'high' | 'highMid' | 'lowMid' | 'low') => void
+  setChannelEqModeIndex: (channelId: number, modeIndex: number) => void
+  cycleChannelEqMode: (channelId: number) => void
   setChannelSendLevel: (channelId: number, busIndex: number, level: number) => void
   setChannelSendPreFader: (channelId: number, busIndex: number, preFader: boolean) => void
 
@@ -119,6 +132,7 @@ export interface MixerState {
 
   // Init
   initChannels: (count: number, labels: string[], inputTypes?: InputType[]) => void
+  resetBoard: () => void
 }
 
 // ---- Helpers ----
@@ -141,6 +155,10 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     pan: defaultPan,
     mute: false,
     solo: false,
+    gateEnabled: false,
+    gateThreshold: -58,
+    compEnabled: false,
+    compThreshold: -25.5,
     hpfEnabled: false,
     hpfFreq: 80,
     eqEnabled: false,
@@ -151,6 +169,8 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     eqMidQ: 1.0,
     eqHighFreq: 5000,
     eqHighGain: 0,
+    eqSelectedBand: 'highMid',
+    eqModeIndex: 0,
     inputSource: { type: 'none' },
     sends: Array.from({ length: NUM_MIX_BUSES }, () => ({ level: 0, preFader: true })),
     dcaGroups: [],
@@ -341,6 +361,18 @@ export const useMixerStore = create<MixerState>()(
         soloActive: false,
       })),
 
+    setChannelGateEnabled: (channelId, enabled) =>
+      set((state) => updateChannel(state, channelId, { gateEnabled: enabled })),
+
+    setChannelGateThreshold: (channelId, thresholdDb) =>
+      set((state) => updateChannel(state, channelId, { gateThreshold: thresholdDb })),
+
+    setChannelCompEnabled: (channelId, enabled) =>
+      set((state) => updateChannel(state, channelId, { compEnabled: enabled })),
+
+    setChannelCompThreshold: (channelId, thresholdDb) =>
+      set((state) => updateChannel(state, channelId, { compThreshold: thresholdDb })),
+
     setChannelHpfEnabled: (channelId, enabled) =>
       set((state) => updateChannel(state, channelId, { hpfEnabled: enabled })),
 
@@ -348,7 +380,12 @@ export const useMixerStore = create<MixerState>()(
       set((state) => updateChannel(state, channelId, { hpfFreq: freq })),
 
     setChannelEqEnabled: (channelId, enabled) =>
-      set((state) => updateChannel(state, channelId, { eqEnabled: enabled })),
+      set((state) => {
+        const ch = state.channels.find((c) => c.id === channelId)
+        if (!ch) return {}
+        const modeIndex = Number.isFinite(ch.eqModeIndex) ? ch.eqModeIndex : 0
+        return updateChannel(state, channelId, { eqEnabled: enabled, eqModeIndex: modeIndex })
+      }),
 
     setChannelEqLowFreq: (channelId, freq) =>
       set((state) => updateChannel(state, channelId, { eqLowFreq: freq })),
@@ -370,6 +407,25 @@ export const useMixerStore = create<MixerState>()(
 
     setChannelEqHighGain: (channelId, gain) =>
       set((state) => updateChannel(state, channelId, { eqHighGain: gain })),
+
+    setChannelEqSelectedBand: (channelId, band) =>
+      set((state) => updateChannel(state, channelId, { eqSelectedBand: band })),
+
+    setChannelEqModeIndex: (channelId, modeIndex) =>
+      set((state) =>
+        updateChannel(state, channelId, {
+          eqModeIndex: Number.isFinite(modeIndex) ? Math.max(0, Math.min(5, Math.floor(modeIndex))) : 0,
+        })
+      ),
+
+    cycleChannelEqMode: (channelId) =>
+      set((state) => {
+        const ch = state.channels.find((c) => c.id === channelId)
+        if (!ch) return {}
+        if (!ch.eqEnabled) return {}
+        const current = Number.isFinite(ch.eqModeIndex) ? ch.eqModeIndex : -1
+        return updateChannel(state, channelId, { eqModeIndex: (current + 1) % 6 })
+      }),
 
     setChannelSendLevel: (channelId, busIndex, level) =>
       set((state) => {
@@ -506,5 +562,25 @@ export const useMixerStore = create<MixerState>()(
           createDefaultChannel(i, labels[i] ?? `Ch ${i + 1}`, inputTypes?.[i] ?? 'direct')
         ),
       }),
+
+    resetBoard: () =>
+      set((state) => ({
+        channels: Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
+          createDefaultChannel(i, `Ch ${i + 1}`)
+        ),
+        mixBuses: Array.from({ length: NUM_MIX_BUSES }, (_, i) => createDefaultMixBus(i)),
+        dcaGroups: Array.from({ length: NUM_DCA_GROUPS }, (_, i) => createDefaultDcaGroup(i)),
+        master: { faderPosition: 0, solo: false },
+        monitor: { source: 'main', level: 0.75 },
+        transportState: 'stopped',
+        currentTime: 0,
+        soloActive: false,
+        loadingError: null,
+        // Keep discovered devices/stems and loaded duration metadata.
+        stemsLoaded: state.stemsLoaded,
+        duration: state.duration,
+        availableStems: state.availableStems,
+        availableLiveDevices: state.availableLiveDevices,
+      })),
   }))
 )

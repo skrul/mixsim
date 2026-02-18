@@ -14,7 +14,7 @@ import { InfoBar } from '@/ui/components/InfoBar'
 import styles from './App.module.css'
 
 function App() {
-  const { isReady, error } = useAudioEngine()
+  const { isReady, error, audioSuspended, resumeAudio } = useAudioEngine()
   const loadingError = useMixerStore((s) => s.loadingError)
 
   useEffect(() => {
@@ -70,6 +70,17 @@ function App() {
           </div>
         </div>
       </div>
+      {audioSuspended && (
+        <div className={styles.getStartedOverlay}>
+          <div className={styles.getStartedDialog}>
+            <h2 className={styles.getStartedTitle}>Get Started</h2>
+            <p className={styles.getStartedBody}>Click below to enable sound and begin mixing.</p>
+            <button className={styles.getStartedButton} onClick={resumeAudio}>
+              Enable Sound
+            </button>
+          </div>
+        </div>
+      )}
       <InfoBar />
     </div>
   )

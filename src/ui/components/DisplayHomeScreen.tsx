@@ -218,7 +218,7 @@ export function DisplayHomeScreen() {
               <div className={styles.tileOut}>
                 <div className={styles.tileTitle}>OUT</div>
                 <div className={styles.outRows}>
-                  <div className={styles.outRow}><span>MONO</span><span>OFF</span></div>
+                  <div className={styles.outRow}><span>MONO</span><span>{summary.channel.monoBus ? 'ON' : 'OFF'}</span></div>
                   <div className={styles.outRow}><span>MUTE</span><span>{summary.channel.mute ? 'ON' : 'OFF'}</span></div>
                 </div>
                 <div className={styles.tileFooter}>

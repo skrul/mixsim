@@ -4,12 +4,13 @@ import type { StemManifest } from '@/audio/transport'
 import { useMixerStore } from '@/state/mixer-store'
 import { NUM_INPUT_CHANNELS } from '@/state/mixer-model'
 import { loadSessionSnapshotFromLocalStorage } from '@/state/session-persistence'
-import { initSourceModeFromProfiles } from '@/state/source-profiles'
+import { ensureActiveSourceModeConsistency, initSourceModeFromProfiles } from '@/state/source-profiles'
 
 export function useAudioEngine() {
   const engineRef = useRef<AudioEngine | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [audioSuspended, setAudioSuspended] = useState(false)
   const initRef = useRef(false)
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export function useAudioEngine() {
         const engine = createAudioEngine()
         engineRef.current = engine
         await engine.init()
+        setAudioSuspended(engine.getAudioState() === 'suspended')
 
         // Load stems
         await engine.getTransport()!.loadStems(manifest)
@@ -62,6 +64,23 @@ export function useAudioEngine() {
           store.applyPresetStems()
         }
 
+        // Ensure source nodes are live after refresh/session restore.
+        // This re-applies persisted channel patching (tones/stems/live/none)
+        // in case browser reload order skipped initial source activation.
+        store.channels.forEach((ch, i) => {
+          sm.setChannelSource(i, ch.inputSource)
+        })
+
+        // If active source mode and restored inputs are inconsistent,
+        // recover by resetting that mode to its defaults.
+        ensureActiveSourceModeConsistency()
+
+        // Final re-bind pass after any mode recovery to guarantee that
+        // active source nodes (especially tones) are attached post-refresh.
+        useMixerStore.getState().channels.forEach((ch, i) => {
+          sm.setChannelSource(i, ch.inputSource)
+        })
+
         // Enumerate live audio devices
         try {
           const devices = await navigator.mediaDevices.enumerateDevices()
@@ -75,6 +94,20 @@ export function useAudioEngine() {
 
         // Start metering
         engine.getMetering()!.start()
+
+        // Autoplay-policy recovery: any user gesture can resume audio context
+        // after a browser refresh.
+        const resumeOnGesture = () => {
+          void engine.resume().then(() => {
+            setAudioSuspended(engine.getAudioState() === 'suspended')
+          })
+        }
+        window.addEventListener('pointerdown', resumeOnGesture, { passive: true })
+        window.addEventListener('keydown', resumeOnGesture, { passive: true })
+
+        const suspendedPoll = window.setInterval(() => {
+          setAudioSuspended(engine.getAudioState() === 'suspended')
+        }, 500)
 
         // Subscribe to transport state changes to drive transport + SourceManager
         const unsubTransport = useMixerStore.subscribe(
@@ -146,6 +179,9 @@ export function useAudioEngine() {
             unsubTransport()
             unsubRewind()
             unsubSeek()
+            window.removeEventListener('pointerdown', resumeOnGesture)
+            window.removeEventListener('keydown', resumeOnGesture)
+            window.clearInterval(suspendedPoll)
             engine.dispose()
           },
         }
@@ -161,5 +197,12 @@ export function useAudioEngine() {
     }
   }, [])
 
-  return { isReady, error }
+  const resumeAudio = async () => {
+    const engine = engineRef.current
+    if (!engine) return
+    await engine.resume()
+    setAudioSuspended(engine.getAudioState() === 'suspended')
+  }
+
+  return { isReady, error, audioSuspended, resumeAudio }
 }

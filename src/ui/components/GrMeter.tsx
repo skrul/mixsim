@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { dynamicsLevels } from '@/audio/metering'
+import { useSurfaceStore } from '@/state/surface-store'
 import styles from './GrMeter.module.css'
 
 interface GrMeterProps {
   channelIndex: number
   compEnabled: boolean
   gateEnabled: boolean
+  helpText?: string
 }
 
 const GR_MARKS = [2, 4, 6, 10, 18, 30]
@@ -18,7 +20,8 @@ function grToLitSegments(grDb: number): number {
   return lit
 }
 
-export function GrMeter({ channelIndex, compEnabled, gateEnabled }: GrMeterProps) {
+export function GrMeter({ channelIndex, compEnabled, gateEnabled, helpText }: GrMeterProps) {
+  const setHelpText = useSurfaceStore((s) => s.setHelpText)
   const [litSegments, setLitSegments] = useState(0)
   const displayRef = useRef(0)
   const rafRef = useRef<number | null>(null)
@@ -50,7 +53,11 @@ export function GrMeter({ channelIndex, compEnabled, gateEnabled }: GrMeterProps
   }, [channelIndex])
 
   return (
-    <div className={styles.grMeter}>
+    <div
+      className={styles.grMeter}
+      onMouseEnter={helpText ? () => setHelpText(helpText) : undefined}
+      onMouseLeave={helpText ? () => setHelpText('') : undefined}
+    >
       <div className={styles.compStatusRow}>
         <div className={`${styles.statusLed} ${compEnabled ? styles.compActive : ''}`} />
         <span className={styles.statusLabel}>COMP</span>
@@ -78,4 +85,3 @@ export function GrMeter({ channelIndex, compEnabled, gateEnabled }: GrMeterProps
     </div>
   )
 }
-

@@ -35,6 +35,8 @@ export interface ChannelState {
   eqHighGain: number     // -15..+15 dB, default 0
   eqSelectedBand: 'high' | 'highMid' | 'lowMid' | 'low'
   eqModeIndex: number    // 0..5, EQ mode selector shown in UI strip
+  monoBus: boolean       // Route channel to center/mono bus
+  mainLrBus: boolean     // Route channel to main LR bus
   inputSource: ChannelInputSource
   sends: SendState[]     // One per mix bus, length === NUM_MIX_BUSES
   dcaGroups: number[]    // Which DCA group IDs this channel belongs to
@@ -68,6 +70,7 @@ export interface MixerState {
   setAvailableLiveDevices: (devices: { deviceId: string; label: string }[]) => void
   applyPresetStems: () => void
   applyPresetTones: () => void
+  applyPresetNone: () => void
 
   // Channel actions
   setChannelGain: (channelId: number, gainDb: number) => void
@@ -94,6 +97,8 @@ export interface MixerState {
   setChannelEqSelectedBand: (channelId: number, band: 'high' | 'highMid' | 'lowMid' | 'low') => void
   setChannelEqModeIndex: (channelId: number, modeIndex: number) => void
   cycleChannelEqMode: (channelId: number) => void
+  setChannelMonoBus: (channelId: number, enabled: boolean) => void
+  setChannelMainLrBus: (channelId: number, enabled: boolean) => void
   setChannelSendLevel: (channelId: number, busIndex: number, level: number) => void
   setChannelSendPreFader: (channelId: number, busIndex: number, preFader: boolean) => void
 
@@ -171,6 +176,8 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     eqHighGain: 0,
     eqSelectedBand: 'highMid',
     eqModeIndex: 0,
+    monoBus: false,
+    mainLrBus: true,
     inputSource: { type: 'none' },
     sends: Array.from({ length: NUM_MIX_BUSES }, () => ({ level: 0, preFader: true })),
     dcaGroups: [],
@@ -318,6 +325,15 @@ export const useMixerStore = create<MixerState>()(
         })),
       })),
 
+    applyPresetNone: () =>
+      set((state) => ({
+        channels: state.channels.map((ch, i) => ({
+          ...ch,
+          inputSource: { type: 'none' as const },
+          label: `Ch ${i + 1}`,
+        })),
+      })),
+
     // Channel actions
     setChannelGain: (channelId, gainDb) =>
       set((state) => updateChannel(state, channelId, { gain: gainDb })),
@@ -426,6 +442,12 @@ export const useMixerStore = create<MixerState>()(
         const current = Number.isFinite(ch.eqModeIndex) ? ch.eqModeIndex : -1
         return updateChannel(state, channelId, { eqModeIndex: (current + 1) % 6 })
       }),
+
+    setChannelMonoBus: (channelId, enabled) =>
+      set((state) => updateChannel(state, channelId, { monoBus: enabled })),
+
+    setChannelMainLrBus: (channelId, enabled) =>
+      set((state) => updateChannel(state, channelId, { mainLrBus: enabled })),
 
     setChannelSendLevel: (channelId, busIndex, level) =>
       set((state) => {
@@ -565,9 +587,17 @@ export const useMixerStore = create<MixerState>()(
 
     resetBoard: () =>
       set((state) => ({
-        channels: Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
-          createDefaultChannel(i, `Ch ${i + 1}`)
-        ),
+        channels: Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) => {
+          const prev = state.channels[i]
+          const base = createDefaultChannel(i, prev?.label ?? `Ch ${i + 1}`, prev?.inputType ?? 'direct')
+          return {
+            ...base,
+            // Zero board should not wipe source patching.
+            inputSource: prev?.inputSource ?? { type: 'none' as const },
+            label: prev?.label ?? base.label,
+            inputType: prev?.inputType ?? base.inputType,
+          }
+        }),
         mixBuses: Array.from({ length: NUM_MIX_BUSES }, (_, i) => createDefaultMixBus(i)),
         dcaGroups: Array.from({ length: NUM_DCA_GROUPS }, (_, i) => createDefaultDcaGroup(i)),
         master: { faderPosition: 0, solo: false },

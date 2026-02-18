@@ -22,9 +22,11 @@ interface StripButtonProps {
   view?: boolean
   disabled?: boolean
   sideLabel?: boolean
+  helpText?: string
 }
 
-function StripButton({ label, active = false, onClick, view = false, disabled = false, sideLabel = false }: StripButtonProps) {
+function StripButton({ label, active = false, onClick, view = false, disabled = false, sideLabel = false, helpText }: StripButtonProps) {
+  const setHelpText = useSurfaceStore((s) => s.setHelpText)
   return (
     <div className={`${styles.stripControl} ${view ? styles.viewControl : ''} ${sideLabel ? styles.sideLabelControl : ''} ${disabled ? styles.stripControlDisabled : ''}`}>
       {view ? <span className={styles.viewLabel}>{label}</span> : null}
@@ -32,6 +34,8 @@ function StripButton({ label, active = false, onClick, view = false, disabled = 
         className={`${styles.stripButton} ${view ? styles.viewButton : ''} ${active && !disabled ? styles.stripButtonActive : ''}`}
         onClick={onClick}
         disabled={disabled}
+        onMouseEnter={helpText ? () => setHelpText(helpText) : undefined}
+        onMouseLeave={helpText ? () => setHelpText('') : undefined}
       />
       {!view ? <span className={styles.stripLabel}>{label}</span> : null}
     </div>
@@ -40,6 +44,7 @@ function StripButton({ label, active = false, onClick, view = false, disabled = 
 
 export function ChannelDetailPanel() {
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
+  const setHelpText = useSurfaceStore((s) => s.setHelpText)
   const channel = useMixerStore((s) => s.channels[selectedChannel])
 
   const setGain = useMixerStore((s) => s.setChannelGain)
@@ -61,6 +66,8 @@ export function ChannelDetailPanel() {
   const setEqBand = useMixerStore((s) => s.setChannelEqSelectedBand)
   const cycleEqMode = useMixerStore((s) => s.cycleChannelEqMode)
   const setChannelSendLevel = useMixerStore((s) => s.setChannelSendLevel)
+  const setChannelMonoBus = useMixerStore((s) => s.setChannelMonoBus)
+  const setChannelMainLrBus = useMixerStore((s) => s.setChannelMainLrBus)
   const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
 
   if (!channel) {
@@ -144,13 +151,13 @@ export function ChannelDetailPanel() {
           </div>
           <div className={styles.preampSwitchLayout}>
             <div className={styles.preampGainSwitches}>
-              <StripButton label="48V" />
-              <StripButton label="Ø" />
+              <StripButton label="48V" helpText="Toggle phantom power for condenser microphones." />
+              <StripButton label="Ø" helpText="Toggle input polarity inversion." />
             </div>
             <div className={styles.preampFreqSwitches}>
-              <StripButton label="LOW CUT" active={channel.hpfEnabled} onClick={() => setHpfEnabled(id, !channel.hpfEnabled)} />
+              <StripButton label="LOW CUT" active={channel.hpfEnabled} onClick={() => setHpfEnabled(id, !channel.hpfEnabled)} helpText="Enable or bypass the high-pass filter." />
               <div className={styles.preampViewCorner}>
-                <StripButton label="VIEW" view />
+                <StripButton label="VIEW" view helpText="Open detailed preamp settings on the display (placeholder)." />
               </div>
             </div>
           </div>
@@ -173,6 +180,7 @@ export function ChannelDetailPanel() {
                 label="Threshold"
                 formatValue={(v) => `${v.toFixed(1)} dB`}
                 available={channel.gateEnabled}
+                helpText="Set the gate threshold. Signals below this level are attenuated."
                 showValue={false}
               />
             </div>
@@ -182,6 +190,7 @@ export function ChannelDetailPanel() {
                 channelIndex={id}
                 compEnabled={channel.compEnabled}
                 gateEnabled={channel.gateEnabled}
+                helpText="Gain reduction meter. Shows combined gate and compressor attenuation in dB."
               />
             </div>
 
@@ -195,6 +204,7 @@ export function ChannelDetailPanel() {
                 label="Threshold"
                 formatValue={(v) => `${v.toFixed(1)} dB`}
                 available={channel.compEnabled}
+                helpText="Set the compressor threshold. Signals above this level are compressed."
                 showValue={false}
               />
             </div>
@@ -202,12 +212,12 @@ export function ChannelDetailPanel() {
 
           <div className={styles.gateDynSwitches}>
             <div className={styles.knobCornerSwitch}>
-              <StripButton label="GATE" active={channel.gateEnabled} onClick={() => setGateEnabled(id, !channel.gateEnabled)} />
-              <StripButton label="VIEW" view />
+              <StripButton label="GATE" active={channel.gateEnabled} onClick={() => setGateEnabled(id, !channel.gateEnabled)} helpText="Enable or bypass the noise gate." />
+              <StripButton label="VIEW" view helpText="Open detailed gate settings on the display (placeholder)." />
             </div>
             <div className={styles.knobCornerSwitch}>
-              <StripButton label="COMPRESSOR" active={channel.compEnabled} onClick={() => setCompEnabled(id, !channel.compEnabled)} />
-              <StripButton label="VIEW" view />
+              <StripButton label="COMPRESSOR" active={channel.compEnabled} onClick={() => setCompEnabled(id, !channel.compEnabled)} helpText="Enable or bypass channel compression." />
+              <StripButton label="VIEW" view helpText="Open detailed compressor settings on the display (placeholder)." />
             </div>
           </div>
         </section>
@@ -221,6 +231,8 @@ export function ChannelDetailPanel() {
               <div
                 key={mode.key}
                 className={`${styles.eqTypeRow} ${channel.eqEnabled && channel.eqModeIndex === index ? styles.eqTypeRowActive : ''}`}
+                onMouseEnter={() => setHelpText(`EQ type ${mode.label}. Use MODE button to select this curve.`)}
+                onMouseLeave={() => setHelpText('')}
               >
                 <span className={styles.eqTypeText}>{mode.label}</span>
               </div>
@@ -237,6 +249,7 @@ export function ChannelDetailPanel() {
               label="Q"
               formatValue={(v) => v.toFixed(2)}
               available={channel.eqEnabled}
+              helpText="Adjust EQ Q (bandwidth) for the selected EQ band."
               showValue={false}
             />
           </div>
@@ -252,6 +265,7 @@ export function ChannelDetailPanel() {
                 label="Freq"
                 formatValue={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${Math.round(v)}`)}
                 available={channel.eqEnabled}
+                helpText="Adjust center/corner frequency for the selected EQ band."
                 showValue={false}
               />
               <span className={`${styles.eqFreqMark} ${styles.eqFreq40}`}>40</span>
@@ -273,25 +287,26 @@ export function ChannelDetailPanel() {
               label="Gain"
               formatValue={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)} dB`}
               available={channel.eqEnabled}
+              helpText="Boost or cut the selected EQ band."
               showValue={false}
             />
           </div>
 
           <div className={styles.eqBandButtons}>
-            <StripButton label="HIGH" active={channel.eqEnabled && selectedBand === 'high'} onClick={() => setEqBand(id, 'high')} disabled={!channel.eqEnabled} />
-            <StripButton label="HIGH MID" active={channel.eqEnabled && selectedBand === 'highMid'} onClick={() => setEqBand(id, 'highMid')} disabled={!channel.eqEnabled} />
-            <StripButton label="LOW MID" active={channel.eqEnabled && selectedBand === 'lowMid'} onClick={() => setEqBand(id, 'lowMid')} disabled={!channel.eqEnabled} />
-            <StripButton label="LOW" active={channel.eqEnabled && selectedBand === 'low'} onClick={() => setEqBand(id, 'low')} disabled={!channel.eqEnabled} />
+            <StripButton label="HIGH" active={channel.eqEnabled && selectedBand === 'high'} onClick={() => setEqBand(id, 'high')} disabled={!channel.eqEnabled} helpText="Select the high EQ band for editing." />
+            <StripButton label="HIGH MID" active={channel.eqEnabled && selectedBand === 'highMid'} onClick={() => setEqBand(id, 'highMid')} disabled={!channel.eqEnabled} helpText="Select the high-mid EQ band for editing." />
+            <StripButton label="LOW MID" active={channel.eqEnabled && selectedBand === 'lowMid'} onClick={() => setEqBand(id, 'lowMid')} disabled={!channel.eqEnabled} helpText="Select the low-mid EQ band for editing." />
+            <StripButton label="LOW" active={channel.eqEnabled && selectedBand === 'low'} onClick={() => setEqBand(id, 'low')} disabled={!channel.eqEnabled} helpText="Select the low EQ band for editing." />
           </div>
         </div>
 
         <div className={styles.eqBottomControls}>
           <div className={styles.eqCenterButtons}>
-            <StripButton label="EQ" active={channel.eqEnabled} onClick={() => setEqEnabled(id, !channel.eqEnabled)} />
-            <StripButton label="MODE" onClick={() => cycleEqMode(id)} />
+            <StripButton label="EQ" active={channel.eqEnabled} onClick={() => setEqEnabled(id, !channel.eqEnabled)} helpText="Enable or bypass the EQ section." />
+            <StripButton label="MODE" onClick={() => cycleEqMode(id)} helpText="Cycle through EQ filter types (HCUT, HSHV, VEQ, PEQ, LSHV, LCUT)." />
           </div>
           <div className={styles.eqViewCorner}>
-            <StripButton label="VIEW" view />
+            <StripButton label="VIEW" view helpText="Open detailed EQ settings on the display (placeholder)." />
           </div>
         </div>
       </section>
@@ -300,7 +315,7 @@ export function ChannelDetailPanel() {
         <h3 className={styles.blockTitle}>BUS MIXES</h3>
         <div className={styles.mixBusHeader}>
           <span>MIX BUS SENDS</span>
-          <StripButton label="VIEW" view />
+          <StripButton label="VIEW" view helpText="Open detailed bus send settings on the display (placeholder)." />
         </div>
         <Knob
           value={channel.sends[sendTargetBus]?.level ?? 0}
@@ -310,10 +325,17 @@ export function ChannelDetailPanel() {
           onChange={(v) => setChannelSendLevel(id, sendTargetBus, v)}
           label="Level"
           formatValue={(v) => `${Math.round(v * 100)}%`}
+          helpText={`Adjust send level from this channel to Mix ${sendTargetBus + 1}.`}
           showValue={false}
         />
         <div className={styles.monoBusRow}>
-          <StripButton label="MONO BUS" sideLabel />
+          <StripButton
+            label="MONO BUS"
+            sideLabel
+            active={channel.monoBus}
+            onClick={() => setChannelMonoBus(id, !channel.monoBus)}
+            helpText="Route this channel to the center/mono bus."
+          />
         </div>
         <div className={styles.panBalRow}>
           <Knob
@@ -332,8 +354,13 @@ export function ChannelDetailPanel() {
           />
         </div>
         <div className={styles.switchRow}>
-          <StripButton label="MAIN LR BUS" />
-          <StripButton label="VIEW" view />
+          <StripButton
+            label="MAIN LR BUS"
+            active={channel.mainLrBus}
+            onClick={() => setChannelMainLrBus(id, !channel.mainLrBus)}
+            helpText="Route this channel to the Main LR bus."
+          />
+          <StripButton label="VIEW" view helpText="Open detailed output routing settings on the display (placeholder)." />
         </div>
       </section>
     </div>

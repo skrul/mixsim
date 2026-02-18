@@ -71,3 +71,51 @@
   margin: 0 4px;
   align-self: stretch;
 }
+
+.getStartedOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 18, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.getStartedDialog {
+  width: min(90vw, 360px);
+  background: #26263d;
+  border: 1px solid #4d4d70;
+  border-radius: 10px;
+  padding: 20px 18px 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+
+.getStartedTitle {
+  margin: 0 0 8px;
+  font-size: 24px;
+  color: #f0f2f7;
+  letter-spacing: 0.4px;
+}
+
+.getStartedBody {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #c6ccdc;
+}
+
+.getStartedButton {
+  padding: 9px 14px;
+  border-radius: 6px;
+  border: 1px solid #6c8cc8;
+  background: #355a9a;
+  color: #eef4ff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.getStartedButton:hover {
+  background: #3e68af;
+}

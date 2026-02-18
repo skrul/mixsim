@@ -6,6 +6,7 @@ import styles from './MonitorSection.module.css'
 
 const MONITOR_SOURCES: { source: MonitorSource; label: string }[] = [
   { source: 'main', label: 'Main' },
+  { source: 'mono', label: 'M/C' },
   ...Array.from({ length: NUM_MIX_BUSES }, (_, i) => ({
     source: `bus-${i}` as MonitorSource,
     label: `Mix ${i + 1}`,
@@ -43,7 +44,7 @@ export function MonitorSection() {
               effectiveSource === source ? styles.activeSource : ''
             } ${soloActive && source === monitor.source ? styles.overridden : ''}`}
             onClick={() => setMonitorSource(source)}
-            onMouseEnter={() => setHelpText("Select which audio source to listen to in the headphones. 'Main' monitors the main stereo mix. 'Mix 1–6' lets you check what musicians are hearing in their monitor mixes.")}
+            onMouseEnter={() => setHelpText("Select which source to hear in headphones. 'Main' is LR mix, 'M/C' is center/mono bus, and 'Mix 1-16' are monitor buses.")}
             onMouseLeave={() => setHelpText('')}
           >
             {label}

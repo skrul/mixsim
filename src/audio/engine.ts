@@ -9,6 +9,8 @@ import { NUM_MIX_BUSES, INPUT_TYPE_CONFIG, GAIN_MIN, type MonitorSource } from '
 export interface AudioEngine {
   init: () => Promise<void>
   dispose: () => void
+  resume: () => Promise<void>
+  getAudioState: () => AudioContextState | 'closed'
   getTransport: () => TransportManager | null
   getMetering: () => MeteringManager | null
   getSourceManager: () => SourceManager | null
@@ -33,6 +35,26 @@ interface GateRuntime {
   thresholdDb: number
   envelope: number
   detectorBuffer: Float32Array<ArrayBuffer>
+}
+
+type EqTargetBand = 'low' | 'mid' | 'high'
+
+function mapSelectedBandToEqTarget(selectedBand: 'high' | 'highMid' | 'lowMid' | 'low'): EqTargetBand {
+  if (selectedBand === 'high') return 'high'
+  if (selectedBand === 'low') return 'low'
+  return 'mid'
+}
+
+function mapEqModeToBiquadType(modeIndex: number): BiquadFilterType {
+  switch (modeIndex) {
+    case 0: return 'highpass'  // HCUT
+    case 1: return 'highshelf' // HSHV
+    case 2: return 'peaking'   // VEQ
+    case 3: return 'peaking'   // PEQ
+    case 4: return 'lowshelf'  // LSHV
+    case 5: return 'lowpass'   // LCUT
+    default: return 'peaking'
+  }
 }
 
 function createDecayImpulseResponse(
@@ -197,6 +219,7 @@ export function createAudioEngine(): AudioEngine {
   let channels: ChannelChain[] = []
   let mixBusChains: MixBusChain[] = []
   let masterGain: GainNode | null = null
+  let monoBusGain: GainNode | null = null
   let masterLAnalyser: AnalyserNode | null = null
   let masterRAnalyser: AnalyserNode | null = null
   let mainSoloTapGain: GainNode | null = null
@@ -204,6 +227,7 @@ export function createAudioEngine(): AudioEngine {
   let soloAnalyser: AnalyserNode | null = null
   // Monitor routing: selectable source taps → monitorLevel → destination
   let monitorTapMain: GainNode | null = null
+  let monitorTapMono: GainNode | null = null
   let monitorTapSolo: GainNode | null = null
   let monitorTapBuses: GainNode[] = []
   let monitorLevel: GainNode | null = null
@@ -223,6 +247,7 @@ export function createAudioEngine(): AudioEngine {
     const effectiveSource = soloActive ? 'solo' : source
 
     monitorTapMain!.gain.setValueAtTime(effectiveSource === 'main' ? 1 : 0, t)
+    monitorTapMono!.gain.setValueAtTime(effectiveSource === 'mono' ? 1 : 0, t)
     monitorTapSolo!.gain.setValueAtTime(effectiveSource === 'solo' ? 1 : 0, t)
     for (let i = 0; i < monitorTapBuses.length; i++) {
       monitorTapBuses[i].gain.setValueAtTime(effectiveSource === `bus-${i}` ? 1 : 0, t)
@@ -274,6 +299,8 @@ export function createAudioEngine(): AudioEngine {
 
     // Master bus: masterGain feeds monitor and dedicated L/R meters
     masterGain = context.createGain()
+    monoBusGain = context.createGain()
+    monoBusGain.gain.value = 1
     const masterSplitter = context.createChannelSplitter(2)
     const masterMerger = context.createChannelMerger(2)
     masterLAnalyser = context.createAnalyser()
@@ -305,10 +332,14 @@ export function createAudioEngine(): AudioEngine {
     monitorLevel.connect(context.destination)
 
     monitorTapMain = context.createGain()
+    monitorTapMono = context.createGain()
     monitorTapSolo = context.createGain()
 
     masterMerger.connect(monitorTapMain)
     monitorTapMain.connect(monitorLevel)
+
+    monoBusGain.connect(monitorTapMono)
+    monitorTapMono.connect(monitorLevel)
 
     soloBusGain.connect(soloAnalyser)
     soloAnalyser.connect(monitorTapSolo)
@@ -355,7 +386,7 @@ export function createAudioEngine(): AudioEngine {
     channels = []
     for (let i = 0; i < channelCount; i++) {
       const ch = store.channels[i]
-      const chain = createChannelChain(context, masterGain, soloBusGain, ch, mixBusSummingNodes)
+      const chain = createChannelChain(context, masterGain, monoBusGain, soloBusGain, ch, mixBusSummingNodes)
       channels.push(chain)
     }
     gateRuntimes = channels.map((chain, i) => {
@@ -539,6 +570,26 @@ export function createAudioEngine(): AudioEngine {
       )
       unsubscribers.push(unsubPan)
 
+      // Channel routing assignment: Main LR and Mono bus
+      const unsubRouting = store.subscribe(
+        (state) => {
+          const ch = state.channels[i]
+          if (!ch) return null
+          return { mainLrBus: ch.mainLrBus, monoBus: ch.monoBus }
+        },
+        (routing) => {
+          if (!routing || !context) return
+          const t = context.currentTime
+          chain.mainAssignGain.gain.setValueAtTime(routing.mainLrBus ? 1 : 0, t)
+          chain.monoAssignGain.gain.setValueAtTime(routing.monoBus ? 1 : 0, t)
+        },
+        {
+          fireImmediately: true,
+          equalityFn: (a, b) => a?.mainLrBus === b?.mainLrBus && a?.monoBus === b?.monoBus,
+        }
+      )
+      unsubscribers.push(unsubRouting)
+
       // Mute (DCA-aware: effective mute = channel mute OR any assigned DCA muted)
       const unsubMute = store.subscribe(
         (state) => {
@@ -589,6 +640,8 @@ export function createAudioEngine(): AudioEngine {
           if (!ch) return null
           return {
             enabled: ch.eqEnabled,
+            selectedBand: ch.eqSelectedBand,
+            modeIndex: ch.eqModeIndex,
             lowFreq: ch.eqLowFreq, lowGain: ch.eqLowGain,
             midFreq: ch.eqMidFreq, midGain: ch.eqMidGain, midQ: ch.eqMidQ,
             highFreq: ch.eqHighFreq, highGain: ch.eqHighGain,
@@ -598,19 +651,51 @@ export function createAudioEngine(): AudioEngine {
           if (!eq || !context) return
           const t = context.currentTime
 
+          // Base EQ defaults when no mode override is active for a band.
+          chain.eqLow.type = 'lowshelf'
           chain.eqLow.frequency.setValueAtTime(eq.lowFreq, t)
           chain.eqLow.gain.setValueAtTime(eq.enabled ? eq.lowGain : 0, t)
+          chain.eqLow.Q.setValueAtTime(0.707, t)
 
+          chain.eqMid.type = 'peaking'
           chain.eqMid.frequency.setValueAtTime(eq.midFreq, t)
           chain.eqMid.gain.setValueAtTime(eq.enabled ? eq.midGain : 0, t)
           chain.eqMid.Q.setValueAtTime(eq.midQ, t)
 
+          chain.eqHigh.type = 'highshelf'
           chain.eqHigh.frequency.setValueAtTime(eq.highFreq, t)
           chain.eqHigh.gain.setValueAtTime(eq.enabled ? eq.highGain : 0, t)
+          chain.eqHigh.Q.setValueAtTime(0.707, t)
+
+          if (!eq.enabled) return
+
+          const targetBand = mapSelectedBandToEqTarget(eq.selectedBand)
+          const modeType = mapEqModeToBiquadType(eq.modeIndex)
+          const targetNode = targetBand === 'low' ? chain.eqLow : targetBand === 'mid' ? chain.eqMid : chain.eqHigh
+          const targetFreq = targetBand === 'low' ? eq.lowFreq : targetBand === 'mid' ? eq.midFreq : eq.highFreq
+          const targetGain = targetBand === 'low' ? eq.lowGain : targetBand === 'mid' ? eq.midGain : eq.highGain
+
+          targetNode.type = modeType
+          targetNode.frequency.setValueAtTime(targetFreq, t)
+
+          if (modeType === 'highpass' || modeType === 'lowpass') {
+            targetNode.Q.setValueAtTime(0.707, t)
+            targetNode.gain.setValueAtTime(0, t)
+          } else if (modeType === 'peaking') {
+            // VEQ (2) is broader/smoother than PEQ (3).
+            const modeQ = eq.modeIndex === 2 ? Math.max(0.1, eq.midQ * 0.6) : eq.midQ
+            targetNode.Q.setValueAtTime(modeQ, t)
+            targetNode.gain.setValueAtTime(targetGain, t)
+          } else {
+            targetNode.Q.setValueAtTime(0.707, t)
+            targetNode.gain.setValueAtTime(targetGain, t)
+          }
         },
         {
           equalityFn: (a, b) =>
             a?.enabled === b?.enabled &&
+            a?.selectedBand === b?.selectedBand &&
+            a?.modeIndex === b?.modeIndex &&
             a?.lowFreq === b?.lowFreq && a?.lowGain === b?.lowGain &&
             a?.midFreq === b?.midFreq && a?.midGain === b?.midGain && a?.midQ === b?.midQ &&
             a?.highFreq === b?.highFreq && a?.highGain === b?.highGain,
@@ -805,6 +890,17 @@ export function createAudioEngine(): AudioEngine {
   return {
     init,
     dispose,
+    resume: async () => {
+      if (!context) return
+      if (context.state === 'suspended') {
+        try {
+          await context.resume()
+        } catch {
+          // Ignore autoplay-policy failures until next user gesture.
+        }
+      }
+    },
+    getAudioState: () => context?.state ?? 'closed',
     getTransport: () => transport,
     getMetering: () => metering,
     getSourceManager: () => sourceManager,

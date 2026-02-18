@@ -52,7 +52,7 @@ export interface DcaGroupState {
   assignedChannels: number[]  // channel IDs
 }
 
-export type MonitorSource = 'main' | 'solo' | `bus-${number}`
+export type MonitorSource = 'main' | 'mono' | 'solo' | `bus-${number}`
 
 export interface MonitorState {
   source: MonitorSource  // user's manual selection, default 'main'

@@ -9,6 +9,17 @@ interface SourceProfilesState {
   profiles: Partial<Record<SourceMode, SessionSnapshot>>
 }
 
+function profileMatchesModeDefaults(snapshot: SessionSnapshot, mode: SourceMode): boolean {
+  if (mode === 'custom') return true
+  if (mode === 'stems') {
+    return snapshot.mixer.channels.some((ch) => ch.inputSource.type === 'stem')
+  }
+  if (mode === 'tones') {
+    return snapshot.mixer.channels.some((ch) => ch.inputSource.type === 'tone')
+  }
+  return true
+}
+
 function loadProfilesState(): SourceProfilesState {
   if (typeof window === 'undefined' || !window.localStorage) {
     return { activeMode: 'custom', profiles: {} }
@@ -57,18 +68,38 @@ export function switchSourceMode(mode: SourceMode): void {
   state.profiles[currentMode] = createSnapshot()
 
   const nextSnapshot = state.profiles[mode]
-  if (nextSnapshot) {
+  if (nextSnapshot && profileMatchesModeDefaults(nextSnapshot, mode)) {
     applySnapshot(nextSnapshot)
   } else {
-    const mixer = useMixerStore.getState()
-    if (mode === 'stems') {
-      mixer.applyPresetStems()
-    } else if (mode === 'tones') {
-      mixer.applyPresetTones()
-      const monitor = useMixerStore.getState().monitor
-      if (monitor.level > 0.25) {
-        useMixerStore.setState({ monitor: { ...monitor, level: 0.25 } })
-      }
+    resetSourceModeDefaults(mode)
+    return
+  }
+
+  useSurfaceStore.getState().setSourceMode(mode)
+  state.activeMode = mode
+  state.profiles[mode] = createSnapshot()
+  saveProfilesState(state)
+}
+
+export function resetSourceModeDefaults(modeArg?: SourceMode): void {
+  const surface = useSurfaceStore.getState()
+  const mode = modeArg ?? surface.sourceMode
+  const state = loadProfilesState()
+  const mixer = useMixerStore.getState()
+
+  if (mode === 'stems') {
+    mixer.applyPresetStems()
+  } else if (mode === 'tones') {
+    mixer.applyPresetTones()
+  } else {
+    mixer.applyPresetNone()
+  }
+  mixer.resetBoard()
+
+  if (mode === 'tones') {
+    const monitor = useMixerStore.getState().monitor
+    if (monitor.level > 0.25) {
+      useMixerStore.setState({ monitor: { ...monitor, level: 0.25 } })
     }
   }
 
@@ -92,3 +123,23 @@ export function markCustomModeFromManualInputChange(): void {
   saveProfilesState(state)
 }
 
+export function ensureActiveSourceModeConsistency(): void {
+  const mode = useSurfaceStore.getState().sourceMode
+  const mixer = useMixerStore.getState()
+  const channels = mixer.channels
+
+  if (mode === 'tones') {
+    const hasTone = channels.some((ch) => ch.inputSource.type === 'tone')
+    if (!hasTone) {
+      resetSourceModeDefaults('tones')
+    }
+    return
+  }
+
+  if (mode === 'stems') {
+    const hasStem = channels.some((ch) => ch.inputSource.type === 'stem')
+    if (!hasStem && mixer.availableStems.length > 0) {
+      resetSourceModeDefaults('stems')
+    }
+  }
+}

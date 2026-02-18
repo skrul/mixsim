@@ -107,6 +107,12 @@ export class SourceManager {
   setChannelSource(index: number, source: ChannelInputSource): void {
     if (index < 0 || index >= this.channels.length) return
 
+    if (source.type !== 'none' && this.context.state === 'suspended') {
+      this.context.resume().catch(() => {
+        // Autoplay policy may block until user interaction; ignore here.
+      })
+    }
+
     // Tear down existing source
     this.teardownChannel(index)
 

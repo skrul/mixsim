@@ -4,7 +4,7 @@ import { useSurfaceStore } from '@/state/surface-store'
 import { NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
 import { getToneLabel } from '@/audio/source-manager'
 import { exportSessionSnapshot, importSessionSnapshot } from '@/state/session-persistence'
-import { markCustomModeFromManualInputChange, saveCurrentSnapshotForMode, switchSourceMode } from '@/state/source-profiles'
+import { markCustomModeFromManualInputChange, resetSourceModeDefaults, saveCurrentSnapshotForMode, switchSourceMode } from '@/state/source-profiles'
 import styles from './TransportBar.module.css'
 
 function formatTime(seconds: number): string {
@@ -123,6 +123,11 @@ export function TransportBar({ compact = false }: TransportBarProps) {
     setHelpText(`Switched source mode to ${mode}.`)
   }
 
+  const handleResetModeDefaults = () => {
+    resetSourceModeDefaults(sourceMode)
+    setHelpText(`Reset ${sourceMode} mode to defaults.`)
+  }
+
   return (
     <div className={`${styles.transportBar} ${compact ? styles.compact : ''}`}>
       {compact ? (
@@ -199,6 +204,14 @@ export function TransportBar({ compact = false }: TransportBarProps) {
               onMouseLeave={() => setHelpText('')}
             >
               Save File
+            </button>
+            <button
+              className={styles.sessionButton}
+              onClick={handleResetModeDefaults}
+              onMouseEnter={() => setHelpText('Reset the active source mode to its default input mapping and a zeroed board.')}
+              onMouseLeave={() => setHelpText('')}
+            >
+              Reset Mode
             </button>
             <button
               className={styles.sessionButton}
@@ -295,6 +308,14 @@ export function TransportBar({ compact = false }: TransportBarProps) {
             onMouseLeave={() => setHelpText('')}
           >
             Save File
+          </button>
+          <button
+            className={styles.sessionButton}
+            onClick={handleResetModeDefaults}
+            onMouseEnter={() => setHelpText('Reset the active source mode to its default input mapping and a zeroed board.')}
+            onMouseLeave={() => setHelpText('')}
+          >
+            Reset Mode
           </button>
           <button
             className={styles.sessionButton}

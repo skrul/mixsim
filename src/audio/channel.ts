@@ -17,6 +17,10 @@ export interface ChannelChain {
   faderGain: GainNode
   muteGain: GainNode
   analyser: AnalyserNode
+  mainAssignGain: GainNode
+  monoAssignGain: GainNode
+  monoSplitter: ChannelSplitterNode
+  monoSum: GainNode
   soloGain: GainNode
   sendGains: GainNode[]  // One per mix bus — controls send level
   inputNode: GainNode    // Where the source connects (sourceAttenuation)
@@ -25,6 +29,7 @@ export interface ChannelChain {
 export function createChannelChain(
   context: AudioContext,
   mainBus: AudioNode,
+  monoBus: AudioNode,
   soloBus: AudioNode,
   initialState: ChannelState,
   mixBusSummingNodes: AudioNode[]
@@ -45,6 +50,10 @@ export function createChannelChain(
   const faderGain = context.createGain()
   const muteGain = context.createGain()
   const analyser = context.createAnalyser()
+  const mainAssignGain = context.createGain()
+  const monoAssignGain = context.createGain()
+  const monoSplitter = context.createChannelSplitter(2)
+  const monoSum = context.createGain()
   const soloGain = context.createGain()
 
   preFaderAnalyser.fftSize = 1024
@@ -86,6 +95,8 @@ export function createChannelChain(
   faderGain.gain.value = faderPositionToGain(initialState.faderPosition)
 
   muteGain.gain.value = initialState.mute ? 0 : 1
+  mainAssignGain.gain.value = initialState.mainLrBus ? 1 : 0
+  monoAssignGain.gain.value = initialState.monoBus ? 1 : 0
 
   soloGain.gain.value = 0 // Always start off; engine manages solo state globally
 
@@ -116,7 +127,15 @@ export function createChannelChain(
     .connect(muteGain)
 
   muteGain.connect(analyser)
-  analyser.connect(mainBus)
+  analyser.connect(mainAssignGain)
+  mainAssignGain.connect(mainBus)
+
+  analyser.connect(monoSplitter)
+  monoSplitter.connect(monoSum, 0)
+  monoSplitter.connect(monoSum, 1)
+  monoSum.gain.value = 0.5
+  monoSum.connect(monoAssignGain)
+  monoAssignGain.connect(monoBus)
 
   // PFL solo tap: feed solo bus from pre-fader path so it is independent of
   // channel fader and mute, which is useful for gain staging.
@@ -145,6 +164,10 @@ export function createChannelChain(
     faderGain,
     muteGain,
     analyser,
+    mainAssignGain,
+    monoAssignGain,
+    monoSplitter,
+    monoSum,
     soloGain,
     sendGains,
     inputNode: sourceAttenuation,

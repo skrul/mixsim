@@ -128,6 +128,31 @@
   text-align: center;
 }
 
+.audioSuspendedBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 5px 6px;
+  border: 1px solid #7d5a22;
+  border-radius: 4px;
+  background: #3a2c12;
+  color: #ffd58a;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.audioResumeButton {
+  padding: 3px 6px !important;
+  background: #6b4d1d !important;
+  border-color: #aa7f34 !important;
+  color: #ffe2aa !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+}
+
 .inputPicker {
   display: flex;
   flex-direction: column;

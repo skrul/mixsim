@@ -4,6 +4,7 @@ import type { StemManifest } from '@/audio/transport'
 import { useMixerStore } from '@/state/mixer-store'
 import { NUM_INPUT_CHANNELS } from '@/state/mixer-model'
 import { loadSessionSnapshotFromLocalStorage } from '@/state/session-persistence'
+import { initSourceModeFromProfiles } from '@/state/source-profiles'
 
 export function useAudioEngine() {
   const engineRef = useRef<AudioEngine | null>(null)
@@ -19,6 +20,7 @@ export function useAudioEngine() {
     async function start() {
       try {
         const restoredFromLocalSession = loadSessionSnapshotFromLocalStorage().ok
+        initSourceModeFromProfiles()
 
         // Load stem manifest
         const manifestResponse = await fetch('/stems.config.json')
@@ -110,6 +112,31 @@ export function useAudioEngine() {
           }
         )
 
+        // Seek/scrub handling: if currentTime is externally changed away from the
+        // transport clock, retime transport and stem sources.
+        const unsubSeek = useMixerStore.subscribe(
+          (state) => state.currentTime,
+          (currentTime) => {
+            const transport = engine.getTransport()
+            if (!transport) return
+
+            const actualTime = transport.getCurrentTime()
+            if (Math.abs(currentTime - actualTime) < 0.12) return
+
+            transport.seek(currentTime)
+
+            const state = useMixerStore.getState()
+            if (state.transportState !== 'playing') return
+
+            const channelSources = state.channels.map((ch) => ch.inputSource)
+            const hasStemChannels = channelSources.some((s) => s.type === 'stem')
+            if (!hasStemChannels) return
+
+            sm.stopStemSources()
+            sm.startStemSources(transport.getOffset(), channelSources)
+          }
+        )
+
         setIsReady(true)
 
         // Store unsubscribers for cleanup
@@ -118,6 +145,7 @@ export function useAudioEngine() {
           dispose: () => {
             unsubTransport()
             unsubRewind()
+            unsubSeek()
             engine.dispose()
           },
         }

@@ -1,5 +1,5 @@
 import { useMixerStore, type ChannelState, type MasterState, type MixerState } from '@/state/mixer-store'
-import { useSurfaceStore, type OutputBankLayer, type SelectedFocus, type SendsOnFaderMode } from '@/state/surface-store'
+import { useSurfaceStore, type OutputBankLayer, type SelectedFocus, type SendsOnFaderMode, type SourceMode } from '@/state/surface-store'
 import type { DcaGroupState, MixBusState, MonitorState } from '@/state/mixer-model'
 
 const SESSION_VERSION = 1
@@ -23,9 +23,10 @@ interface SavedSurfaceState {
   sendsOnFaderMode: SendsOnFaderMode
   sendTargetBus: number
   selectedOutputIndex: number
+  sourceMode?: SourceMode
 }
 
-interface SessionSnapshot {
+export interface SessionSnapshot {
   version: number
   savedAt: string
   mixer: SavedMixerState
@@ -41,7 +42,7 @@ function computeSoloActive(data: SavedMixerState): boolean {
   )
 }
 
-function createSnapshot(): SessionSnapshot {
+export function createSnapshot(): SessionSnapshot {
   const mixer = useMixerStore.getState()
   const surface = useSurfaceStore.getState()
   return {
@@ -64,6 +65,7 @@ function createSnapshot(): SessionSnapshot {
       sendsOnFaderMode: surface.sendsOnFaderMode,
       sendTargetBus: surface.sendTargetBus,
       selectedOutputIndex: surface.selectedOutputIndex,
+      sourceMode: surface.sourceMode,
     },
   }
 }
@@ -100,7 +102,7 @@ function normalizeSavedChannels(channels: ChannelState[]): ChannelState[] {
   })
 }
 
-function applySnapshot(snapshot: SessionSnapshot): void {
+export function applySnapshot(snapshot: SessionSnapshot): void {
   const mixer = snapshot.mixer
   const surface = snapshot.surface
   const normalizedChannels = normalizeSavedChannels(mixer.channels)
@@ -125,6 +127,7 @@ function applySnapshot(snapshot: SessionSnapshot): void {
     sendsOnFaderMode: surface.sendsOnFaderMode,
     sendTargetBus: surface.sendTargetBus,
     selectedOutputIndex: surface.selectedOutputIndex,
+    sourceMode: surface.sourceMode ?? 'custom',
     dcaAssignArmedId: null,
     busAssignArmedId: null,
     helpText: '',

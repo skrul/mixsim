@@ -49,6 +49,11 @@
   background: #3a7a3a !important;
 }
 
+.transportToggleButton {
+  min-height: 30px;
+  white-space: nowrap;
+}
+
 .timeDisplay {
   margin-left: auto;
   font-size: 14px;
@@ -62,6 +67,23 @@
   text-align: center;
   font-size: 12px;
   color: #b5f1b5;
+}
+
+.seekRow {
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.seekBar {
+  width: 100%;
+  accent-color: #7dcf7d;
+  cursor: pointer;
+}
+
+.seekBar:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .title {
@@ -90,6 +112,12 @@
 
 .sourceModeButton:hover {
   background: #333 !important;
+}
+
+.sourceModeButtonActive {
+  background: #2f5f2f !important;
+  border-color: #4b8a4b !important;
+  color: #d7f3d7 !important;
 }
 
 .compactHeader {

@@ -3,6 +3,7 @@ import { create } from 'zustand'
 export type OutputBankLayer = 'dcas' | 'buses'
 export type SendsOnFaderMode = 'bus' | 'channel'
 export type SelectedFocus = 'input' | 'output'
+export type SourceMode = 'stems' | 'tones' | 'custom'
 
 export interface SurfaceState {
   selectedFocus: SelectedFocus
@@ -16,6 +17,7 @@ export interface SurfaceState {
   sendsOnFaderMode: SendsOnFaderMode
   sendTargetBus: number
   selectedOutputIndex: number
+  sourceMode: SourceMode
   helpText: string
 
   setSelectedChannel: (channelId: number) => void
@@ -29,6 +31,7 @@ export interface SurfaceState {
   toggleSendsOnFaderForSelectedChannel: () => void
   disableSendsOnFader: () => void
   setSelectedOutputIndex: (index: number) => void
+  setSourceMode: (mode: SourceMode) => void
   resetSurfaceState: () => void
   setHelpText: (text: string) => void
 }
@@ -45,6 +48,7 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   sendsOnFaderMode: 'bus',
   sendTargetBus: 0,
   selectedOutputIndex: -1,
+  sourceMode: 'custom',
   helpText: '',
 
   setSelectedChannel: (channelId) => set({ selectedFocus: 'input', selectedChannel: channelId, selectedOutputIndex: -1 }),
@@ -118,8 +122,9 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   disableSendsOnFader: () =>
     set({ sendsOnFader: false, sendsOnFaderMode: 'bus', selectedOutputIndex: -1 }),
   setSelectedOutputIndex: (index) => set({ selectedFocus: index >= 0 ? 'output' : 'input', selectedOutputIndex: index }),
+  setSourceMode: (mode) => set({ sourceMode: mode }),
   resetSurfaceState: () =>
-    set({
+    set((state) => ({
       selectedFocus: 'input',
       selectedChannel: 0,
       dcaAssignArmedId: null,
@@ -131,7 +136,8 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
       sendsOnFaderMode: 'bus',
       sendTargetBus: 0,
       selectedOutputIndex: -1,
+      sourceMode: state.sourceMode,
       helpText: '',
-    }),
+    })),
   setHelpText: (text) => set({ helpText: text }),
 }))

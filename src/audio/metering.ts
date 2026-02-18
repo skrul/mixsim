@@ -15,6 +15,11 @@ export interface MeterLevels {
   masterR: number
 }
 
+export interface DynamicsLevels {
+  compReductionDb: Float32Array
+  gateReductionDb: Float32Array
+}
+
 // Shared singleton — written by MeteringManager, read by Meter components
 export const meterLevels: MeterLevels = {
   channels: new Float32Array(8).fill(-Infinity),
@@ -23,6 +28,11 @@ export const meterLevels: MeterLevels = {
   solo: -Infinity,
   masterL: -Infinity,
   masterR: -Infinity,
+}
+
+export const dynamicsLevels: DynamicsLevels = {
+  compReductionDb: new Float32Array(8).fill(0),
+  gateReductionDb: new Float32Array(8).fill(0),
 }
 
 function computePeakDb(samples: Float32Array): number {
@@ -84,6 +94,8 @@ export class MeteringManager {
     meterLevels.solo = -Infinity
     meterLevels.masterL = -Infinity
     meterLevels.masterR = -Infinity
+    dynamicsLevels.compReductionDb = new Float32Array(channelAnalysers.length).fill(0)
+    dynamicsLevels.gateReductionDb = new Float32Array(channelAnalysers.length).fill(0)
   }
 
   start(): void {
@@ -105,6 +117,8 @@ export class MeteringManager {
     meterLevels.solo = -Infinity
     meterLevels.masterL = -Infinity
     meterLevels.masterR = -Infinity
+    dynamicsLevels.compReductionDb.fill(0)
+    dynamicsLevels.gateReductionDb.fill(0)
   }
 
   private updateLevels(): void {

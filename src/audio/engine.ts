@@ -2,7 +2,7 @@ import { useMixerStore } from '@/state/mixer-store'
 import { faderPositionToGain, dbToGain } from '@/audio/fader-taper'
 import { createChannelChain, type ChannelChain } from '@/audio/channel'
 import { TransportManager } from '@/audio/transport'
-import { MeteringManager } from '@/audio/metering'
+import { MeteringManager, dynamicsLevels } from '@/audio/metering'
 import { SourceManager } from '@/audio/source-manager'
 import { NUM_MIX_BUSES, INPUT_TYPE_CONFIG, GAIN_MIN, type MonitorSource } from '@/state/mixer-model'
 
@@ -261,6 +261,8 @@ export function createAudioEngine(): AudioEngine {
       if (runtime.envelope < 0.0001) runtime.envelope = 0
 
       chain.gateGain.gain.setValueAtTime(runtime.envelope, t)
+      dynamicsLevels.gateReductionDb[i] = runtime.enabled ? (1 - runtime.envelope) * 30 : 0
+      dynamicsLevels.compReductionDb[i] = Math.max(0, -(chain.compressor.reduction ?? 0))
     }
 
     gateRafId = requestAnimationFrame(updateGates)
@@ -365,6 +367,8 @@ export function createAudioEngine(): AudioEngine {
         detectorBuffer: new Float32Array(chain.gateDetector.fftSize),
       }
     })
+    dynamicsLevels.gateReductionDb = new Float32Array(channels.length).fill(0)
+    dynamicsLevels.compReductionDb = new Float32Array(channels.length).fill(0)
 
     // Default X32-style FX sends/returns:
     // Bus 13-16 feed FX1-4, returned on FX1L/R .. FX4L/R (channels 25-32).
@@ -794,6 +798,8 @@ export function createAudioEngine(): AudioEngine {
     context = null
     channels = []
     gateRuntimes = []
+    dynamicsLevels.gateReductionDb.fill(0)
+    dynamicsLevels.compReductionDb.fill(0)
   }
 
   return {

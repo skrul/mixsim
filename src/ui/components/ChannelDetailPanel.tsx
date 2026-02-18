@@ -3,6 +3,7 @@ import { useSurfaceStore } from '@/state/surface-store'
 import { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT } from '@/state/mixer-model'
 import { Knob } from './Knob'
 import { Meter } from './Meter'
+import { GrMeter } from './GrMeter'
 import styles from './ChannelDetailPanel.module.css'
 
 const EQ_MODES = [
@@ -177,19 +178,11 @@ export function ChannelDetailPanel() {
             </div>
 
             <div className={styles.grMeterStack}>
-              <div className={styles.grScale}>
-                <span>COMP</span>
-                <span>2</span>
-                <span>4</span>
-                <span>6</span>
-                <span>10</span>
-                <span>18</span>
-                <span>30</span>
-              </div>
-              <div className={styles.verticalMeterGroup}>
-                <Meter channelIndex={id} source="preFader" helpText="Gain reduction style indicator." />
-                <span className={styles.meterLabel}>GR / dB</span>
-              </div>
+              <GrMeter
+                channelIndex={id}
+                compEnabled={channel.compEnabled}
+                gateEnabled={channel.gateEnabled}
+              />
             </div>
 
             <div className={styles.gateDynKnobCol}>

@@ -1,0 +1,91 @@
+.grMeter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 46px;
+}
+
+.compStatusRow,
+.gateStatusRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statusLed {
+  width: 10px;
+  height: 6px;
+  border-radius: 4px;
+  background: #2d3444;
+  border: 1px solid #3f475a;
+}
+
+.compActive {
+  background: #ffb03a;
+  border-color: #ffd07a;
+  box-shadow: 0 0 6px rgba(255, 176, 58, 0.75);
+}
+
+.gateActive {
+  background: #ff4747;
+  border-color: #ff8b8b;
+  box-shadow: 0 0 6px rgba(255, 71, 71, 0.75);
+}
+
+.statusLabel {
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 700;
+  color: #c1c9dc;
+  letter-spacing: 0.4px;
+}
+
+.scaleRows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scaleRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.grLed {
+  width: 10px;
+  height: 5px;
+  border-radius: 4px;
+  background: #202634;
+  border: 1px solid #343d50;
+}
+
+.grLedHigh {
+  background: #ffb03a;
+  border-color: #ffd07a;
+  box-shadow: 0 0 6px rgba(255, 176, 58, 0.65);
+}
+
+.grLedLow {
+  background: #45ff70;
+  border-color: #95ffac;
+  box-shadow: 0 0 6px rgba(69, 255, 112, 0.7);
+}
+
+.grMark {
+  font-size: 8px;
+  line-height: 1;
+  color: #b8c0d3;
+  font-weight: 700;
+  min-width: 12px;
+  text-align: left;
+}
+
+.bottomLabel {
+  font-size: 9px;
+  line-height: 1;
+  color: #c0c9dc;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}

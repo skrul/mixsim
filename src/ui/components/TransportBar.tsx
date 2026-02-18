@@ -1,9 +1,10 @@
-import { useRef, type ChangeEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
 import { NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
 import { getToneLabel } from '@/audio/source-manager'
 import { exportSessionSnapshot, importSessionSnapshot } from '@/state/session-persistence'
+import { markCustomModeFromManualInputChange, saveCurrentSnapshotForMode, switchSourceMode } from '@/state/source-profiles'
 import styles from './TransportBar.module.css'
 
 function formatTime(seconds: number): string {
@@ -48,13 +49,20 @@ export function TransportBar({ compact = false }: TransportBarProps) {
   const availableLiveDevices = useMixerStore((s) => s.availableLiveDevices)
   const setChannelInputSource = useMixerStore((s) => s.setChannelInputSource)
   const resetBoard = useMixerStore((s) => s.resetBoard)
-  const applyPresetStems = useMixerStore((s) => s.applyPresetStems)
-  const applyPresetTones = useMixerStore((s) => s.applyPresetTones)
   const play = useMixerStore((s) => s.play)
   const stop = useMixerStore((s) => s.stop)
-  const rewind = useMixerStore((s) => s.rewind)
+  const setCurrentTime = useMixerStore((s) => s.setCurrentTime)
   const setHelpText = useSurfaceStore((s) => s.setHelpText)
+  const sourceMode = useSurfaceStore((s) => s.sourceMode)
   const sessionFileInputRef = useRef<HTMLInputElement>(null)
+  const [isScrubbing, setIsScrubbing] = useState(false)
+  const [scrubTime, setScrubTime] = useState(0)
+
+  useEffect(() => {
+    if (!isScrubbing) {
+      setScrubTime(currentTime)
+    }
+  }, [currentTime, isScrubbing])
 
   const handleZeroBoard = () => {
     resetBoard()
@@ -88,6 +96,33 @@ export function TransportBar({ compact = false }: TransportBarProps) {
     setHelpText(result.ok ? 'Session loaded.' : result.error)
   }
 
+  const handleSeekInput = (event: FormEvent<HTMLInputElement>) => {
+    if (duration <= 0) return
+    const value = Number(event.currentTarget.value)
+    const next = Math.max(0, Math.min(duration, Number.isFinite(value) ? value : 0))
+    setScrubTime(next)
+  }
+
+  const commitSeek = (raw: string) => {
+    if (duration <= 0) return
+    const value = Number(raw)
+    const next = Math.max(0, Math.min(duration, Number.isFinite(value) ? value : 0))
+    setCurrentTime(next)
+  }
+
+  const handleManualInputSourceChange = (value: string) => {
+    if (sourceMode !== 'custom') {
+      markCustomModeFromManualInputChange()
+    }
+    setChannelInputSource(selectedChannel, valueToSource(value))
+    saveCurrentSnapshotForMode('custom')
+  }
+
+  const handleSwitchSourceMode = (mode: 'stems' | 'tones' | 'custom') => {
+    switchSourceMode(mode)
+    setHelpText(`Switched source mode to ${mode}.`)
+  }
+
   return (
     <div className={`${styles.transportBar} ${compact ? styles.compact : ''}`}>
       {compact ? (
@@ -99,7 +134,7 @@ export function TransportBar({ compact = false }: TransportBarProps) {
               <select
                 className={styles.inputSelect}
                 value={sourceToValue(selectedChannelState.inputSource)}
-                onChange={(e) => setChannelInputSource(selectedChannel, valueToSource(e.target.value))}
+                onChange={(e) => handleManualInputSourceChange(e.target.value)}
                 onMouseEnter={() => setHelpText('Choose the source for the selected input channel: stems, tones, live device, or none.')}
                 onMouseLeave={() => setHelpText('')}
               >
@@ -134,20 +169,28 @@ export function TransportBar({ compact = false }: TransportBarProps) {
           )}
           <div className={styles.compactGrid}>
             <button
-              className={styles.sourceModeButton}
-              onClick={applyPresetStems}
+              className={`${styles.sourceModeButton} ${sourceMode === 'stems' ? styles.sourceModeButtonActive : ''}`}
+              onClick={() => handleSwitchSourceMode('stems')}
               onMouseEnter={() => setHelpText('Set all channels to their default stem inputs from the loaded audio files.')}
               onMouseLeave={() => setHelpText('')}
             >
               Stems
             </button>
             <button
-              className={styles.sourceModeButton}
-              onClick={applyPresetTones}
+              className={`${styles.sourceModeButton} ${sourceMode === 'tones' ? styles.sourceModeButtonActive : ''}`}
+              onClick={() => handleSwitchSourceMode('tones')}
               onMouseEnter={() => setHelpText('Set all channels to test tones — sine waves, sawtooth, square, triangle, and noise. Great for learning what each control does.')}
               onMouseLeave={() => setHelpText('')}
             >
               Tones
+            </button>
+            <button
+              className={`${styles.sourceModeButton} ${sourceMode === 'custom' ? styles.sourceModeButtonActive : ''}`}
+              onClick={() => handleSwitchSourceMode('custom')}
+              onMouseEnter={() => setHelpText('Use your own custom input assignments and mix settings.')}
+              onMouseLeave={() => setHelpText('')}
+            >
+              Custom
             </button>
             <button
               className={styles.sessionButton}
@@ -174,22 +217,43 @@ export function TransportBar({ compact = false }: TransportBarProps) {
               Zero Board
             </button>
             <button
-              onClick={rewind}
-              disabled={!stemsLoaded}
-              onMouseEnter={() => setHelpText("Return playback to the beginning of the track.")}
-              onMouseLeave={() => setHelpText('')}
-            >
-              ⏮ Rewind
-            </button>
-            <button
               onClick={transportState === 'playing' ? stop : play}
               disabled={!stemsLoaded}
-              className={transportState !== 'playing' ? styles.playButton : undefined}
-              onMouseEnter={() => setHelpText("Start or stop playback of stem-assigned channels. Only channels set to a stem input will be affected.")}
+              className={`${styles.transportToggleButton} ${transportState !== 'playing' ? styles.playButton : ''}`}
+              onMouseEnter={() => setHelpText("Start or pause playback of stem-assigned channels. Only channels set to a stem input will be affected.")}
               onMouseLeave={() => setHelpText('')}
             >
-              {transportState === 'playing' ? '⏹ Stop' : '▶ Play'}
+              {transportState === 'playing' ? '⏸ Pause' : '▶ Play'}
             </button>
+          </div>
+          <div
+            className={styles.seekRow}
+            onMouseEnter={() => setHelpText('Drag to scrub through the loaded stems.')}
+            onMouseLeave={() => setHelpText('')}
+          >
+            <input
+              type="range"
+              min={0}
+              max={Math.max(duration, 0.001)}
+              step={0.01}
+              value={Math.max(0, Math.min(isScrubbing ? scrubTime : currentTime, duration || 0))}
+              onChange={(e) => {
+                if (!isScrubbing) commitSeek(e.target.value)
+              }}
+              onInput={handleSeekInput}
+              onPointerDown={() => setIsScrubbing(true)}
+              onPointerUp={(e) => {
+                setIsScrubbing(false)
+                commitSeek(e.currentTarget.value)
+              }}
+              onPointerCancel={(e) => {
+                setIsScrubbing(false)
+                commitSeek(e.currentTarget.value)
+              }}
+              disabled={!stemsLoaded || duration <= 0}
+              className={styles.seekBar}
+              aria-label="Playback position"
+            />
           </div>
           <div className={styles.timeDisplay}>
             {formatTime(currentTime)} / {formatTime(duration)}
@@ -199,20 +263,28 @@ export function TransportBar({ compact = false }: TransportBarProps) {
         <>
           <div className={styles.sourceModeButtons}>
             <button
-              className={styles.sourceModeButton}
-              onClick={applyPresetStems}
+              className={`${styles.sourceModeButton} ${sourceMode === 'stems' ? styles.sourceModeButtonActive : ''}`}
+              onClick={() => handleSwitchSourceMode('stems')}
               onMouseEnter={() => setHelpText('Set all channels to their default stem inputs from the loaded audio files.')}
               onMouseLeave={() => setHelpText('')}
             >
               Stems
             </button>
             <button
-              className={styles.sourceModeButton}
-              onClick={applyPresetTones}
+              className={`${styles.sourceModeButton} ${sourceMode === 'tones' ? styles.sourceModeButtonActive : ''}`}
+              onClick={() => handleSwitchSourceMode('tones')}
               onMouseEnter={() => setHelpText('Set all channels to test tones — sine waves, sawtooth, square, triangle, and noise. Great for learning what each control does.')}
               onMouseLeave={() => setHelpText('')}
             >
               Tones
+            </button>
+            <button
+              className={`${styles.sourceModeButton} ${sourceMode === 'custom' ? styles.sourceModeButtonActive : ''}`}
+              onClick={() => handleSwitchSourceMode('custom')}
+              onMouseEnter={() => setHelpText('Use your own custom input assignments and mix settings.')}
+              onMouseLeave={() => setHelpText('')}
+            >
+              Custom
             </button>
           </div>
           <div className={styles.separator} />
@@ -234,21 +306,13 @@ export function TransportBar({ compact = false }: TransportBarProps) {
           </button>
           <div className={styles.separator} />
           <button
-            onClick={rewind}
-            disabled={!stemsLoaded}
-            onMouseEnter={() => setHelpText("Return playback to the beginning of the track.")}
-            onMouseLeave={() => setHelpText('')}
-          >
-            ⏮ Rewind
-          </button>
-          <button
             onClick={transportState === 'playing' ? stop : play}
             disabled={!stemsLoaded}
-            className={transportState !== 'playing' ? styles.playButton : undefined}
-            onMouseEnter={() => setHelpText("Start or stop playback of stem-assigned channels. Only channels set to a stem input will be affected.")}
+            className={`${styles.transportToggleButton} ${transportState !== 'playing' ? styles.playButton : ''}`}
+            onMouseEnter={() => setHelpText("Start or pause playback of stem-assigned channels. Only channels set to a stem input will be affected.")}
             onMouseLeave={() => setHelpText('')}
           >
-            {transportState === 'playing' ? '⏹ Stop' : '▶ Play'}
+            {transportState === 'playing' ? '⏸ Pause' : '▶ Play'}
           </button>
           <span className={styles.title}>MixSim</span>
           <div className={styles.timeDisplay}>

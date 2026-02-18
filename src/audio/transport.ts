@@ -65,6 +65,13 @@ export class TransportManager {
     return this.pausedAt
   }
 
+  getCurrentTime(): number {
+    if (this.isPlaying) {
+      return Math.max(0, Math.min(this.duration, this.context.currentTime - this.startedAt))
+    }
+    return Math.max(0, Math.min(this.duration, this.pausedAt))
+  }
+
   play(): void {
     if (this.isPlaying) return
 
@@ -78,10 +85,12 @@ export class TransportManager {
   }
 
   stop(): void {
-    if (!this.isPlaying) return
-    this.pausedAt = 0
+    if (this.isPlaying) {
+      this.pausedAt = this.context.currentTime - this.startedAt
+    }
     this.isPlaying = false
     this.stopTimeUpdates()
+    useMixerStore.getState().setCurrentTime(this.pausedAt)
   }
 
   rewind(): void {
@@ -89,6 +98,15 @@ export class TransportManager {
     this.pausedAt = 0
     this.stopTimeUpdates()
     useMixerStore.getState().setCurrentTime(0)
+  }
+
+  seek(time: number): void {
+    const clamped = Math.max(0, Math.min(this.duration, Number.isFinite(time) ? time : 0))
+    this.pausedAt = clamped
+    if (this.isPlaying) {
+      this.startedAt = this.context.currentTime - clamped
+    }
+    useMixerStore.getState().setCurrentTime(clamped)
   }
 
   getIsPlaying(): boolean {

@@ -31,7 +31,7 @@
 }
 
 .statusLed {
-  width: 10px;
+  width: calc(100% - 2px);
   height: 6px;
   border-radius: 4px;
   background: #2d3444;
@@ -65,7 +65,7 @@
 }
 
 .grLed {
-  width: 10px;
+  width: calc(100% - 2px);
   height: 5px;
   border-radius: 4px;
   background: #202634;
@@ -85,7 +85,7 @@
 }
 
 .rail {
-  width: 12px;
+  width: 10px;
   border-radius: 6px;
   background: linear-gradient(180deg, #0f1118 0%, #07090f 100%);
   border: 1px solid #202530;

@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1 1 auto;
+  min-height: 120px;
   gap: 4px;
   user-select: none;
   touch-action: none;
@@ -15,7 +17,11 @@
 }
 
 .hitArea {
-  padding: 12px 0;
+  padding: 8px 0 4px;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
   cursor: pointer;
   outline: none;
 }
@@ -23,7 +29,9 @@
 .track {
   position: relative;
   width: 40px;
-  height: 200px;
+  height: 100%;
+  min-height: 96px;
+  max-height: 200px;
   background: #222;
   border-radius: 3px;
   overflow: visible;

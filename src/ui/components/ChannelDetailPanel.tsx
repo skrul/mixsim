@@ -2,7 +2,7 @@ import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
 import { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT } from '@/state/mixer-model'
 import { Knob } from './Knob'
-import { Meter } from './Meter'
+import { PreampLevelMeter } from './PreampLevelMeter'
 import { GrMeter } from './GrMeter'
 import styles from './ChannelDetailPanel.module.css'
 
@@ -133,8 +133,8 @@ export function ChannelDetailPanel() {
               showValue={false}
             />
             <div className={styles.verticalMeterGroup}>
-              <Meter channelIndex={id} source="preFader" helpText="Pre-fader level meter." />
-              <span className={styles.meterLabel}>LEVEL / dB</span>
+              <PreampLevelMeter channelIndex={id} helpText="Pre-fader level meter for gain staging." />
+              <span className={styles.preampMeterLabel}>LEVEL / dB</span>
             </div>
             <Knob
               value={channel.hpfFreq}

@@ -43,34 +43,29 @@
 
 .preampRow {
   display: grid;
-  grid-template-columns: 1fr 20px 1fr;
+  grid-template-columns: 1fr 46px 1fr;
   align-items: center;
   gap: 1px;
 }
 
 .verticalMeterGroup {
-  height: 74px;
+  height: 78px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: 2px;
 }
 
-.verticalMeterGroup :global(.meterContainer) {
-  height: 58px;
-}
-
-.verticalMeterGroup :global(.meterTrack) {
-  width: 7px;
-}
-
-.meterLabel {
-  font-size: 8px;
-  color: #8f97ab;
+.preampMeterLabel {
+  font-size: 9px;
+  line-height: 1;
+  color: #c0c9dc;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-align: center;
+  width: max-content;
 }
 
 .switchRow {

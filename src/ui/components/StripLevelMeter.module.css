@@ -1,0 +1,83 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.rail {
+  width: 10px;
+  flex: 0 0 auto;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #0f1118 0%, #07090f 100%);
+  border: 1px solid #202530;
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+  align-items: center;
+  justify-items: center;
+  padding: 1px 0;
+}
+
+.led {
+  width: calc(100% - 2px);
+  height: 5px;
+  border-radius: 2px;
+  opacity: 1;
+  box-shadow: 0 0 5px currentColor;
+}
+
+.cool {
+  color: #45ff70;
+  background: #45ff70;
+}
+
+.warm {
+  color: #ffb03a;
+  background: #ffb03a;
+}
+
+.red {
+  color: #ff4747;
+  background: #ff4747;
+}
+
+.off {
+  opacity: 0.16;
+  box-shadow: none;
+}
+
+.labels {
+  min-width: 21px;
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+  align-items: center;
+  justify-items: start;
+}
+
+.ledSpacer {
+  width: 1px;
+  height: 1px;
+}
+
+.labelSpacer {
+  width: 1px;
+  height: 1px;
+}
+
+.topLabel,
+.scaleLabel,
+.bottomLabel {
+  font-size: 6px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  color: #d0d6e3;
+  user-select: none;
+}
+
+.topLabel,
+.bottomLabel {
+  text-transform: uppercase;
+}

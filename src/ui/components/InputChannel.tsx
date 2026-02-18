@@ -1,7 +1,7 @@
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
 import { Fader } from './Fader'
-import { Meter } from './Meter'
+import { StripLevelMeter } from './StripLevelMeter'
 import { ToggleButton } from './ToggleButton'
 import styles from './InputChannel.module.css'
 
@@ -88,24 +88,21 @@ export function InputChannel({ channelIndex, scribbleLabel, stripType = 'input' 
         square
         helpText={selectHelpText}
       />
-      <div className={styles.ledWrapper}>
-        <div className={`${styles.led} ${channel.compEnabled ? styles.compLedActive : ''}`} />
-        <span className={`${styles.ledLabel} ${channel.compEnabled ? styles.ledLabelActive : ''}`}>COMP</span>
-      </div>
       <div className={styles.meterBox}>
-        <Meter
+        <StripLevelMeter
           channelIndex={channelIndex}
           source="preFader"
+          topLabel="COMP"
+          topActive={channel.compEnabled}
+          bottomLabel="GATE"
+          bottomActive={channel.gateEnabled}
+          bottomTone="green"
           helpText={
             isFxReturn
               ? 'Shows the pre-fader level of this FX return signal.'
               : 'Shows the pre-fader signal level for gain staging. Green is healthy, yellow is approaching the limit, red means clipping.'
           }
         />
-      </div>
-      <div className={styles.ledWrapper}>
-        <div className={`${styles.led} ${channel.gateEnabled ? styles.gateLedActive : ''}`} />
-        <span className={`${styles.ledLabel} ${channel.gateEnabled ? styles.ledLabelActive : ''}`}>GATE</span>
       </div>
       <ToggleButton
         active={channel.solo}

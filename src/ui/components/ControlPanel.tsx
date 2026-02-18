@@ -46,7 +46,6 @@ const METER_MARKS = [
 
 const METER_ROWS = METER_MARKS.length
 const CLIP_LED_THRESHOLD_DB = -1
-const DISPLAY_METER_TRIM_DB = 4
 const METER_THRESHOLDS = METER_MARKS.map((mark) =>
   mark === 'CLIP' ? CLIP_LED_THRESHOLD_DB : Number.parseFloat(mark)
 )
@@ -86,9 +85,9 @@ export function ControlPanel() {
 
   useEffect(() => {
     const tick = () => {
-      const targetMcSolo = (soloActive ? meterLevels.solo : meterLevels.mono) + DISPLAY_METER_TRIM_DB
-      const targetL = meterLevels.masterL + DISPLAY_METER_TRIM_DB
-      const targetR = meterLevels.masterR + DISPLAY_METER_TRIM_DB
+      const targetMcSolo = soloActive ? meterLevels.solo : meterLevels.mono
+      const targetL = meterLevels.masterL
+      const targetR = meterLevels.masterR
 
       const next = { ...displayDbRef.current }
 

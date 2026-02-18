@@ -2,15 +2,32 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  min-width: 46px;
+  gap: 3px;
+  min-width: 52px;
 }
 
-.compStatusRow,
-.gateStatusRow {
+.scaleLayout {
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  justify-content: center;
   gap: 4px;
+  min-height: 82px;
+}
+
+.leftLabels {
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  align-items: center;
+  justify-items: end;
+}
+
+.gateLabel {
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 700;
+  color: #c1c9dc;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
 .statusLed {
@@ -47,12 +64,6 @@
   gap: 2px;
 }
 
-.scaleRow {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .grLed {
   width: 10px;
   height: 5px;
@@ -73,12 +84,31 @@
   box-shadow: 0 0 6px rgba(69, 255, 112, 0.7);
 }
 
+.rail {
+  width: 12px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #0f1118 0%, #07090f 100%);
+  border: 1px solid #202530;
+  padding: 1px 0;
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  align-items: center;
+  justify-items: center;
+}
+
+.rightLabels {
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  align-items: center;
+  justify-items: start;
+}
+
 .grMark {
-  font-size: 8px;
+  font-size: 7px;
   line-height: 1;
   color: #b8c0d3;
   font-weight: 700;
-  min-width: 12px;
+  min-width: 10px;
   text-align: left;
 }
 
@@ -88,4 +118,14 @@
   color: #c0c9dc;
   font-weight: 700;
   letter-spacing: 0.5px;
+}
+
+.bottomSpacer {
+  width: 10px;
+  height: 6px;
+}
+
+.rowSpacer {
+  width: 1px;
+  height: 1px;
 }

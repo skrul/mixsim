@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
 import { Fader } from './Fader'
-import { Meter } from './Meter'
+import { StripLevelMeter } from './StripLevelMeter'
 import { ToggleButton } from './ToggleButton'
 import styles from './BusFaderStrip.module.css'
 
@@ -103,16 +103,17 @@ export function BusFaderStrip({ busIndex }: BusFaderStripProps) {
             : 'Click to select this bus. Press and hold for 0.5s to arm send assignment mode for this bus.'
         }
       />
-      <div className={styles.ledWrapper}>
-        <div className={styles.led} />
-        <span className={styles.ledLabel}>COMP</span>
-      </div>
       <div className={styles.meterBox}>
-        <Meter channelIndex={busIndex} source="mixBus" helpText="Shows the output level of this mix bus." />
-      </div>
-      <div className={styles.ledWrapper}>
-        <div className={styles.led} />
-        <span className={styles.ledLabel}>PRE</span>
+        <StripLevelMeter
+          channelIndex={busIndex}
+          source="mixBus"
+          topLabel="COMP"
+          topActive={false}
+          bottomLabel="PRE"
+          bottomActive={Boolean(selectedChannelState?.sends[busIndex]?.preFader)}
+          bottomTone="red"
+          helpText="Shows the output level of this mix bus. PRE light indicates the selected channel's send is pre-fader."
+        />
       </div>
       <ToggleButton
         active={bus.solo}

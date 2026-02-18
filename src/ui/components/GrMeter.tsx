@@ -58,27 +58,37 @@ export function GrMeter({ channelIndex, compEnabled, gateEnabled, helpText }: Gr
       onMouseEnter={helpText ? () => setHelpText(helpText) : undefined}
       onMouseLeave={helpText ? () => setHelpText('') : undefined}
     >
-      <div className={styles.compStatusRow}>
-        <div className={`${styles.statusLed} ${compEnabled ? styles.compActive : ''}`} />
-        <span className={styles.statusLabel}>COMP</span>
-      </div>
+      <div className={styles.scaleLayout}>
+        <div className={styles.leftLabels}>
+          <span className={styles.rowSpacer} />
+          <span className={styles.rowSpacer} />
+          <span className={styles.rowSpacer} />
+          <span className={styles.rowSpacer} />
+          <span className={styles.rowSpacer} />
+          <span className={styles.rowSpacer} />
+          <span className={styles.rowSpacer} />
+          <span className={styles.gateLabel}>GATE</span>
+        </div>
 
-      <div className={styles.scaleRows}>
-        {GR_MARKS.map((mark, i) => {
-          const isLit = litSegments > i
-          const isBottom = i === GR_MARKS.length - 1
-          return (
-            <div key={mark} className={styles.scaleRow}>
-              <div className={`${styles.grLed} ${isLit ? (isBottom ? styles.grLedLow : styles.grLedHigh) : ''}`} />
-              <span className={styles.grMark}>{mark}</span>
-            </div>
-          )
-        })}
-      </div>
+        <div className={styles.rail}>
+          <div className={`${styles.statusLed} ${compEnabled ? styles.compActive : ''}`} />
+          {GR_MARKS.map((mark, i) => {
+            const isLit = litSegments > (GR_MARKS.length - 1 - i)
+            const isBottom = i === GR_MARKS.length - 1
+            return (
+              <div key={mark} className={`${styles.grLed} ${isLit ? (isBottom ? styles.grLedLow : styles.grLedHigh) : ''}`} />
+            )
+          })}
+          <div className={`${styles.statusLed} ${gateEnabled ? styles.gateActive : ''}`} />
+        </div>
 
-      <div className={styles.gateStatusRow}>
-        <span className={styles.statusLabel}>GATE</span>
-        <div className={`${styles.statusLed} ${gateEnabled ? styles.gateActive : ''}`} />
+        <div className={styles.rightLabels}>
+          <span className={styles.statusLabel}>COMP</span>
+          {GR_MARKS.map((mark) => (
+            <span key={mark} className={styles.grMark}>{mark}</span>
+          ))}
+          <span className={styles.rowSpacer} />
+        </div>
       </div>
 
       <div className={styles.bottomLabel}>GR / dB</div>

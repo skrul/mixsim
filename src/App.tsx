@@ -20,6 +20,9 @@ function App() {
   useEffect(() => {
     let saveTimer: number | null = null
     const scheduleSave = () => {
+      if (useSurfaceStore.getState().sourceMode === 'demo') {
+        return
+      }
       if (saveTimer !== null) {
         window.clearTimeout(saveTimer)
       }

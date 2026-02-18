@@ -7,6 +7,8 @@ import { exportSessionSnapshot, importSessionSnapshot } from '@/state/session-pe
 import { markCustomModeFromManualInputChange, resetSourceModeDefaults, saveCurrentSnapshotForMode, switchSourceMode } from '@/state/source-profiles'
 import styles from './TransportBar.module.css'
 
+const DEMO_SNAPSHOT_URL = '/demo-session.json'
+
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
@@ -53,6 +55,7 @@ export function TransportBar({ compact = false }: TransportBarProps) {
   const stop = useMixerStore((s) => s.stop)
   const setCurrentTime = useMixerStore((s) => s.setCurrentTime)
   const setHelpText = useSurfaceStore((s) => s.setHelpText)
+  const setSourceMode = useSurfaceStore((s) => s.setSourceMode)
   const sourceMode = useSurfaceStore((s) => s.sourceMode)
   const sessionFileInputRef = useRef<HTMLInputElement>(null)
   const [isScrubbing, setIsScrubbing] = useState(false)
@@ -123,7 +126,36 @@ export function TransportBar({ compact = false }: TransportBarProps) {
     setHelpText(`Switched source mode to ${mode}.`)
   }
 
+  const activateDemoSnapshot = (raw: string): boolean => {
+    const result = importSessionSnapshot(raw)
+    if (!result.ok) {
+      setHelpText(result.error)
+      return false
+    }
+    setSourceMode('demo')
+    setHelpText('Demo mix loaded. Demo mode changes are not auto-saved.')
+    return true
+  }
+
+  const handleDemoClick = async () => {
+    try {
+      const response = await fetch(DEMO_SNAPSHOT_URL, { cache: 'no-store' })
+      if (!response.ok) {
+        setHelpText('Demo file not found. Add /public/demo-session.json to the repo.')
+        return
+      }
+      const raw = await response.text()
+      activateDemoSnapshot(raw)
+    } catch {
+      setHelpText('Failed to load demo-session.json.')
+    }
+  }
+
   const handleResetModeDefaults = () => {
+    if (sourceMode === 'demo') {
+      setHelpText('Demo mode uses the loaded demo file. Load Demo again or switch to stems/tones/custom.')
+      return
+    }
     resetSourceModeDefaults(sourceMode)
     setHelpText(`Reset ${sourceMode} mode to defaults.`)
   }
@@ -196,6 +228,14 @@ export function TransportBar({ compact = false }: TransportBarProps) {
               onMouseLeave={() => setHelpText('')}
             >
               Custom
+            </button>
+            <button
+              className={`${styles.sourceModeButton} ${sourceMode === 'demo' ? styles.sourceModeButtonActive : ''}`}
+              onClick={handleDemoClick}
+              onMouseEnter={() => setHelpText('Load the preconfigured demo mix (cached from a saved session file) and start playback.')}
+              onMouseLeave={() => setHelpText('')}
+            >
+              Demo
             </button>
             <button
               className={styles.sessionButton}
@@ -298,6 +338,14 @@ export function TransportBar({ compact = false }: TransportBarProps) {
               onMouseLeave={() => setHelpText('')}
             >
               Custom
+            </button>
+            <button
+              className={`${styles.sourceModeButton} ${sourceMode === 'demo' ? styles.sourceModeButtonActive : ''}`}
+              onClick={handleDemoClick}
+              onMouseEnter={() => setHelpText('Load the preconfigured demo mix (cached from a saved session file) and start playback.')}
+              onMouseLeave={() => setHelpText('')}
+            >
+              Demo
             </button>
           </div>
           <div className={styles.separator} />

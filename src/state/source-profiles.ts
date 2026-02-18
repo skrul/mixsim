@@ -11,6 +11,7 @@ interface SourceProfilesState {
 
 function profileMatchesModeDefaults(snapshot: SessionSnapshot, mode: SourceMode): boolean {
   if (mode === 'custom') return true
+  if (mode === 'demo') return true
   if (mode === 'stems') {
     return snapshot.mixer.channels.some((ch) => ch.inputSource.type === 'stem')
   }
@@ -29,7 +30,11 @@ function loadProfilesState(): SourceProfilesState {
     if (!raw) return { activeMode: 'custom', profiles: {} }
     const parsed = JSON.parse(raw) as Partial<SourceProfilesState>
     return {
-      activeMode: parsed.activeMode === 'stems' || parsed.activeMode === 'tones' || parsed.activeMode === 'custom'
+      activeMode:
+        parsed.activeMode === 'stems' ||
+        parsed.activeMode === 'tones' ||
+        parsed.activeMode === 'custom' ||
+        parsed.activeMode === 'demo'
         ? parsed.activeMode
         : 'custom',
       profiles: parsed.profiles ?? {},
@@ -54,6 +59,7 @@ export function initSourceModeFromProfiles(): void {
 }
 
 export function saveCurrentSnapshotForMode(mode: SourceMode): void {
+  if (mode === 'demo') return
   const state = loadProfilesState()
   state.profiles[mode] = createSnapshot()
   state.activeMode = mode
@@ -65,7 +71,16 @@ export function switchSourceMode(mode: SourceMode): void {
   const currentMode = surface.sourceMode
   const state = loadProfilesState()
 
-  state.profiles[currentMode] = createSnapshot()
+  if (currentMode !== 'demo') {
+    state.profiles[currentMode] = createSnapshot()
+  }
+
+  if (mode === 'demo') {
+    useSurfaceStore.getState().setSourceMode('demo')
+    state.activeMode = 'demo'
+    saveProfilesState(state)
+    return
+  }
 
   const nextSnapshot = state.profiles[mode]
   if (nextSnapshot && profileMatchesModeDefaults(nextSnapshot, mode)) {
@@ -91,6 +106,8 @@ export function resetSourceModeDefaults(modeArg?: SourceMode): void {
     mixer.applyPresetStems()
   } else if (mode === 'tones') {
     mixer.applyPresetTones()
+  } else if (mode === 'demo') {
+    return
   } else {
     mixer.applyPresetNone()
   }
@@ -114,7 +131,7 @@ export function markCustomModeFromManualInputChange(): void {
   const previousMode = surface.sourceMode
   const state = loadProfilesState()
 
-  if (previousMode !== 'custom') {
+  if (previousMode !== 'custom' && previousMode !== 'demo') {
     state.profiles[previousMode] = createSnapshot()
   }
   useSurfaceStore.getState().setSourceMode('custom')
@@ -127,6 +144,8 @@ export function ensureActiveSourceModeConsistency(): void {
   const mode = useSurfaceStore.getState().sourceMode
   const mixer = useMixerStore.getState()
   const channels = mixer.channels
+
+  if (mode === 'demo') return
 
   if (mode === 'tones') {
     const hasTone = channels.some((ch) => ch.inputSource.type === 'tone')

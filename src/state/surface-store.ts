@@ -3,7 +3,7 @@ import { create } from 'zustand'
 export type OutputBankLayer = 'dcas' | 'buses'
 export type SendsOnFaderMode = 'bus' | 'channel'
 export type SelectedFocus = 'input' | 'output'
-export type SourceMode = 'stems' | 'tones' | 'custom'
+export type SourceMode = 'stems' | 'tones' | 'custom' | 'demo'
 
 export interface SurfaceState {
   selectedFocus: SelectedFocus

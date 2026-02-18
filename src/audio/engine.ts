@@ -220,6 +220,7 @@ export function createAudioEngine(): AudioEngine {
   let mixBusChains: MixBusChain[] = []
   let masterGain: GainNode | null = null
   let monoBusGain: GainNode | null = null
+  let monoAnalyser: AnalyserNode | null = null
   let masterLAnalyser: AnalyserNode | null = null
   let masterRAnalyser: AnalyserNode | null = null
   let mainSoloTapGain: GainNode | null = null
@@ -301,6 +302,8 @@ export function createAudioEngine(): AudioEngine {
     masterGain = context.createGain()
     monoBusGain = context.createGain()
     monoBusGain.gain.value = 1
+    monoAnalyser = context.createAnalyser()
+    monoAnalyser.fftSize = 2048
     const masterSplitter = context.createChannelSplitter(2)
     const masterMerger = context.createChannelMerger(2)
     masterLAnalyser = context.createAnalyser()
@@ -339,6 +342,7 @@ export function createAudioEngine(): AudioEngine {
     monitorTapMain.connect(monitorLevel)
 
     monoBusGain.connect(monitorTapMono)
+    monoBusGain.connect(monoAnalyser)
     monitorTapMono.connect(monitorLevel)
 
     soloBusGain.connect(soloAnalyser)
@@ -449,7 +453,8 @@ export function createAudioEngine(): AudioEngine {
       mixBusChains.map((b) => b.analyser),
       masterLAnalyser,
       masterRAnalyser,
-      soloAnalyser
+      soloAnalyser,
+      monoAnalyser
     )
     gateRafId = requestAnimationFrame(updateGates)
   }

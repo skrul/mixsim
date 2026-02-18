@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { meterLevels } from '@/audio/metering'
+import { useMixerStore } from '@/state/mixer-store'
 import { DisplayHomeScreen } from './DisplayHomeScreen'
 import styles from './ControlPanel.module.css'
 
@@ -73,6 +74,7 @@ function ledToneClass(index: number): string {
 }
 
 export function ControlPanel() {
+  const soloActive = useMixerStore((state) => state.soloActive)
   const [activePage, setActivePage] = useState<DisplayMenuKey>('HOME')
   const [displayMeters, setDisplayMeters] = useState<DisplayMeterLevels>({
     mcSolo: 0,
@@ -84,7 +86,7 @@ export function ControlPanel() {
 
   useEffect(() => {
     const tick = () => {
-      const targetSolo = meterLevels.solo + DISPLAY_METER_TRIM_DB
+      const targetMcSolo = (soloActive ? meterLevels.solo : meterLevels.mono) + DISPLAY_METER_TRIM_DB
       const targetL = meterLevels.masterL + DISPLAY_METER_TRIM_DB
       const targetR = meterLevels.masterR + DISPLAY_METER_TRIM_DB
 
@@ -96,7 +98,7 @@ export function ControlPanel() {
         return Math.max(decayed, target)
       }
 
-      next.mcSolo = applyBallistics(next.mcSolo, targetSolo)
+      next.mcSolo = applyBallistics(next.mcSolo, targetMcSolo)
       next.left = applyBallistics(next.left, targetL)
       next.right = applyBallistics(next.right, targetR)
       displayDbRef.current = next
@@ -124,7 +126,7 @@ export function ControlPanel() {
         cancelAnimationFrame(rafRef.current)
       }
     }
-  }, [])
+  }, [soloActive])
 
   return (
     <div className={styles.panel}>

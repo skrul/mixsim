@@ -11,6 +11,7 @@ export interface MeterLevels {
   preFaderChannels: Float32Array
   mixBuses: Float32Array
   solo: number
+  mono: number
   masterL: number
   masterR: number
 }
@@ -26,6 +27,7 @@ export const meterLevels: MeterLevels = {
   preFaderChannels: new Float32Array(8).fill(-Infinity),
   mixBuses: new Float32Array(6).fill(-Infinity),
   solo: -Infinity,
+  mono: -Infinity,
   masterL: -Infinity,
   masterR: -Infinity,
 }
@@ -52,6 +54,7 @@ export class MeteringManager {
   private masterLAnalyser: AnalyserNode
   private masterRAnalyser: AnalyserNode
   private soloAnalyser: AnalyserNode
+  private monoAnalyser: AnalyserNode
   private rafId: number | null = null
   private timeDomainBuffers: Float32Array<ArrayBuffer>[]
   private preFaderBuffers: Float32Array<ArrayBuffer>[]
@@ -59,6 +62,7 @@ export class MeteringManager {
   private masterLBuffer: Float32Array<ArrayBuffer>
   private masterRBuffer: Float32Array<ArrayBuffer>
   private soloBuffer: Float32Array<ArrayBuffer>
+  private monoBuffer: Float32Array<ArrayBuffer>
 
   constructor(
     channelAnalysers: AnalyserNode[],
@@ -66,7 +70,8 @@ export class MeteringManager {
     mixBusAnalysers: AnalyserNode[],
     masterLAnalyser: AnalyserNode,
     masterRAnalyser: AnalyserNode,
-    soloAnalyser: AnalyserNode
+    soloAnalyser: AnalyserNode,
+    monoAnalyser: AnalyserNode
   ) {
     this.channelAnalysers = channelAnalysers
     this.preFaderAnalysers = preFaderAnalysers
@@ -74,6 +79,7 @@ export class MeteringManager {
     this.masterLAnalyser = masterLAnalyser
     this.masterRAnalyser = masterRAnalyser
     this.soloAnalyser = soloAnalyser
+    this.monoAnalyser = monoAnalyser
 
     this.timeDomainBuffers = channelAnalysers.map(
       (a) => new Float32Array(a.fftSize)
@@ -87,11 +93,13 @@ export class MeteringManager {
     this.masterLBuffer = new Float32Array(masterLAnalyser.fftSize)
     this.masterRBuffer = new Float32Array(masterRAnalyser.fftSize)
     this.soloBuffer = new Float32Array(soloAnalyser.fftSize)
+    this.monoBuffer = new Float32Array(monoAnalyser.fftSize)
 
     meterLevels.channels = new Float32Array(channelAnalysers.length).fill(-Infinity)
     meterLevels.preFaderChannels = new Float32Array(preFaderAnalysers.length).fill(-Infinity)
     meterLevels.mixBuses = new Float32Array(mixBusAnalysers.length).fill(-Infinity)
     meterLevels.solo = -Infinity
+    meterLevels.mono = -Infinity
     meterLevels.masterL = -Infinity
     meterLevels.masterR = -Infinity
     dynamicsLevels.compReductionDb = new Float32Array(channelAnalysers.length).fill(0)
@@ -115,6 +123,7 @@ export class MeteringManager {
     meterLevels.preFaderChannels.fill(-Infinity)
     meterLevels.mixBuses.fill(-Infinity)
     meterLevels.solo = -Infinity
+    meterLevels.mono = -Infinity
     meterLevels.masterL = -Infinity
     meterLevels.masterR = -Infinity
     dynamicsLevels.compReductionDb.fill(0)
@@ -139,6 +148,9 @@ export class MeteringManager {
 
     this.soloAnalyser.getFloatTimeDomainData(this.soloBuffer)
     meterLevels.solo = computePeakDb(this.soloBuffer)
+
+    this.monoAnalyser.getFloatTimeDomainData(this.monoBuffer)
+    meterLevels.mono = computePeakDb(this.monoBuffer)
 
     this.masterLAnalyser.getFloatTimeDomainData(this.masterLBuffer)
     meterLevels.masterL = computePeakDb(this.masterLBuffer)

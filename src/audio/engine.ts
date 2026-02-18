@@ -580,17 +580,20 @@ export function createAudioEngine(): AudioEngine {
         (state) => {
           const ch = state.channels[i]
           if (!ch) return null
-          return { mainLrBus: ch.mainLrBus, monoBus: ch.monoBus }
+          return { mainLrBus: ch.mainLrBus, monoBus: ch.monoBus, monoLevel: ch.monoLevel }
         },
         (routing) => {
           if (!routing || !context) return
           const t = context.currentTime
           chain.mainAssignGain.gain.setValueAtTime(routing.mainLrBus ? 1 : 0, t)
-          chain.monoAssignGain.gain.setValueAtTime(routing.monoBus ? 1 : 0, t)
+          chain.monoAssignGain.gain.setValueAtTime(routing.monoBus ? routing.monoLevel : 0, t)
         },
         {
           fireImmediately: true,
-          equalityFn: (a, b) => a?.mainLrBus === b?.mainLrBus && a?.monoBus === b?.monoBus,
+          equalityFn: (a, b) =>
+            a?.mainLrBus === b?.mainLrBus &&
+            a?.monoBus === b?.monoBus &&
+            a?.monoLevel === b?.monoLevel,
         }
       )
       unsubscribers.push(unsubRouting)

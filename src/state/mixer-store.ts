@@ -36,6 +36,7 @@ export interface ChannelState {
   eqSelectedBand: 'high' | 'highMid' | 'lowMid' | 'low'
   eqModeIndex: number    // 0..5, EQ mode selector shown in UI strip
   monoBus: boolean       // Route channel to center/mono bus
+  monoLevel: number      // 0..1 level sent to center/mono bus
   mainLrBus: boolean     // Route channel to main LR bus
   inputSource: ChannelInputSource
   sends: SendState[]     // One per mix bus, length === NUM_MIX_BUSES
@@ -98,6 +99,7 @@ export interface MixerState {
   setChannelEqModeIndex: (channelId: number, modeIndex: number) => void
   cycleChannelEqMode: (channelId: number) => void
   setChannelMonoBus: (channelId: number, enabled: boolean) => void
+  setChannelMonoLevel: (channelId: number, level: number) => void
   setChannelMainLrBus: (channelId: number, enabled: boolean) => void
   setChannelSendLevel: (channelId: number, busIndex: number, level: number) => void
   setChannelSendPreFader: (channelId: number, busIndex: number, preFader: boolean) => void
@@ -177,6 +179,7 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     eqSelectedBand: 'highMid',
     eqModeIndex: 0,
     monoBus: false,
+    monoLevel: 0.75,
     mainLrBus: true,
     inputSource: { type: 'none' },
     sends: Array.from({ length: NUM_MIX_BUSES }, () => ({ level: 0, preFader: true })),
@@ -445,6 +448,9 @@ export const useMixerStore = create<MixerState>()(
 
     setChannelMonoBus: (channelId, enabled) =>
       set((state) => updateChannel(state, channelId, { monoBus: enabled })),
+
+    setChannelMonoLevel: (channelId, level) =>
+      set((state) => updateChannel(state, channelId, { monoLevel: Math.max(0, Math.min(1, level)) })),
 
     setChannelMainLrBus: (channelId, enabled) =>
       set((state) => updateChannel(state, channelId, { mainLrBus: enabled })),

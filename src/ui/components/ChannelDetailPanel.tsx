@@ -65,10 +65,9 @@ export function ChannelDetailPanel() {
   const setEqHighGain = useMixerStore((s) => s.setChannelEqHighGain)
   const setEqBand = useMixerStore((s) => s.setChannelEqSelectedBand)
   const cycleEqMode = useMixerStore((s) => s.cycleChannelEqMode)
-  const setChannelSendLevel = useMixerStore((s) => s.setChannelSendLevel)
   const setChannelMonoBus = useMixerStore((s) => s.setChannelMonoBus)
+  const setChannelMonoLevel = useMixerStore((s) => s.setChannelMonoLevel)
   const setChannelMainLrBus = useMixerStore((s) => s.setChannelMainLrBus)
-  const sendTargetBus = useSurfaceStore((s) => s.sendTargetBus)
 
   if (!channel) {
     return (
@@ -318,14 +317,14 @@ export function ChannelDetailPanel() {
           <StripButton label="VIEW" view helpText="Open detailed bus send settings on the display (placeholder)." />
         </div>
         <Knob
-          value={channel.sends[sendTargetBus]?.level ?? 0}
+          value={channel.monoLevel}
           min={0}
           max={1}
-          defaultValue={0}
-          onChange={(v) => setChannelSendLevel(id, sendTargetBus, v)}
+          defaultValue={0.75}
+          onChange={(v) => setChannelMonoLevel(id, v)}
           label="Level"
           formatValue={(v) => `${Math.round(v * 100)}%`}
-          helpText={`Adjust send level from this channel to Mix ${sendTargetBus + 1}.`}
+          helpText="Adjust send level from this channel to the center/mono bus."
           showValue={false}
         />
         <div className={styles.monoBusRow}>

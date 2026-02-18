@@ -14,42 +14,11 @@
   border: 1px solid transparent;
 }
 
-.ledWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-}
-
-.led {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #333;
-  border: 1px solid #555;
-}
-
-.ledLabel {
-  font-size: 6px;
-  font-weight: 700;
-  color: #666;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
 .meterBox {
-  flex: 0 0 60px;
-  height: 60px;
-  min-height: 60px;
-  width: 10px;
-}
-
-.meterPlaceholder {
+  flex: 0 0 74px;
+  height: 74px;
+  min-height: 74px;
   width: 100%;
-  height: 100%;
-  border: 1px solid #1b1f26;
-  border-radius: 2px;
-  background: linear-gradient(180deg, #10151d 0%, #0a0d13 100%);
 }
 
 .scribbleStrip {

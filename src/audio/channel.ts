@@ -96,7 +96,7 @@ export function createChannelChain(
 
   muteGain.gain.value = initialState.mute ? 0 : 1
   mainAssignGain.gain.value = initialState.mainLrBus ? 1 : 0
-  monoAssignGain.gain.value = initialState.monoBus ? 1 : 0
+  monoAssignGain.gain.value = initialState.monoBus ? initialState.monoLevel : 0
 
   soloGain.gain.value = 0 // Always start off; engine manages solo state globally
 

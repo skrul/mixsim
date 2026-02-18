@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
 import { Fader } from './Fader'
+import { StripLevelMeter } from './StripLevelMeter'
 import { ToggleButton } from './ToggleButton'
 import styles from './DcaFaderStrip.module.css'
 
@@ -84,16 +85,17 @@ export function DcaFaderStrip({ dcaIndex }: DcaFaderStripProps) {
             : 'Click to select this DCA. Press and hold for 0.5s to arm DCA assignment mode.'
         }
       />
-      <div className={styles.ledWrapper}>
-        <div className={styles.led} />
-        <span className={styles.ledLabel}>COMP</span>
-      </div>
       <div className={styles.meterBox}>
-        <div className={styles.meterPlaceholder} />
-      </div>
-      <div className={styles.ledWrapper}>
-        <div className={styles.led} />
-        <span className={styles.ledLabel}>PRE</span>
+        <StripLevelMeter
+          channelIndex={-1}
+          source="mixBus"
+          topLabel="COMP"
+          topActive={false}
+          bottomLabel="PRE"
+          bottomActive={false}
+          bottomTone="red"
+          helpText="DCA strips use a styled meter face but do not show independent signal level in this simulator."
+        />
       </div>
       <ToggleButton
         active={dca.solo}

@@ -8,77 +8,284 @@
   font-family: 'Trebuchet MS', 'Verdana', sans-serif;
 }
 
-.statusBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #202734;
-  border-bottom: 1px solid #4f5870;
-  padding: 2px 7px;
-  min-height: 20px;
+.topHeader {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  grid-template-rows: 24px 19px;
+}
+
+.globalStatusBar {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 86px;
+  gap: 2px;
+  background: #2b313f;
+  border-bottom: 1px solid #3f485d;
+  padding: 2px 3px 1px;
+  min-height: 0;
   box-sizing: border-box;
 }
 
-.leftStatus {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
+.statusMidGrid,
+.statusAesClock,
+.statusClock {
+  background: #222a39;
+  border: 1px solid #4d5770;
+  min-height: 20px;
 }
 
-.headerId {
-  font-size: 11px;
+.statusChannel {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  position: relative;
+  display: grid;
+  grid-template-rows: 10px 12px 1px 1fr;
+  align-content: stretch;
+  padding: 1px 6px 1px 6px;
+  background: #222a39;
+  border-right: 1px solid #4d5770;
+  border-bottom: 1px solid #3f485d;
+}
+
+.statusChannelId {
+  font-size: 9px;
   font-weight: 800;
-  color: #9fc2ff;
-}
-
-.headerLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: #ffd678;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #dbe5f7;
+  line-height: 1;
+  align-self: center;
   white-space: nowrap;
 }
 
-.centerStatus {
-  font-size: 10px;
+.statusChannelName {
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.4px;
-  color: #aeb6ca;
+  color: #c3cee2;
+  line-height: 1;
+  align-self: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusChannelIconSlot {
+  min-height: 9px;
+  align-self: center;
+}
+
+.statusChannelDivider {
+  border-top: 1px solid #58627d;
+  opacity: 0.85;
+}
+
+.statusChannelColor {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  width: 6px;
+  border-radius: 1px;
+}
+
+.statusMidGrid {
+  display: grid;
+  grid-template-columns: 34px 70px minmax(0, 1fr);
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  padding: 1px;
+}
+
+.statusMidCell {
+  background: #1f2533;
+  border: 1px solid #3d465c;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  overflow: hidden;
+}
+
+.statusUsbCell {
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #dbe5f7;
+  white-space: nowrap;
+}
+
+.statusSceneTagCell {
+  font-size: 9px;
+  font-weight: 800;
+  color: #dce5f7;
+}
+
+.statusSceneMainCell {
+  font-size: 9px;
+  font-weight: 800;
+  color: #e8eef9;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.statusAesClock {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  padding: 1px 4px;
+}
+
+.statusAesRow {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) 7px 8px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 1px;
+}
+
+.statusKey {
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 800;
+  color: #e6edf9;
+}
+
+.statusValue {
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 700;
+  color: #d0dbef;
+  white-space: nowrap;
+}
+
+.statusDot,
+.statusDotOff {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid #5b657c;
+}
+
+.statusDot {
+  background: #57e86d;
+  box-shadow: 0 0 4px rgba(87, 232, 109, 0.75);
+}
+
+.statusDotOff {
+  background: #2a3140;
+}
+
+.statusClock {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 0 4px;
+}
+
+.statusClockHm {
+  font-size: 21px;
+  line-height: 1;
+  font-weight: 800;
+  color: #f4c761;
+  letter-spacing: 0.3px;
+}
+
+.statusClockRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+  transform: translateY(1px);
+}
+
+.statusClockAmPm {
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 700;
+  color: #d7dde8;
+}
+
+.statusClockSec {
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 800;
+  color: #f4c761;
 }
 
 .topTabs {
+  grid-column: 2;
+  grid-row: 2;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 2px;
-  padding: 2px 5px;
-  background: #232a38;
+  padding: 0 3px 0;
+  background: #2b313f;
   border-bottom: 1px solid #4b556d;
 }
 
 .tab {
   text-align: center;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  color: #9aa5bb;
-  padding: 3px 0 2px;
+  color: #a9b3c8;
+  padding: 2px 0 1px;
   border-radius: 1px;
-  background: #2a3345;
+  background: #363d4d;
+  text-transform: uppercase;
 }
 
 .activeTab {
-  background: #dce6ff;
-  color: #1f293c;
+  background: #8f9fc2;
+  color: #eef4ff;
 }
 
 .body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 102px;
-  gap: 4px;
+  display: flex;
   flex: 1;
   min-height: 0;
   padding: 4px;
+}
+
+.signalPathRow {
+  width: 100%;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 0.9fr)
+    minmax(0, 1.45fr)
+    minmax(0, 1.75fr)
+    minmax(0, 1.45fr)
+    minmax(0, 0.6fr)
+    minmax(0, 0.6fr)
+    minmax(0, 0.85fr)
+    minmax(0, 1.35fr);
+  gap: 1px;
+  min-height: 0;
+}
+
+.signalCell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: #364055;
+  border: 1px solid #5a6681;
+}
+
+.signalCellHeader {
+  font-size: 9px;
+  font-weight: 800;
+  color: #dbe2f2;
+  border-bottom: 1px solid #5a6681;
+  padding: 2px 4px;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.signalCellBody {
+  flex: 1;
+  min-height: 0;
+  margin: 1px;
+  background: #2f3748;
 }
 
 .channelGrid {

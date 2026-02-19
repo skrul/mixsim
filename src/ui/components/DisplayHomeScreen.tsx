@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore, type SelectedFocus } from '@/state/surface-store'
 import styles from './DisplayHomeScreen.module.css'
@@ -24,17 +24,14 @@ function percent(value: number): string {
   return `${Math.round(value * 100)}%`
 }
 
-function sourceLabel(source: { type: string }): string {
-  switch (source.type) {
-    case 'stem':
-      return 'STEM'
-    case 'tone':
-      return 'TONE'
-    case 'live':
-      return 'LIVE'
-    default:
-      return 'OFF'
-  }
+function pad2(v: number): string {
+  return v.toString().padStart(2, '0')
+}
+
+function formatTargetTitle(kind: SelectedTarget['kind'], index: number): string {
+  if (kind === 'channel') return `CH${index + 1}`
+  if (kind === 'bus') return `BUS${index + 1}`
+  return `DCA${index + 1}`
 }
 
 function getSelectedTarget(
@@ -58,6 +55,22 @@ export function DisplayHomeScreen() {
   const outputBankLayer = useSurfaceStore((s) => s.outputBankLayer)
   const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
+  const [clockText, setClockText] = useState({ hm: '12:00', sec: '00', ampm: 'AM' })
+
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date()
+      const hour12 = now.getHours() % 12 || 12
+      setClockText({
+        hm: `${pad2(hour12)}:${pad2(now.getMinutes())}`,
+        sec: pad2(now.getSeconds()),
+        ampm: now.getHours() >= 12 ? 'PM' : 'AM',
+      })
+    }
+    updateClock()
+    const id = window.setInterval(updateClock, 1000)
+    return () => window.clearInterval(id)
+  }, [])
 
   const target = getSelectedTarget(selectedFocus, outputBankLayer, selectedOutputIndex, selectedChannel)
 
@@ -109,13 +122,11 @@ export function DisplayHomeScreen() {
 
     const channel = channels[target.index]
     if (!channel) return null
-    const busSends = channel.sends.map((send, idx) => ({ idx, label: `${idx + 1}`, level: send.level }))
     return {
       kind: 'channel' as const,
       headerId: `CH${target.index + 1}`,
       headerLabel: channel.label || `Channel ${target.index + 1}`,
       channel,
-      busSends,
       encoderValues: [
         formatDb(channel.gain),
         channel.gateEnabled ? channel.gateThreshold.toFixed(1) : 'OFF',
@@ -133,124 +144,80 @@ export function DisplayHomeScreen() {
 
   return (
     <div className={styles.screen}>
-      <div className={styles.statusBar}>
-        <div className={styles.leftStatus}>
-          <span className={styles.headerId}>{summary.headerId}</span>
-          <span className={styles.headerLabel}>{summary.headerLabel}</span>
+      <div className={styles.topHeader}>
+        <div className={styles.statusChannel}>
+          <div className={styles.statusChannelIconSlot} />
+          <div className={styles.statusChannelId}>{formatTargetTitle(target.kind, target.index)}</div>
+          <div className={styles.statusChannelDivider} />
+          <div className={styles.statusChannelName}>
+            {target.kind === 'channel' ? summary.headerLabel : (target.kind === 'bus' ? `MixBus ${pad2(target.index + 1)}` : summary.headerLabel)}
+          </div>
+          <div
+            className={styles.statusChannelColor}
+            style={{
+              backgroundColor:
+                summary.kind === 'channel'
+                  ? summary.channel.color
+                  : '#f2d75e',
+            }}
+          />
         </div>
-        <div className={styles.centerStatus}>HOME</div>
-      </div>
 
-      <div className={styles.topTabs}>
-        <div className={`${styles.tab} ${styles.activeTab}`}>HOME</div>
-        <div className={styles.tab}>CONFIG</div>
-        <div className={styles.tab}>GATE</div>
-        <div className={styles.tab}>DYN</div>
-        <div className={styles.tab}>EQ</div>
-        <div className={styles.tab}>SENDS</div>
-        <div className={styles.tab}>MAIN</div>
+        <div className={styles.globalStatusBar}>
+          <div className={styles.statusMidGrid}>
+            <div className={styles.statusMidCell} />
+            <div className={styles.statusMidCell} />
+            <div className={`${styles.statusMidCell} ${styles.statusUsbCell}`}>No USB drive</div>
+            <div className={`${styles.statusMidCell} ${styles.statusSceneTagCell}`}>SCENE</div>
+            <div className={`${styles.statusMidCell} ${styles.statusSceneMainCell}`}>00:TEST</div>
+            <div className={styles.statusMidCell} />
+          </div>
+          <div className={styles.statusAesClock}>
+            <div className={styles.statusAesRow}>
+              <span className={styles.statusKey}>A:</span>
+              <span className={styles.statusValue}>S16</span>
+              <span className={styles.statusDot} />
+              <span className={styles.statusKey}>L:</span>
+              <span className={styles.statusValue}>48K</span>
+            </div>
+            <div className={styles.statusAesRow}>
+              <span className={styles.statusKey}>B:</span>
+              <span className={styles.statusValue}>-</span>
+              <span className={styles.statusDotOff} />
+              <span className={styles.statusKey}>C:</span>
+              <span className={styles.statusValue}>LIVE</span>
+            </div>
+          </div>
+          <div className={styles.statusClock}>
+            <span className={styles.statusClockHm}>{clockText.hm}</span>
+            <span className={styles.statusClockRight}>
+              <span className={styles.statusClockAmPm}>{clockText.ampm}</span>
+              <span className={styles.statusClockSec}>{clockText.sec}</span>
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.topTabs}>
+          <div className={`${styles.tab} ${styles.activeTab}`}>HOME</div>
+          <div className={styles.tab}>CONFIG</div>
+          <div className={styles.tab}>GATE</div>
+          <div className={styles.tab}>DYN</div>
+          <div className={styles.tab}>EQ</div>
+          <div className={styles.tab}>SENDS</div>
+          <div className={styles.tab}>MAIN</div>
+        </div>
       </div>
 
       {summary.kind === 'channel' ? (
         <>
           <div className={styles.body}>
-            <div className={styles.channelGrid}>
-              <div className={`${styles.tile} ${styles.tileIn}`}>
-                <div className={styles.tileTitle}>IN</div>
-                <div className={styles.inRows}>
-                  <div className={styles.inRow}><span>SOURCE</span><span>{sourceLabel(summary.channel.inputSource)}</span></div>
-                  <div className={styles.inRow}><span>+48V</span><span>{summary.channel.inputType === 'mic' ? 'ON' : 'OFF'}</span></div>
-                  <div className={styles.inRow}><span>INVERT</span><span>OFF</span></div>
-                  <div className={styles.inRow}><span>DELAY</span><span>0.3 ms</span></div>
-                  <div className={styles.inRow}><span>LOCUT</span><span>{summary.channel.hpfEnabled ? `${Math.round(summary.channel.hpfFreq)} Hz` : 'OFF'}</span></div>
+            <div className={styles.signalPathRow}>
+              {['IN', 'GATE', 'EQ', 'DYNAMICS', 'INS', 'OUT', 'AUTO', 'BUS SENDS'].map((label) => (
+                <div key={label} className={styles.signalCell}>
+                  <div className={styles.signalCellHeader}>{label}</div>
+                  <div className={styles.signalCellBody} />
                 </div>
-                <div className={styles.tileFooter}>
-                  <div className={styles.badge}>LINK</div>
-                  <div className={styles.value}>{formatDb(summary.channel.gain)}</div>
-                  <div className={styles.knob} />
-                </div>
-              </div>
-
-              <div className={styles.tile}>
-                <div className={styles.tileTitle}>GATE</div>
-                <div className={`${styles.graph} ${styles.graphGate}`} />
-                <div className={styles.tileFooter}>
-                  <div className={styles.badge}>GATE</div>
-                  <div className={styles.value}>{summary.channel.gateEnabled ? summary.channel.gateThreshold.toFixed(1) : 'OFF'}</div>
-                  <div className={styles.knob} />
-                </div>
-              </div>
-
-              <div className={styles.tileNarrow}>
-                <div className={styles.tileTitle}>INS</div>
-                <div className={styles.insertFlow}>
-                  <div className={styles.flowNode}>PRE</div>
-                  <div className={styles.flowNode}>INS</div>
-                  <div className={`${styles.flowNode} ${styles.activeNode}`}>POST</div>
-                </div>
-                <div className={styles.tileFooter}>
-                  <div className={styles.badge}>INS</div>
-                  <div className={styles.value}>POST</div>
-                  <div className={styles.knob} />
-                </div>
-              </div>
-
-              <div className={styles.tile}>
-                <div className={styles.tileTitle}>EQ</div>
-                <div className={`${styles.graph} ${styles.graphEq}`} />
-                <div className={styles.tileFooter}>
-                  <div className={styles.badge}>EQ</div>
-                  <div className={styles.value}>{summary.channel.eqEnabled ? 'ON' : 'OFF'}</div>
-                  <div className={styles.knob} />
-                </div>
-              </div>
-
-              <div className={styles.tile}>
-                <div className={styles.tileTitle}>DYNAMICS</div>
-                <div className={`${styles.graph} ${styles.graphDyn}`} />
-                <div className={styles.tileFooter}>
-                  <div className={styles.badge}>COMP</div>
-                  <div className={styles.value}>{summary.channel.compEnabled ? summary.channel.compThreshold.toFixed(1) : 'OFF'}</div>
-                  <div className={styles.knob} />
-                </div>
-              </div>
-
-              <div className={styles.tileOut}>
-                <div className={styles.tileTitle}>OUT</div>
-                <div className={styles.outRows}>
-                  <div className={styles.outRow}><span>MONO</span><span>{summary.channel.monoBus ? 'ON' : 'OFF'}</span></div>
-                  <div className={styles.outRow}><span>MUTE</span><span>{summary.channel.mute ? 'ON' : 'OFF'}</span></div>
-                </div>
-                <div className={styles.tileFooter}>
-                  <div className={styles.badge}>LR</div>
-                  <div className={styles.value}>{formatPan(summary.channel.pan)}</div>
-                  <div className={styles.knob} />
-                </div>
-              </div>
-
-              <div className={styles.tileAuto}>
-                <div className={styles.tileTitle}>AUTO</div>
-                <div className={styles.autoRows}>
-                  <div className={styles.autoKey}>X</div>
-                  <div className={styles.autoKey}>Y</div>
-                  <div className={styles.autoKey}>MONO</div>
-                  <div className={styles.autoKey}>SUB</div>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.busSendsTile}>
-              <div className={styles.tileTitle}>BUS SENDS</div>
-              <div className={styles.busSendsList}>
-                {summary.busSends.map((row) => (
-                  <div key={row.idx} className={styles.busSendRow}>
-                    <span className={styles.busSendLabel}>{row.label}</span>
-                    <div className={styles.sendBar}>
-                      <div className={styles.sendFill} style={{ width: `${Math.max(0, Math.min(100, row.level * 100))}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
 

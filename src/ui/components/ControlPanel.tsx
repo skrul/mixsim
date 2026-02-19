@@ -127,20 +127,24 @@ export function ControlPanel() {
     }
   }, [soloActive])
 
+  const renderDisplayScreen = () => (
+    activePage === 'HOME' ? (
+      <DisplayHomeScreen />
+    ) : (
+      <div className={styles.notImplementedScreen}>
+        <div className={styles.notImplementedTitle}>{activePage}</div>
+        <div className={styles.notImplementedBody}>Read-only HOME page is implemented first.</div>
+      </div>
+    )
+  )
+
   return (
     <div className={styles.panel}>
       <div className={styles.displayPanel}>
         <div className={styles.displayTop}>
           <div className={styles.screenOuter}>
             <div className={styles.screen}>
-              {activePage === 'HOME' ? (
-                <DisplayHomeScreen />
-              ) : (
-                <div className={styles.notImplementedScreen}>
-                  <div className={styles.notImplementedTitle}>{activePage}</div>
-                  <div className={styles.notImplementedBody}>Read-only HOME page is implemented first.</div>
-                </div>
-              )}
+              {renderDisplayScreen()}
             </div>
             <div className={styles.meterRail}>
               <div className={styles.meterBody}>

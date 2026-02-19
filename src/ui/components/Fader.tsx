@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState } from 'react'
-import { faderPositionToDb, formatDb } from '@/audio/fader-taper'
+import { faderPositionToDb } from '@/audio/fader-taper'
 import { useSurfaceStore } from '@/state/surface-store'
 import styles from './Fader.module.css'
 
@@ -11,7 +11,7 @@ interface FaderProps {
   helpText?: string
 }
 
-export function Fader({ value, onChange, label, showDb = true, helpText }: FaderProps) {
+export function Fader({ value, onChange, label, showDb = false, helpText }: FaderProps) {
   const setHelpText = useSurfaceStore((s) => s.setHelpText)
   const trackRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
@@ -68,7 +68,6 @@ export function Fader({ value, onChange, label, showDb = true, helpText }: Fader
     setDragging(false)
   }, [])
 
-  const db = faderPositionToDb(value)
   const thumbPercent = value * 100
   const trackClass = `${styles.track} ${dragging ? styles.dragging : ''}`
 
@@ -96,7 +95,7 @@ export function Fader({ value, onChange, label, showDb = true, helpText }: Fader
           <div className={styles.thumb} style={{ bottom: `${thumbPercent}%` }} />
         </div>
       </div>
-      {showDb && <div className={styles.dbReadout}>{formatDb(db)} dB</div>}
+      {showDb && <div className={styles.dbReadout}>{faderPositionToDb(value).toFixed(1)} dB</div>}
     </div>
   )
 }

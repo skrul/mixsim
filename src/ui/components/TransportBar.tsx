@@ -15,6 +15,11 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
+function truncateLabel(label: string, max = 26): string {
+  if (label.length <= max) return label
+  return `${label.slice(0, max - 1)}…`
+}
+
 function sourceToValue(source: ChannelInputSource): string {
   switch (source.type) {
     case 'stem': return `stem:${source.stemIndex}`
@@ -180,7 +185,7 @@ export function TransportBar({ compact = false }: TransportBarProps) {
                   <optgroup label="Stems">
                     {availableStems.map((s) => (
                       <option key={`stem:${s.index}`} value={`stem:${s.index}`}>
-                        {s.label}
+                        {truncateLabel(s.label)}
                       </option>
                     ))}
                   </optgroup>
@@ -196,7 +201,7 @@ export function TransportBar({ compact = false }: TransportBarProps) {
                   <optgroup label="Live Input">
                     {availableLiveDevices.map((d) => (
                       <option key={`live:${d.deviceId}`} value={`live:${d.deviceId}`}>
-                        {d.label}
+                        {truncateLabel(d.label)}
                       </option>
                     ))}
                   </optgroup>

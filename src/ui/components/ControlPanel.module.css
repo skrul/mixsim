@@ -4,7 +4,10 @@
   background: #1d1d2b;
   border: 1px solid #2e2e40;
   border-radius: 7px;
-  min-width: 860px;
+  display: inline-block;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
   box-sizing: border-box;
 }
 
@@ -14,9 +17,15 @@
   gap: 8px;
 }
 
+.displayPanelDimmed {
+  opacity: 0.42;
+  pointer-events: none;
+  filter: saturate(0.7);
+}
+
 .displayTop {
   display: flex;
-  gap: 8px;
+  gap: 2px;
   align-items: flex-start;
 }
 
@@ -127,28 +136,29 @@
 }
 
 .sideColumn {
-  width: 168px;
+  width: 76px;
+  height: 304px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sideMenu {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px 6px;
+  grid-template-columns: 1fr;
+  gap: 4px;
   align-content: start;
 }
 
 .menuButton {
-  height: 28px;
-  border-radius: 10px;
+  height: 22px;
+  border-radius: 8px;
   border: 2px solid #c0c4cc;
   background: #3f434c;
   color: #edf0f5;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   cursor: pointer;
 }
 
@@ -198,45 +208,69 @@
 
 .navCluster {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 6px;
   align-items: start;
+  margin-top: auto;
+}
+
+.inlinePopoutButton {
+  height: 22px;
+  border: 1px solid #6d7486;
+  border-radius: 6px;
+  background: #2a3040;
+  color: #dbe3f4;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+.inlinePopoutButton:hover:not(:disabled) {
+  border-color: #8e96aa;
+  background: #343b4d;
+}
+
+.inlinePopoutButton:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .navBlock {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  justify-self: center;
+  gap: 3px;
 }
 
 .navLabel {
   font-size: 8px;
   font-weight: 700;
   color: #9a9fb0;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .layerButtons {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .pageButtons {
   display: flex;
-  gap: 4px;
+  gap: 3px;
 }
 
 .navButton {
-  width: 30px;
-  height: 26px;
-  border-radius: 9px;
+  width: 28px;
+  height: 22px;
+  border-radius: 8px;
   border: 1px solid #777d8b;
   background: #232733;
   color: #e7ebf0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   cursor: not-allowed;
 }
@@ -262,4 +296,86 @@
 .notImplementedBody {
   font-size: 12px;
   color: #c2cad9;
+}
+
+.displayPopupWindow {
+  position: fixed;
+  z-index: 1200;
+  background: #1b1f29;
+  border: 1px solid #5c6376;
+  border-radius: 8px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.displayPopupHeader {
+  height: 34px;
+  border-bottom: 1px solid #4f576b;
+  background: linear-gradient(180deg, #30384a 0%, #242b3a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 10px;
+  cursor: move;
+  user-select: none;
+  flex: 0 0 34px;
+}
+
+.displayPopupTitle {
+  color: #e7edf9;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.displayPopupClose {
+  height: 22px;
+  border: 1px solid #727a8f;
+  border-radius: 5px;
+  background: #323a4b;
+  color: #f0f4fc;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+.displayPopupClose:hover {
+  border-color: #939cb3;
+  background: #3a4255;
+}
+
+.displayPopupBody {
+  flex: 1;
+  min-height: 0;
+  padding: 8px;
+  box-sizing: border-box;
+  background: #11151f;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+}
+
+.displayPopupScaledBox {
+  flex: 0 0 auto;
+}
+
+.displayPopupScaledContent {
+  transform-origin: top left;
+}
+
+.displayPopupResizeHandle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  right: 2px;
+  bottom: 2px;
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 0 40%, #8e96a9 40% 48%, transparent 48% 62%, #8e96a9 62% 70%, transparent 70%);
+  opacity: 0.9;
 }

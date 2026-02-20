@@ -69,8 +69,10 @@ export function DisplayHomeScreen() {
   const [clockText, setClockText] = useState({ hm: '12:00', sec: '00', ampm: 'AM' })
   const [inMeterLit, setInMeterLit] = useState(0)
   const [gateReductionNorm, setGateReductionNorm] = useState(0)
+  const [compReductionNorm, setCompReductionNorm] = useState(0)
   const inMeterDbRef = useRef(-Infinity)
   const gateReductionRef = useRef(0)
+  const compReductionRef = useRef(0)
   const inMeterRafRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -109,6 +111,13 @@ export function DisplayHomeScreen() {
         : Math.max(gateReductionRef.current - 0.04, targetGateNorm)
       gateReductionRef.current = nextGate
       setGateReductionNorm((prev) => (Math.abs(prev - nextGate) < 0.002 ? prev : nextGate))
+
+      const targetCompNorm = clamp((dynamicsLevels.compReductionDb[channelIndex] ?? 0) / 30, 0, 1)
+      const nextComp = targetCompNorm > compReductionRef.current
+        ? targetCompNorm
+        : Math.max(compReductionRef.current - 0.04, targetCompNorm)
+      compReductionRef.current = nextComp
+      setCompReductionNorm((prev) => (Math.abs(prev - nextComp) < 0.002 ? prev : nextComp))
 
       inMeterRafRef.current = requestAnimationFrame(tick)
     }
@@ -170,7 +179,9 @@ export function DisplayHomeScreen() {
     const gainNorm = clamp((channel.gain - GAIN_MIN) / (GAIN_MAX - GAIN_MIN), 0, 1)
     const gainAngle = -130 + gainNorm * 260
     const gateAngle = -130 + ((channel.gateThreshold + 80) / 80) * 260
+    const compAngle = -130 + ((channel.compThreshold + 60) / 60) * 260
     const gateThresholdNorm = clamp((channel.gateThreshold + 80) / 80, 0, 1)
+    const compThresholdNorm = clamp((channel.compThreshold + 60) / 60, 0, 1)
     return {
       kind: 'channel' as const,
       headerId: `CH${target.index + 1}`,
@@ -178,7 +189,9 @@ export function DisplayHomeScreen() {
       channel,
       gainAngle,
       gateAngle,
+      compAngle,
       gateThresholdNorm,
+      compThresholdNorm,
       encoderValues: [
         formatDb(channel.gain),
         channel.gateEnabled ? channel.gateThreshold.toFixed(1) : 'OFF',
@@ -381,7 +394,76 @@ export function DisplayHomeScreen() {
                   </div>
                 </div>
               </div>
-              {['EQ', 'DYNAMICS', 'INS', 'OUT', 'AUTO', 'BUS SENDS'].map((label) => (
+              <div className={styles.signalCell}>
+                <div className={styles.signalCellHeader}>EQ</div>
+                <div className={styles.signalCellBody} />
+              </div>
+              <div className={`${styles.signalCell} ${styles.dynTile}`}>
+                <div className={styles.signalCellHeader}>DYNAMICS</div>
+                <div className={styles.gateTileBody}>
+                  <div className={styles.gateGraphWrap}>
+                    <div className={styles.gateGraphGrid}>
+                      <svg className={styles.gateGraphSvg} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                        {Array.from({ length: 9 }, (_, i) => {
+                          const p = (i / 8) * 100
+                          return <line key={`dx-${i}`} x1={p} y1={0} x2={p} y2={100} className={styles.gateGridLine} />
+                        })}
+                        {Array.from({ length: 9 }, (_, i) => {
+                          const p = (i / 8) * 100
+                          return <line key={`dy-${i}`} x1={0} y1={p} x2={100} y2={p} className={styles.gateGridLine} />
+                        })}
+                        {summary.channel.compEnabled ? (
+                          <>
+                            {(() => {
+                              const knee = 1 - summary.compThresholdNorm
+                              return (
+                                <>
+                                  <line
+                                    x1={0}
+                                    y1={100}
+                                    x2={knee * 100}
+                                    y2={(1 - knee) * 100}
+                                    className={styles.gateCurveLine}
+                                  />
+                                  <line
+                                    x1={knee * 100}
+                                    y1={(1 - knee) * 100}
+                                    x2={100}
+                                    y2={(1 - knee) * 100}
+                                    className={styles.gateCurveLine}
+                                  />
+                                </>
+                              )
+                            })()}
+                          </>
+                        ) : (
+                          <line x1={0} y1={100} x2={100} y2={0} className={styles.gateCurveLine} />
+                        )}
+                      </svg>
+                    </div>
+                    <div className={styles.dynGraphMeter}>
+                      <div
+                        className={styles.dynGraphMeterFill}
+                        style={{ height: `${Math.round(compReductionNorm * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.gateTileLower}>
+                    <div className={`${styles.gateBadge} ${summary.channel.compEnabled ? styles.gateBadgeActive : ''}`}>COMP</div>
+                    <div className={styles.gateValueBadge}>
+                      {summary.channel.compEnabled ? summary.channel.compThreshold.toFixed(1) : 'OFF'}
+                    </div>
+                    <div className={styles.inKnobWrap}>
+                      <div className={styles.displayReadKnob} style={{ '--knob-angle': `${summary.compAngle}deg` } as CSSProperties}>
+                        <div className={styles.displayReadKnobHighlight} />
+                        <div className={styles.displayReadKnobPointer} />
+                      </div>
+                    </div>
+                    <div className={styles.inKnobLabel}>THRESH</div>
+                  </div>
+                </div>
+              </div>
+              {['INS', 'OUT', 'AUTO', 'BUS SENDS'].map((label) => (
                 <div key={label} className={styles.signalCell}>
                   <div className={styles.signalCellHeader}>{label}</div>
                   <div className={styles.signalCellBody} />

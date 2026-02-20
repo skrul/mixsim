@@ -559,6 +559,11 @@
   background: #7586ac;
 }
 
+.dynTile {
+  overflow: hidden;
+  background: #7586ac;
+}
+
 .gateTileBody {
   display: grid;
   grid-template-rows: 72px minmax(0, 1fr);
@@ -610,6 +615,20 @@
 }
 
 .gateGraphMeterFill {
+  width: 100%;
+  background: linear-gradient(180deg, #ff5489 0%, #e0386f 100%);
+  box-shadow: 0 0 6px rgba(255, 84, 137, 0.45);
+}
+
+.dynGraphMeter {
+  border-left: 1px solid #55607a;
+  background: linear-gradient(180deg, #7f0f3f 0%, #8d174b 44%, #9b1f59 100%);
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+
+.dynGraphMeterFill {
   width: 100%;
   background: linear-gradient(180deg, #ff5489 0%, #e0386f 100%);
   box-shadow: 0 0 6px rgba(255, 84, 137, 0.45);

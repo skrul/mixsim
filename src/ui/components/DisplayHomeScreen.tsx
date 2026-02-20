@@ -9,7 +9,10 @@ type SelectedTarget =
   | { kind: 'bus'; index: number }
   | { kind: 'dca'; index: number }
 
-const IN_METER_THRESHOLDS = [-60, -48, -36, -27, -21, -18, -15, -12, -9, -6, -3, 0]
+const DISPLAY_TILE_METER_THRESHOLDS = [
+  -60, -57, -54, -51, -48, -45, -42, -39, -36, -33, -30,
+  -27, -24, -21, -18, -15, -12, -10, -8, -6, -4, 0,
+]
 
 function formatDb(value: number): string {
   if (!Number.isFinite(value)) return '0.0 dB'
@@ -68,9 +71,11 @@ export function DisplayHomeScreen() {
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
   const [clockText, setClockText] = useState({ hm: '12:00', sec: '00', ampm: 'AM' })
   const [inMeterLit, setInMeterLit] = useState(0)
+  const [outMeterLit, setOutMeterLit] = useState(0)
   const [gateReductionNorm, setGateReductionNorm] = useState(0)
   const [compReductionNorm, setCompReductionNorm] = useState(0)
   const inMeterDbRef = useRef(-Infinity)
+  const outMeterDbRef = useRef(-Infinity)
   const gateReductionRef = useRef(0)
   const compReductionRef = useRef(0)
   const inMeterRafRef = useRef<number | null>(null)
@@ -100,10 +105,20 @@ export function DisplayHomeScreen() {
       const nextDb = db > current ? db : Math.max(current - 1.4, db)
       inMeterDbRef.current = nextDb
       let lit = 0
-      for (let i = 0; i < IN_METER_THRESHOLDS.length; i++) {
-        if (nextDb >= IN_METER_THRESHOLDS[i]) lit++
+      for (let i = 0; i < DISPLAY_TILE_METER_THRESHOLDS.length; i++) {
+        if (nextDb >= DISPLAY_TILE_METER_THRESHOLDS[i]) lit++
       }
       setInMeterLit((prev) => (prev === lit ? prev : lit))
+
+      const outDb = meterLevels.channels[channelIndex] ?? -Infinity
+      const currentOut = outMeterDbRef.current
+      const nextOutDb = outDb > currentOut ? outDb : Math.max(currentOut - 1.4, outDb)
+      outMeterDbRef.current = nextOutDb
+      let outLit = 0
+      for (let i = 0; i < DISPLAY_TILE_METER_THRESHOLDS.length; i++) {
+        if (nextOutDb >= DISPLAY_TILE_METER_THRESHOLDS[i]) outLit++
+      }
+      setOutMeterLit((prev) => (prev === outLit ? prev : outLit))
 
       const targetGateNorm = clamp((dynamicsLevels.gateReductionDb[channelIndex] ?? 0) / 30, 0, 1)
       const nextGate = targetGateNorm > gateReductionRef.current
@@ -283,13 +298,13 @@ export function DisplayHomeScreen() {
                   <div className={styles.inTileUpper}>
                     <div className={styles.inLevelMeter}>
                       <div className={styles.inLevelTrack}>
-                        {IN_METER_THRESHOLDS.map((_, i) => {
-                          const rowFromBottom = IN_METER_THRESHOLDS.length - 1 - i
+                        {DISPLAY_TILE_METER_THRESHOLDS.map((_, i) => {
+                          const rowFromBottom = DISPLAY_TILE_METER_THRESHOLDS.length - 1 - i
                           const isLit = rowFromBottom < inMeterLit
                           const toneClass =
                             i === 0
                               ? styles.inSegClip
-                              : (i < 4 ? styles.inSegWarm : styles.inSegCool)
+                              : (i <= 10 ? styles.inSegWarm : styles.inSegCool)
                           return (
                             <div
                               key={`in-meter-${i}`}
@@ -318,9 +333,9 @@ export function DisplayHomeScreen() {
                       </div>
                     </div>
                   </div>
-                  <div className={styles.inTileLower}>
-                    <div className={`${styles.inBadge} ${styles.inBadgeOff}`}>LINK</div>
-                    <div className={styles.inValueBadge}>
+                  <div className={styles.tileLower}>
+                    <div className={`${styles.tileBadge} ${styles.tileBadgeOff}`}>LINK</div>
+                    <div className={styles.tileValueBadge}>
                       {summary.channel.gain >= 0 ? '+' : ''}{summary.channel.gain.toFixed(1)}
                     </div>
                     <div className={styles.inKnobWrap}>
@@ -332,7 +347,7 @@ export function DisplayHomeScreen() {
                         <div className={styles.displayReadKnobPointer} />
                       </div>
                     </div>
-                    <div className={styles.inKnobLabel}>GAIN</div>
+                    <div className={styles.tileKnobLabel}>GAIN</div>
                   </div>
                 </div>
               </div>
@@ -379,9 +394,9 @@ export function DisplayHomeScreen() {
                       />
                     </div>
                   </div>
-                  <div className={styles.gateTileLower}>
-                    <div className={`${styles.gateBadge} ${summary.channel.gateEnabled ? styles.gateBadgeActive : ''}`}>GATE</div>
-                    <div className={styles.gateValueBadge}>
+                  <div className={styles.tileLower}>
+                    <div className={`${styles.tileBadge} ${summary.channel.gateEnabled ? styles.tileBadgeActive : ''}`}>GATE</div>
+                    <div className={styles.tileValueBadge}>
                       {summary.channel.gateEnabled ? summary.channel.gateThreshold.toFixed(1) : 'OFF'}
                     </div>
                     <div className={styles.inKnobWrap}>
@@ -390,7 +405,7 @@ export function DisplayHomeScreen() {
                         <div className={styles.displayReadKnobPointer} />
                       </div>
                     </div>
-                    <div className={styles.inKnobLabel}>THRESH</div>
+                    <div className={styles.tileKnobLabel}>THRESH</div>
                   </div>
                 </div>
               </div>
@@ -448,9 +463,9 @@ export function DisplayHomeScreen() {
                       />
                     </div>
                   </div>
-                  <div className={styles.gateTileLower}>
-                    <div className={`${styles.gateBadge} ${summary.channel.compEnabled ? styles.gateBadgeActive : ''}`}>COMP</div>
-                    <div className={styles.gateValueBadge}>
+                  <div className={styles.tileLower}>
+                    <div className={`${styles.tileBadge} ${summary.channel.compEnabled ? styles.tileBadgeActive : ''}`}>COMP</div>
+                    <div className={styles.tileValueBadge}>
                       {summary.channel.compEnabled ? summary.channel.compThreshold.toFixed(1) : 'OFF'}
                     </div>
                     <div className={styles.inKnobWrap}>
@@ -459,16 +474,78 @@ export function DisplayHomeScreen() {
                         <div className={styles.displayReadKnobPointer} />
                       </div>
                     </div>
-                    <div className={styles.inKnobLabel}>THRESH</div>
+                    <div className={styles.tileKnobLabel}>THRESH</div>
                   </div>
                 </div>
               </div>
-              {['INS', 'OUT', 'AUTO', 'BUS SENDS'].map((label) => (
-                <div key={label} className={styles.signalCell}>
-                  <div className={styles.signalCellHeader}>{label}</div>
-                  <div className={styles.signalCellBody} />
+              <div className={styles.signalCell}>
+                <div className={styles.signalCellHeader}>INS</div>
+                <div className={styles.signalCellBody} />
+              </div>
+              <div className={`${styles.signalCell} ${styles.outAutoTile}`}>
+                <div className={styles.outAutoTop}>
+                  <div className={styles.outTopCol}>
+                    <div className={`${styles.signalCellHeader} ${styles.outAutoHeader}`}>OUT</div>
+                    <div className={styles.outMeterWrap}>
+                      <div
+                        className={styles.outFaderTrack}
+                        style={{ '--out-fader-pos': `${summary.channel.faderPosition}` } as CSSProperties}
+                      >
+                        <div className={styles.outFaderThumb} />
+                      </div>
+                      <div className={styles.outLevelTrack}>
+                        {DISPLAY_TILE_METER_THRESHOLDS.map((_, i) => {
+                          const rowFromBottom = DISPLAY_TILE_METER_THRESHOLDS.length - 1 - i
+                          const isLit = rowFromBottom < outMeterLit
+                          const toneClass =
+                            i === 0
+                              ? styles.outSegClip
+                              : (i <= 10 ? styles.outSegWarm : styles.outSegCool)
+                          return (
+                            <div
+                              key={`out-meter-${i}`}
+                              className={`${styles.outLevelSeg} ${toneClass} ${isLit ? '' : styles.inLevelSegOff}`}
+                            />
+                          )
+                        })}
+                      </div>
+                      <div className={styles.outBaseLine} />
+                    </div>
+                  </div>
+                  <div className={styles.autoTopCol}>
+                    <div className={`${styles.signalCellHeader} ${styles.outAutoHeader}`}>AUTO</div>
+                    <div className={styles.autoTopBody}>
+                      <div className={styles.autoBlueMeters}>
+                        <div className={styles.autoBlueBar} />
+                        <div className={styles.autoBlueBar} />
+                      </div>
+                      <div className={styles.autoXYButtons}>
+                        <div className={styles.autoKey}>X</div>
+                        <div className={styles.autoKey}>Y</div>
+                      </div>
+                      <div className={styles.autoMonoSub}>
+                        <div className={`${styles.autoRouteLabel} ${styles.autoMonoLabel}`}>MONO</div>
+                        <div className={`${styles.autoRouteLabel} ${styles.autoSubLabel}`}>SUB</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
+                <div className={styles.outAutoBottom}>
+                  <div className={`${styles.tileBadge} ${summary.channel.mainLrBus ? styles.tileBadgeActive : ''}`}>LR</div>
+                  <div className={styles.tileValueBadge}>{formatPan(summary.channel.pan)}</div>
+                  <div className={styles.inKnobWrap}>
+                    <div className={styles.displayReadKnob} style={{ '--knob-angle': `${-130 + ((summary.channel.pan + 1) / 2) * 260}deg` } as CSSProperties}>
+                      <div className={styles.displayReadKnobHighlight} />
+                      <div className={styles.displayReadKnobPointer} />
+                    </div>
+                  </div>
+                  <div className={styles.tileKnobLabel}>PAN</div>
+                </div>
+              </div>
+              <div className={styles.signalCell}>
+                <div className={styles.signalCellHeader}>BUS SENDS</div>
+                <div className={styles.signalCellBody} />
+              </div>
             </div>
           </div>
           <div className={styles.assignRow}>

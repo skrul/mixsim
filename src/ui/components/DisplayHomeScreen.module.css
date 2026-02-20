@@ -242,13 +242,14 @@
   flex: 1;
   min-height: 0;
   padding: 4px;
+  padding-bottom: 2px;
 }
 
 .signalPathRow {
   width: 100%;
   display: grid;
   grid-template-columns:
-    minmax(0, 0.9fr)
+    minmax(0, 1.08fr)
     minmax(0, 1.45fr)
     minmax(0, 1.75fr)
     minmax(0, 1.45fr)
@@ -256,8 +257,10 @@
     minmax(0, 0.6fr)
     minmax(0, 0.85fr)
     minmax(0, 1.35fr);
-  gap: 1px;
+  gap: 0;
   min-height: 0;
+  background: #364055;
+  border: 1px solid #5a6681;
 }
 
 .signalCell {
@@ -266,7 +269,11 @@
   min-width: 0;
   min-height: 0;
   background: #364055;
-  border: 1px solid #5a6681;
+  border-left: 1px solid #5a6681;
+}
+
+.signalCell:first-child {
+  border-left: 0;
 }
 
 .signalCellHeader {
@@ -286,6 +293,333 @@
   min-height: 0;
   margin: 1px;
   background: #2f3748;
+}
+
+.inTile {
+  overflow: hidden;
+  background: #7586ac;
+}
+
+.inTileBody {
+  display: grid;
+  grid-template-rows: 72px minmax(0, 1fr);
+  min-height: 0;
+  height: 100%;
+}
+
+.inTileUpper {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 13px minmax(0, 1fr);
+  gap: 1px;
+  padding: 4px 0px 0px 0px;
+  overflow: hidden;
+}
+
+.inLevelMeter {
+  display: flex;
+  align-items: stretch;
+}
+
+.inLevelTrack {
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid #0f1320;
+  background: #222939;
+  padding: 2px 1px 1px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  justify-content: flex-end;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.inLevelSeg {
+  height: 4px;
+  border-radius: 1px;
+  margin-bottom: 1px;
+  flex: 0 0 auto;
+}
+
+.inSegCool {
+  background: #66ff62;
+  box-shadow: 0 0 3px rgba(102, 255, 98, 0.35);
+}
+
+.inSegWarm {
+  background: #d8d451;
+  box-shadow: 0 0 3px rgba(216, 212, 81, 0.35);
+}
+
+.inSegClip {
+  background: #8f2049;
+  box-shadow: 0 0 3px rgba(143, 32, 73, 0.28);
+}
+
+.inLevelSegOff {
+  opacity: 0.1;
+  box-shadow: none;
+}
+
+.inFlags {
+  display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  min-height: 0;
+  align-content: stretch;
+}
+
+.inFlagRow {
+  display: grid;
+  grid-template-columns: 13px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px;
+  padding: 0 2px 0 0;
+  border: 1px solid #7c89a9;
+  background: #9ba8c7;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.inFlagOn {
+  background: #afbbd7;
+}
+
+.inFlagOff {
+  opacity: 0.95;
+}
+
+.inFlagGlyph {
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 800;
+  color: #2f3a55;
+  text-align: center;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #7f8aa8;
+  background: #c2cbe0;
+  box-sizing: border-box;
+  opacity: 0.9;
+}
+
+.inFlagOn .inFlagGlyph {
+  background: #f2d75e;
+  color: #2c2730;
+  box-shadow: inset 0 0 0 1px rgba(248, 237, 177, 0.45);
+}
+
+.inFlagLabel {
+  font-size: 8px;
+  line-height: 0.82;
+  font-weight: 800;
+  color: #f3f7ff;
+  white-space: nowrap;
+  letter-spacing: -1.0px;
+}
+
+.inTileLower {
+  border-top: 1px solid #8290b0;
+  padding: 3px 3px 3px;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+}
+
+.inBadge {
+  width: auto;
+  height: 11px;
+  min-width: 0;
+  text-align: center;
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 800;
+  color: #1f2a42;
+  border: 1px solid #95a4c3;
+  background: #d8e2f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1px;
+  box-sizing: border-box;
+}
+
+.inBadgeOff {
+  opacity: 0.8;
+}
+
+.inValueBadge {
+  width: 28px;
+  height: 11px;
+  min-width: 0;
+  text-align: center;
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 800;
+  color: #2b3a55;
+  border: 1px solid #9daecd;
+  background: #f4f7ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.inKnobWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.inKnob,
+.displayReadKnob {
+  --knob-angle: 0deg;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #dfe5f1;
+  position: relative;
+  box-shadow: none;
+}
+
+.displayReadKnobSmall {
+  width: 20px;
+  height: 20px;
+}
+
+.inKnob::before,
+.displayReadKnob::before {
+  content: none;
+}
+
+.inKnob::after,
+.displayReadKnob::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #d6deef 0deg 142deg,
+    transparent 142deg 218deg,
+    #d6deef 218deg 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.inKnobHighlight,
+.displayReadKnobHighlight {
+  position: absolute;
+  width: 4px;
+  height: 2px;
+  left: 50%;
+  top: 50%;
+  border-radius: 999px;
+  background: #ead46e;
+  box-shadow: 0 0 4px rgba(234, 212, 110, 0.45);
+  transform-origin: center center;
+  transform: translate(-50%, -50%) rotate(var(--knob-angle)) translateY(-13px);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.inKnobPointer,
+.displayReadKnobPointer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 11px;
+  border-radius: 2px;
+  background: #6f7f9b;
+  transform-origin: 50% 100%;
+  transform: translate(-50%, -100%) rotate(var(--knob-angle));
+  z-index: 2;
+}
+
+.inKnobLabel {
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 800;
+  color: #f1f4fd;
+  text-transform: uppercase;
+}
+
+.assignRow {
+  margin: 0 4px 3px;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) minmax(0, 0.85fr);
+  gap: 2px;
+  min-height: 18px;
+}
+
+.safeCell {
+  border: 1px solid #9ba9c9;
+  background: #bfd0ef;
+  color: #2c3a54;
+  font-size: 8px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.groupSection {
+  border: 1px solid #6d7998;
+  background: #707da1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  min-height: 0;
+}
+
+.groupLabel {
+  background: #111826;
+  color: #ecf2ff;
+  font-size: 8px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.groupNumbers {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
+  padding: 1px;
+  align-items: stretch;
+}
+
+.groupNumber {
+  border: 1px solid #8ea0c1;
+  background: #b8caea;
+  color: #31415f;
+  font-size: 8px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.groupNumberActive {
+  background: #f1d56e;
+  border-color: #f1d56e;
+  color: #2f2a1d;
+  box-shadow: 0 0 4px rgba(241, 213, 110, 0.45);
 }
 
 .channelGrid {
@@ -544,42 +878,136 @@
   gap: 2px;
   background: #202733;
   border-top: 1px solid #4c566f;
-  padding: 3px 4px;
+  padding: 2px 4px 3px;
 }
 
 .encoderCell {
-  background: #313b4f;
-  border: 1px solid #5d6985;
-  text-align: center;
-  padding: 2px 3px;
-  min-height: 30px;
+  background: #354055;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 12px;
+  min-height: 58px;
 }
 
-.encoderValue {
-  font-size: 9px;
+.encoderTop {
+  padding: 2px 3px 2px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-height: 0;
+}
+
+.encoderTopKnob {
+  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  justify-items: stretch;
+  column-gap: 4px;
+  row-gap: 1px;
+}
+
+.encoderTopArrow {
+  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  justify-items: stretch;
+  column-gap: 4px;
+  row-gap: 1px;
+}
+
+.encoderKnobWrap {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.encoderTopKnob .encoderKnobWrap {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.encoderKnobMeta {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  align-content: center;
+  gap: 1px;
+}
+
+.encoderArrow {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  font-size: 16px;
+  line-height: 1;
   font-weight: 700;
-  color: #f8fbff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #d8e0f1;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.encoderLabel {
-  margin-top: 2px;
-  font-size: 8px;
-  font-weight: 800;
-  color: #aeb7c9;
-  text-transform: uppercase;
+.encoderArrowMeta {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  align-content: center;
+  gap: 1px;
 }
 
-.encoderSub {
+.encoderTopLabel {
   font-size: 7px;
-  color: #8e9ab2;
+  font-weight: 800;
+  color: #dbe4f6;
   text-transform: uppercase;
-  margin-top: 1px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.encoderValueRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.encoderValueBox {
+  min-width: 26px;
+  height: 10px;
+  border: 1px solid #9aa8c8;
+  background: #f3f6fd;
+  color: #2e3e5a;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.encoderUnit {
+  font-size: 7px;
+  font-weight: 800;
+  color: #d7e0f2;
+}
+
+.encoderBottom {
+  border-top: 1px solid #667393;
+  background: #aebddb;
+  color: #263450;
+  font-size: 7px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1px;
 }
 
 .empty {

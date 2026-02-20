@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useMixerStore } from '@/state/mixer-store'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { GAIN_MAX, GAIN_MIN, useMixerStore } from '@/state/mixer-store'
+import { meterLevels } from '@/audio/metering'
 import { useSurfaceStore, type SelectedFocus } from '@/state/surface-store'
 import styles from './DisplayHomeScreen.module.css'
 
@@ -7,6 +8,8 @@ type SelectedTarget =
   | { kind: 'channel'; index: number }
   | { kind: 'bus'; index: number }
   | { kind: 'dca'; index: number }
+
+const IN_METER_THRESHOLDS = [-60, -48, -36, -27, -21, -18, -15, -12, -9, -6, -3, 0]
 
 function formatDb(value: number): string {
   if (!Number.isFinite(value)) return '0.0 dB'
@@ -22,6 +25,10 @@ function formatPan(value: number): string {
 
 function percent(value: number): string {
   return `${Math.round(value * 100)}%`
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value))
 }
 
 function pad2(v: number): string {
@@ -47,6 +54,10 @@ function getSelectedTarget(
   return { kind: 'channel', index: selectedChannel }
 }
 
+function formatSigned(value: number): string {
+  return `${value >= 0 ? '+' : ''}${value.toFixed(1)}`
+}
+
 export function DisplayHomeScreen() {
   const channels = useMixerStore((s) => s.channels)
   const mixBuses = useMixerStore((s) => s.mixBuses)
@@ -56,6 +67,9 @@ export function DisplayHomeScreen() {
   const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
   const [clockText, setClockText] = useState({ hm: '12:00', sec: '00', ampm: 'AM' })
+  const [inMeterLit, setInMeterLit] = useState(0)
+  const inMeterDbRef = useRef(-Infinity)
+  const inMeterRafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const updateClock = () => {
@@ -73,6 +87,27 @@ export function DisplayHomeScreen() {
   }, [])
 
   const target = getSelectedTarget(selectedFocus, outputBankLayer, selectedOutputIndex, selectedChannel)
+
+  useEffect(() => {
+    const tick = () => {
+      const channelIndex = target.kind === 'channel' ? target.index : selectedChannel
+      const db = meterLevels.preFaderChannels[channelIndex] ?? -Infinity
+      const current = inMeterDbRef.current
+      const nextDb = db > current ? db : Math.max(current - 1.4, db)
+      inMeterDbRef.current = nextDb
+      let lit = 0
+      for (let i = 0; i < IN_METER_THRESHOLDS.length; i++) {
+        if (nextDb >= IN_METER_THRESHOLDS[i]) lit++
+      }
+      setInMeterLit((prev) => (prev === lit ? prev : lit))
+      inMeterRafRef.current = requestAnimationFrame(tick)
+    }
+    inMeterRafRef.current = requestAnimationFrame(tick)
+    return () => {
+      if (inMeterRafRef.current !== null) cancelAnimationFrame(inMeterRafRef.current)
+      inMeterRafRef.current = null
+    }
+  }, [selectedChannel, target])
 
   const summary = useMemo(() => {
     if (target.kind === 'bus') {
@@ -122,11 +157,14 @@ export function DisplayHomeScreen() {
 
     const channel = channels[target.index]
     if (!channel) return null
+    const gainNorm = clamp((channel.gain - GAIN_MIN) / (GAIN_MAX - GAIN_MIN), 0, 1)
+    const gainAngle = -130 + gainNorm * 260
     return {
       kind: 'channel' as const,
       headerId: `CH${target.index + 1}`,
       headerLabel: channel.label || `Channel ${target.index + 1}`,
       channel,
+      gainAngle,
       encoderValues: [
         formatDb(channel.gain),
         channel.gateEnabled ? channel.gateThreshold.toFixed(1) : 'OFF',
@@ -212,7 +250,66 @@ export function DisplayHomeScreen() {
         <>
           <div className={styles.body}>
             <div className={styles.signalPathRow}>
-              {['IN', 'GATE', 'EQ', 'DYNAMICS', 'INS', 'OUT', 'AUTO', 'BUS SENDS'].map((label) => (
+              <div className={`${styles.signalCell} ${styles.inTile}`}>
+                <div className={styles.signalCellHeader}>IN</div>
+                <div className={styles.inTileBody}>
+                  <div className={styles.inTileUpper}>
+                    <div className={styles.inLevelMeter}>
+                      <div className={styles.inLevelTrack}>
+                        {IN_METER_THRESHOLDS.map((_, i) => {
+                          const rowFromBottom = IN_METER_THRESHOLDS.length - 1 - i
+                          const isLit = rowFromBottom < inMeterLit
+                          const toneClass =
+                            i === 0
+                              ? styles.inSegClip
+                              : (i < 4 ? styles.inSegWarm : styles.inSegCool)
+                          return (
+                            <div
+                              key={`in-meter-${i}`}
+                              className={`${styles.inLevelSeg} ${toneClass} ${isLit ? '' : styles.inLevelSegOff}`}
+                            />
+                          )
+                        })}
+                      </div>
+                    </div>
+                    <div className={styles.inFlags}>
+                      <div className={`${styles.inFlagRow} ${styles.inFlagOff}`}>
+                        <span className={styles.inFlagGlyph}>⚡</span>
+                        <span className={styles.inFlagLabel}>48V</span>
+                      </div>
+                      <div className={`${styles.inFlagRow} ${styles.inFlagOff}`}>
+                        <span className={styles.inFlagGlyph}>Φ</span>
+                        <span className={styles.inFlagLabel}>INVERT</span>
+                      </div>
+                      <div className={`${styles.inFlagRow} ${styles.inFlagOff}`}>
+                        <span className={styles.inFlagGlyph}>Δ</span>
+                        <span className={styles.inFlagLabel}>DELAY</span>
+                      </div>
+                      <div className={`${styles.inFlagRow} ${summary.channel.hpfEnabled ? styles.inFlagOn : styles.inFlagOff}`}>
+                        <span className={styles.inFlagGlyph}>📈</span>
+                        <span className={styles.inFlagLabel}>LOCUT</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.inTileLower}>
+                    <div className={`${styles.inBadge} ${styles.inBadgeOff}`}>LINK</div>
+                    <div className={styles.inValueBadge}>
+                      {summary.channel.gain >= 0 ? '+' : ''}{summary.channel.gain.toFixed(1)}
+                    </div>
+                    <div className={styles.inKnobWrap}>
+                      <div
+                        className={`${styles.displayReadKnob} ${styles.displayReadKnobSmall}`}
+                        style={{ '--knob-angle': `${summary.gainAngle}deg` } as CSSProperties}
+                      >
+                        <div className={styles.displayReadKnobHighlight} />
+                        <div className={styles.displayReadKnobPointer} />
+                      </div>
+                    </div>
+                    <div className={styles.inKnobLabel}>GAIN</div>
+                  </div>
+                </div>
+              </div>
+              {['GATE', 'EQ', 'DYNAMICS', 'INS', 'OUT', 'AUTO', 'BUS SENDS'].map((label) => (
                 <div key={label} className={styles.signalCell}>
                   <div className={styles.signalCellHeader}>{label}</div>
                   <div className={styles.signalCellBody} />
@@ -220,14 +317,135 @@ export function DisplayHomeScreen() {
               ))}
             </div>
           </div>
+          <div className={styles.assignRow}>
+            <div className={styles.safeCell}>SAFE</div>
+            <div className={styles.groupSection}>
+              <div className={styles.groupLabel}>DCAs</div>
+              <div className={styles.groupNumbers}>
+                {Array.from({ length: 8 }, (_, i) => {
+                  const id = i + 1
+                  const active = summary.channel.dcaGroups.includes(i)
+                  return (
+                    <div key={`dca-${id}`} className={`${styles.groupNumber} ${active ? styles.groupNumberActive : ''}`}>
+                      {id}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+            <div className={styles.groupSection}>
+              <div className={styles.groupLabel}>MUTE GROUPS</div>
+              <div className={styles.groupNumbers}>
+                {Array.from({ length: 6 }, (_, i) => (
+                  <div key={`mute-${i + 1}`} className={styles.groupNumber}>
+                    {i + 1}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
           <div className={styles.encoderStrip}>
-            <div className={styles.encoderCell}><div className={styles.encoderValue}>{summary.encoderValues[0]}</div><div className={styles.encoderLabel}>Gain</div><div className={styles.encoderSub}>LINK</div></div>
-            <div className={styles.encoderCell}><div className={styles.encoderValue}>{summary.encoderValues[1]}</div><div className={styles.encoderLabel}>Threshold</div><div className={styles.encoderSub}>GATE/EXP/DUCK</div></div>
-            <div className={styles.encoderCell}><div className={styles.encoderValue}>{summary.encoderValues[2]}</div><div className={styles.encoderLabel}>Insert</div><div className={styles.encoderSub}>INSERT</div></div>
-            <div className={styles.encoderCell}><div className={styles.encoderValue}>{summary.encoderValues[3]}</div><div className={styles.encoderLabel}>Dynamics</div><div className={styles.encoderSub}>EQ</div></div>
-            <div className={styles.encoderCell}><div className={styles.encoderValue}>{summary.encoderValues[4]}</div><div className={styles.encoderLabel}>Threshold</div><div className={styles.encoderSub}>COMP/EXP</div></div>
-            <div className={styles.encoderCell}><div className={styles.encoderValue}>{summary.encoderValues[5]}</div><div className={styles.encoderLabel}>Pan</div><div className={styles.encoderSub}>LR</div></div>
+            <div className={styles.encoderCell}>
+              <div className={`${styles.encoderTop} ${styles.encoderTopKnob}`}>
+                <div className={styles.encoderKnobWrap}>
+                  <div className={styles.displayReadKnob} style={{ '--knob-angle': `${summary.gainAngle}deg` } as CSSProperties}>
+                    <div className={styles.displayReadKnobHighlight} />
+                    <div className={styles.displayReadKnobPointer} />
+                  </div>
+                </div>
+                <div className={styles.encoderKnobMeta}>
+                  <div className={styles.encoderTopLabel}>Gain</div>
+                  <div className={styles.encoderValueRow}>
+                    <div className={styles.encoderValueBox}>{formatSigned(summary.channel.gain)}</div>
+                    <div className={styles.encoderUnit}>dB</div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.encoderBottom}>LINK</div>
+            </div>
+
+            <div className={styles.encoderCell}>
+              <div className={`${styles.encoderTop} ${styles.encoderTopKnob}`}>
+                <div className={styles.encoderKnobWrap}>
+                  <div className={styles.displayReadKnob} style={{ '--knob-angle': `${-130 + ((summary.channel.gateThreshold + 80) / 80) * 260}deg` } as CSSProperties}>
+                    <div className={styles.displayReadKnobHighlight} />
+                    <div className={styles.displayReadKnobPointer} />
+                  </div>
+                </div>
+                <div className={styles.encoderKnobMeta}>
+                  <div className={styles.encoderTopLabel}>Threshold</div>
+                  <div className={styles.encoderValueRow}>
+                    <div className={styles.encoderValueBox}>{summary.channel.gateThreshold.toFixed(1)}</div>
+                    <div className={styles.encoderUnit}>dB</div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.encoderBottom}>GATE/EXP/DUCK</div>
+            </div>
+
+            <div className={styles.encoderCell}>
+              <div className={`${styles.encoderTop} ${styles.encoderTopArrow}`}>
+                <div className={styles.encoderArrow}>↔</div>
+                <div className={styles.encoderArrowMeta}>
+                  <div className={styles.encoderTopLabel}>Insert</div>
+                  <div className={styles.encoderValueRow}>
+                    <div className={styles.encoderValueBox}>POST</div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.encoderBottom}>INSERT</div>
+            </div>
+
+            <div className={styles.encoderCell}>
+              <div className={`${styles.encoderTop} ${styles.encoderTopArrow}`}>
+                <div className={styles.encoderArrow}>↔</div>
+                <div className={styles.encoderArrowMeta}>
+                  <div className={styles.encoderTopLabel}>Dynamics</div>
+                  <div className={styles.encoderValueRow}>
+                    <div className={styles.encoderValueBox}>POST</div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.encoderBottom}>EQ</div>
+            </div>
+
+            <div className={styles.encoderCell}>
+              <div className={`${styles.encoderTop} ${styles.encoderTopKnob}`}>
+                <div className={styles.encoderKnobWrap}>
+                  <div className={styles.displayReadKnob} style={{ '--knob-angle': `${-130 + ((summary.channel.compThreshold + 60) / 60) * 260}deg` } as CSSProperties}>
+                    <div className={styles.displayReadKnobHighlight} />
+                    <div className={styles.displayReadKnobPointer} />
+                  </div>
+                </div>
+                <div className={styles.encoderKnobMeta}>
+                  <div className={styles.encoderTopLabel}>Threshold</div>
+                  <div className={styles.encoderValueRow}>
+                    <div className={styles.encoderValueBox}>{summary.channel.compThreshold.toFixed(1)}</div>
+                    <div className={styles.encoderUnit}>dB</div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.encoderBottom}>COMP/EXP</div>
+            </div>
+
+            <div className={styles.encoderCell}>
+              <div className={`${styles.encoderTop} ${styles.encoderTopKnob}`}>
+                <div className={styles.encoderKnobWrap}>
+                  <div className={styles.displayReadKnob} style={{ '--knob-angle': `${-130 + ((summary.channel.pan + 1) / 2) * 260}deg` } as CSSProperties}>
+                    <div className={styles.displayReadKnobHighlight} />
+                    <div className={styles.displayReadKnobPointer} />
+                  </div>
+                </div>
+                <div className={styles.encoderKnobMeta}>
+                  <div className={styles.encoderTopLabel}>Pan</div>
+                  <div className={styles.encoderValueRow}>
+                    <div className={styles.encoderValueBox}>{formatPan(summary.channel.pan)}</div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.encoderBottom}>LR</div>
+            </div>
           </div>
         </>
       ) : (

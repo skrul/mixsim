@@ -3,8 +3,8 @@
   flex-direction: column;
   align-items: center;
   flex: 1 1 auto;
-  min-height: 120px;
-  gap: 4px;
+  min-height: 0;
+  gap: clamp(2px, 0.5vh, 4px);
   user-select: none;
   touch-action: none;
 }
@@ -17,7 +17,7 @@
 }
 
 .hitArea {
-  padding: 8px 0 4px;
+  padding: clamp(2px, 0.8vh, 8px) 0 clamp(2px, 0.5vh, 4px);
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
@@ -30,8 +30,8 @@
   position: relative;
   width: 40px;
   height: 100%;
-  min-height: 96px;
-  max-height: 200px;
+  min-height: clamp(56px, 8vh, 96px);
+  max-height: clamp(120px, 22vh, 200px);
   background: #222;
   border-radius: 3px;
   overflow: visible;
@@ -75,7 +75,7 @@
   position: absolute;
   left: 2px;
   right: 2px;
-  height: 24px;
+  height: clamp(18px, 3vh, 24px);
   background: linear-gradient(to bottom, #ddd, #aaa);
   border: 1px solid #666;
   border-radius: 2px;

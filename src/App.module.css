@@ -9,9 +9,9 @@
 .topSurface {
   display: flex;
   flex-wrap: nowrap;
-  gap: 6px;
+  gap: clamp(4px, 0.7vh, 6px);
   align-items: stretch;
-  padding: 6px 8px 2px;
+  padding: clamp(4px, 0.8vh, 6px) 8px 2px;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -24,7 +24,7 @@
 .mixerSurface {
   display: flex;
   flex: 1;
-  padding: 8px;
+  padding: clamp(4px, 0.8vh, 8px);
   gap: 4px;
   overflow-x: auto;
   overflow-y: hidden;

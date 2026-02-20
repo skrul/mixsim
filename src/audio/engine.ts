@@ -641,6 +641,17 @@ export function createAudioEngine(): AudioEngine {
       )
       unsubscribers.push(unsubHpf)
 
+      // Phase invert
+      const unsubPhaseInvert = store.subscribe(
+        (state) => state.channels[i]?.phaseInvert,
+        (phaseInvert) => {
+          if (phaseInvert !== undefined && context) {
+            chain.phaseGain.gain.setValueAtTime(phaseInvert ? -1 : 1, context.currentTime)
+          }
+        }
+      )
+      unsubscribers.push(unsubPhaseInvert)
+
       // EQ (enabled + all band params as a group)
       const unsubEq = store.subscribe(
         (state) => {

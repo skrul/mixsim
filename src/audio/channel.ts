@@ -4,6 +4,7 @@ import { GAIN_MIN } from '@/state/mixer-model'
 
 export interface ChannelChain {
   sourceAttenuation: GainNode
+  phaseGain: GainNode
   inputGain: GainNode
   preFaderAnalyser: AnalyserNode
   gateGain: GainNode
@@ -37,6 +38,7 @@ export function createChannelChain(
   const preampDbToGain = (gainDb: number): number => (gainDb <= GAIN_MIN ? 0 : dbToGain(gainDb))
 
   const sourceAttenuation = context.createGain()
+  const phaseGain = context.createGain()
   const inputGain = context.createGain()
   const preFaderAnalyser = context.createAnalyser()
   const gateGain = context.createGain()
@@ -63,6 +65,7 @@ export function createChannelChain(
   // Source attenuation simulates mic/line level input
   const typeConfig = INPUT_TYPE_CONFIG[initialState.inputType]
   sourceAttenuation.gain.value = dbToGain(typeConfig.attenuation)
+  phaseGain.gain.value = initialState.phaseInvert ? -1 : 1
 
   // Initial values
   inputGain.gain.value = preampDbToGain(initialState.gain)
@@ -109,6 +112,7 @@ export function createChannelChain(
 
   // Wire signal chain: source → attenuation → gain → processing
   sourceAttenuation
+    .connect(phaseGain)
     .connect(inputGain)
 
   // Pre-fader meter tap (after gain, before processing)
@@ -151,6 +155,7 @@ export function createChannelChain(
 
   return {
     sourceAttenuation,
+    phaseGain,
     inputGain,
     preFaderAnalyser,
     gateGain,

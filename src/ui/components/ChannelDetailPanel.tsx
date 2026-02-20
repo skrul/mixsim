@@ -53,6 +53,8 @@ export function ChannelDetailPanel() {
   const setGateThreshold = useMixerStore((s) => s.setChannelGateThreshold)
   const setCompEnabled = useMixerStore((s) => s.setChannelCompEnabled)
   const setCompThreshold = useMixerStore((s) => s.setChannelCompThreshold)
+  const setPhantom48V = useMixerStore((s) => s.setChannelPhantom48V)
+  const setPhaseInvert = useMixerStore((s) => s.setChannelPhaseInvert)
   const setHpfEnabled = useMixerStore((s) => s.setChannelHpfEnabled)
   const setHpfFreq = useMixerStore((s) => s.setChannelHpfFreq)
   const setEqEnabled = useMixerStore((s) => s.setChannelEqEnabled)
@@ -150,8 +152,8 @@ export function ChannelDetailPanel() {
           </div>
           <div className={styles.preampSwitchLayout}>
             <div className={styles.preampGainSwitches}>
-              <StripButton label="48V" helpText="Toggle phantom power for condenser microphones." />
-              <StripButton label="Ø" helpText="Toggle input polarity inversion." />
+              <StripButton label="48V" active={channel.phantom48V} onClick={() => setPhantom48V(id, !channel.phantom48V)} helpText="Toggle phantom power for condenser microphones." />
+              <StripButton label="Ø" active={channel.phaseInvert} onClick={() => setPhaseInvert(id, !channel.phaseInvert)} helpText="Toggle input polarity inversion." />
             </div>
             <div className={styles.preampFreqSwitches}>
               <StripButton label="LOW CUT" active={channel.hpfEnabled} onClick={() => setHpfEnabled(id, !channel.hpfEnabled)} helpText="Enable or bypass the high-pass filter." />

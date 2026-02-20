@@ -23,6 +23,8 @@ export interface ChannelState {
   gateThreshold: number  // -80..0 dB
   compEnabled: boolean
   compThreshold: number  // -60..0 dB
+  phantom48V: boolean    // Phantom power status (UI/state only)
+  phaseInvert: boolean   // Input polarity inversion (180 degree phase flip)
   hpfEnabled: boolean
   hpfFreq: number        // 20..500 Hz, default 80
   eqEnabled: boolean
@@ -85,6 +87,8 @@ export interface MixerState {
   setChannelGateThreshold: (channelId: number, thresholdDb: number) => void
   setChannelCompEnabled: (channelId: number, enabled: boolean) => void
   setChannelCompThreshold: (channelId: number, thresholdDb: number) => void
+  setChannelPhantom48V: (channelId: number, enabled: boolean) => void
+  setChannelPhaseInvert: (channelId: number, enabled: boolean) => void
   setChannelHpfEnabled: (channelId: number, enabled: boolean) => void
   setChannelHpfFreq: (channelId: number, freq: number) => void
   setChannelEqEnabled: (channelId: number, enabled: boolean) => void
@@ -166,6 +170,8 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     gateThreshold: -58,
     compEnabled: false,
     compThreshold: -25.5,
+    phantom48V: false,
+    phaseInvert: false,
     hpfEnabled: false,
     hpfFreq: 80,
     eqEnabled: false,
@@ -391,6 +397,12 @@ export const useMixerStore = create<MixerState>()(
 
     setChannelCompThreshold: (channelId, thresholdDb) =>
       set((state) => updateChannel(state, channelId, { compThreshold: thresholdDb })),
+
+    setChannelPhantom48V: (channelId, enabled) =>
+      set((state) => updateChannel(state, channelId, { phantom48V: enabled })),
+
+    setChannelPhaseInvert: (channelId, enabled) =>
+      set((state) => updateChannel(state, channelId, { phaseInvert: enabled })),
 
     setChannelHpfEnabled: (channelId, enabled) =>
       set((state) => updateChannel(state, channelId, { hpfEnabled: enabled })),

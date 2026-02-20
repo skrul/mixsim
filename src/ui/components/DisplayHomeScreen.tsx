@@ -273,11 +273,11 @@ export function DisplayHomeScreen() {
                       </div>
                     </div>
                     <div className={styles.inFlags}>
-                      <div className={`${styles.inFlagRow} ${styles.inFlagOff}`}>
+                      <div className={`${styles.inFlagRow} ${summary.channel.phantom48V ? styles.inFlagOn : styles.inFlagOff}`}>
                         <span className={styles.inFlagGlyph}>⚡</span>
                         <span className={styles.inFlagLabel}>48V</span>
                       </div>
-                      <div className={`${styles.inFlagRow} ${styles.inFlagOff}`}>
+                      <div className={`${styles.inFlagRow} ${summary.channel.phaseInvert ? styles.inFlagOn : styles.inFlagOff}`}>
                         <span className={styles.inFlagGlyph}>Φ</span>
                         <span className={styles.inFlagLabel}>INVERT</span>
                       </div>

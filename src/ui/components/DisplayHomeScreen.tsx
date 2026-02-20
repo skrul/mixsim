@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { GAIN_MAX, GAIN_MIN, useMixerStore } from '@/state/mixer-store'
-import { meterLevels } from '@/audio/metering'
+import { dynamicsLevels, meterLevels } from '@/audio/metering'
 import { useSurfaceStore, type SelectedFocus } from '@/state/surface-store'
 import styles from './DisplayHomeScreen.module.css'
 
@@ -68,7 +68,9 @@ export function DisplayHomeScreen() {
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
   const [clockText, setClockText] = useState({ hm: '12:00', sec: '00', ampm: 'AM' })
   const [inMeterLit, setInMeterLit] = useState(0)
+  const [gateReductionNorm, setGateReductionNorm] = useState(0)
   const inMeterDbRef = useRef(-Infinity)
+  const gateReductionRef = useRef(0)
   const inMeterRafRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -100,6 +102,14 @@ export function DisplayHomeScreen() {
         if (nextDb >= IN_METER_THRESHOLDS[i]) lit++
       }
       setInMeterLit((prev) => (prev === lit ? prev : lit))
+
+      const targetGateNorm = clamp((dynamicsLevels.gateReductionDb[channelIndex] ?? 0) / 30, 0, 1)
+      const nextGate = targetGateNorm > gateReductionRef.current
+        ? targetGateNorm
+        : Math.max(gateReductionRef.current - 0.04, targetGateNorm)
+      gateReductionRef.current = nextGate
+      setGateReductionNorm((prev) => (Math.abs(prev - nextGate) < 0.002 ? prev : nextGate))
+
       inMeterRafRef.current = requestAnimationFrame(tick)
     }
     inMeterRafRef.current = requestAnimationFrame(tick)
@@ -159,12 +169,16 @@ export function DisplayHomeScreen() {
     if (!channel) return null
     const gainNorm = clamp((channel.gain - GAIN_MIN) / (GAIN_MAX - GAIN_MIN), 0, 1)
     const gainAngle = -130 + gainNorm * 260
+    const gateAngle = -130 + ((channel.gateThreshold + 80) / 80) * 260
+    const gateThresholdNorm = clamp((channel.gateThreshold + 80) / 80, 0, 1)
     return {
       kind: 'channel' as const,
       headerId: `CH${target.index + 1}`,
       headerLabel: channel.label || `Channel ${target.index + 1}`,
       channel,
       gainAngle,
+      gateAngle,
+      gateThresholdNorm,
       encoderValues: [
         formatDb(channel.gain),
         channel.gateEnabled ? channel.gateThreshold.toFixed(1) : 'OFF',
@@ -309,7 +323,65 @@ export function DisplayHomeScreen() {
                   </div>
                 </div>
               </div>
-              {['GATE', 'EQ', 'DYNAMICS', 'INS', 'OUT', 'AUTO', 'BUS SENDS'].map((label) => (
+              <div className={`${styles.signalCell} ${styles.gateTile}`}>
+                <div className={styles.signalCellHeader}>GATE</div>
+                <div className={styles.gateTileBody}>
+                  <div className={styles.gateGraphWrap}>
+                    <div className={styles.gateGraphGrid}>
+                      <svg className={styles.gateGraphSvg} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                        {Array.from({ length: 9 }, (_, i) => {
+                          const p = (i / 8) * 100
+                          return <line key={`gx-${i}`} x1={p} y1={0} x2={p} y2={100} className={styles.gateGridLine} />
+                        })}
+                        {Array.from({ length: 9 }, (_, i) => {
+                          const p = (i / 8) * 100
+                          return <line key={`gy-${i}`} x1={0} y1={p} x2={100} y2={p} className={styles.gateGridLine} />
+                        })}
+                        {summary.channel.gateEnabled ? (
+                          <>
+                            <line
+                              x1={summary.gateThresholdNorm * 100}
+                              y1={100}
+                              x2={summary.gateThresholdNorm * 100}
+                              y2={(1 - summary.gateThresholdNorm) * 100}
+                              className={styles.gateCurveLine}
+                            />
+                            <line
+                              x1={summary.gateThresholdNorm * 100}
+                              y1={(1 - summary.gateThresholdNorm) * 100}
+                              x2={100}
+                              y2={0}
+                              className={styles.gateCurveLine}
+                            />
+                          </>
+                        ) : (
+                          <line x1={0} y1={100} x2={100} y2={0} className={styles.gateCurveLine} />
+                        )}
+                      </svg>
+                    </div>
+                    <div className={styles.gateGraphMeter}>
+                      <div
+                        className={styles.gateGraphMeterFill}
+                        style={{ height: `${Math.round(gateReductionNorm * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.gateTileLower}>
+                    <div className={`${styles.gateBadge} ${summary.channel.gateEnabled ? styles.gateBadgeActive : ''}`}>GATE</div>
+                    <div className={styles.gateValueBadge}>
+                      {summary.channel.gateEnabled ? summary.channel.gateThreshold.toFixed(1) : 'OFF'}
+                    </div>
+                    <div className={styles.inKnobWrap}>
+                      <div className={styles.displayReadKnob} style={{ '--knob-angle': `${summary.gateAngle}deg` } as CSSProperties}>
+                        <div className={styles.displayReadKnobHighlight} />
+                        <div className={styles.displayReadKnobPointer} />
+                      </div>
+                    </div>
+                    <div className={styles.inKnobLabel}>THRESH</div>
+                  </div>
+                </div>
+              </div>
+              {['EQ', 'DYNAMICS', 'INS', 'OUT', 'AUTO', 'BUS SENDS'].map((label) => (
                 <div key={label} className={styles.signalCell}>
                   <div className={styles.signalCellHeader}>{label}</div>
                   <div className={styles.signalCellBody} />

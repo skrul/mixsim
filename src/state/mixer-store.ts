@@ -26,12 +26,14 @@ export interface ChannelState {
   phantom48V: boolean    // Phantom power status (UI/state only)
   phaseInvert: boolean   // Input polarity inversion (180 degree phase flip)
   hpfEnabled: boolean
-  hpfFreq: number        // 20..500 Hz, default 80
+  hpfFreq: number        // 0..400 Hz, default 100
   eqEnabled: boolean
   eqLowFreq: number      // 40..500 Hz, default 200
   eqLowGain: number      // -15..+15 dB, default 0
-  eqMidFreq: number      // 200..8000 Hz, default 1000
-  eqMidGain: number      // -15..+15 dB, default 0
+  eqLowMidFreq: number   // 100..3000 Hz, default 400
+  eqLowMidGain: number   // -15..+15 dB, default 0
+  eqHighMidFreq: number  // 800..10000 Hz, default 3000
+  eqHighMidGain: number  // -15..+15 dB, default 0
   eqMidQ: number         // 0.1..10, default 1.0
   eqHighFreq: number     // 2000..16000 Hz, default 5000
   eqHighGain: number     // -15..+15 dB, default 0
@@ -94,8 +96,10 @@ export interface MixerState {
   setChannelEqEnabled: (channelId: number, enabled: boolean) => void
   setChannelEqLowFreq: (channelId: number, freq: number) => void
   setChannelEqLowGain: (channelId: number, gain: number) => void
-  setChannelEqMidFreq: (channelId: number, freq: number) => void
-  setChannelEqMidGain: (channelId: number, gain: number) => void
+  setChannelEqLowMidFreq: (channelId: number, freq: number) => void
+  setChannelEqLowMidGain: (channelId: number, gain: number) => void
+  setChannelEqHighMidFreq: (channelId: number, freq: number) => void
+  setChannelEqHighMidGain: (channelId: number, gain: number) => void
   setChannelEqMidQ: (channelId: number, q: number) => void
   setChannelEqHighFreq: (channelId: number, freq: number) => void
   setChannelEqHighGain: (channelId: number, gain: number) => void
@@ -173,14 +177,16 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     phantom48V: false,
     phaseInvert: false,
     hpfEnabled: false,
-    hpfFreq: 80,
+    hpfFreq: 100,
     eqEnabled: false,
     eqLowFreq: 200,
     eqLowGain: 0,
-    eqMidFreq: 1000,
-    eqMidGain: 0,
+    eqLowMidFreq: 400,
+    eqLowMidGain: 0,
+    eqHighMidFreq: 3000,
+    eqHighMidGain: 0,
     eqMidQ: 1.0,
-    eqHighFreq: 5000,
+    eqHighFreq: 6000,
     eqHighGain: 0,
     eqSelectedBand: 'highMid',
     eqModeIndex: 0,
@@ -408,7 +414,7 @@ export const useMixerStore = create<MixerState>()(
       set((state) => updateChannel(state, channelId, { hpfEnabled: enabled })),
 
     setChannelHpfFreq: (channelId, freq) =>
-      set((state) => updateChannel(state, channelId, { hpfFreq: freq })),
+      set((state) => updateChannel(state, channelId, { hpfFreq: Math.max(0, Math.min(400, freq)) })),
 
     setChannelEqEnabled: (channelId, enabled) =>
       set((state) => {
@@ -424,11 +430,17 @@ export const useMixerStore = create<MixerState>()(
     setChannelEqLowGain: (channelId, gain) =>
       set((state) => updateChannel(state, channelId, { eqLowGain: gain })),
 
-    setChannelEqMidFreq: (channelId, freq) =>
-      set((state) => updateChannel(state, channelId, { eqMidFreq: freq })),
+    setChannelEqLowMidFreq: (channelId, freq) =>
+      set((state) => updateChannel(state, channelId, { eqLowMidFreq: freq })),
 
-    setChannelEqMidGain: (channelId, gain) =>
-      set((state) => updateChannel(state, channelId, { eqMidGain: gain })),
+    setChannelEqLowMidGain: (channelId, gain) =>
+      set((state) => updateChannel(state, channelId, { eqLowMidGain: gain })),
+
+    setChannelEqHighMidFreq: (channelId, freq) =>
+      set((state) => updateChannel(state, channelId, { eqHighMidFreq: freq })),
+
+    setChannelEqHighMidGain: (channelId, gain) =>
+      set((state) => updateChannel(state, channelId, { eqHighMidGain: gain })),
 
     setChannelEqMidQ: (channelId, q) =>
       set((state) => updateChannel(state, channelId, { eqMidQ: q })),

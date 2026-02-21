@@ -37,12 +37,13 @@ interface GateRuntime {
   detectorBuffer: Float32Array<ArrayBuffer>
 }
 
-type EqTargetBand = 'low' | 'mid' | 'high'
+type EqTargetBand = 'low' | 'lowMid' | 'highMid' | 'high'
 
 function mapSelectedBandToEqTarget(selectedBand: 'high' | 'highMid' | 'lowMid' | 'low'): EqTargetBand {
   if (selectedBand === 'high') return 'high'
   if (selectedBand === 'low') return 'low'
-  return 'mid'
+  if (selectedBand === 'lowMid') return 'lowMid'
+  return 'highMid'
 }
 
 function mapEqModeToBiquadType(modeIndex: number): BiquadFilterType {
@@ -632,7 +633,7 @@ export function createAudioEngine(): AudioEngine {
         (hpf) => {
           if (hpf && context) {
             chain.hpf.frequency.setValueAtTime(
-              hpf.enabled ? hpf.freq : 10,
+              hpf.enabled ? Math.max(10, hpf.freq) : 10,
               context.currentTime
             )
           }
@@ -662,7 +663,9 @@ export function createAudioEngine(): AudioEngine {
             selectedBand: ch.eqSelectedBand,
             modeIndex: ch.eqModeIndex,
             lowFreq: ch.eqLowFreq, lowGain: ch.eqLowGain,
-            midFreq: ch.eqMidFreq, midGain: ch.eqMidGain, midQ: ch.eqMidQ,
+            lowMidFreq: ch.eqLowMidFreq, lowMidGain: ch.eqLowMidGain,
+            highMidFreq: ch.eqHighMidFreq, highMidGain: ch.eqHighMidGain,
+            midQ: ch.eqMidQ,
             highFreq: ch.eqHighFreq, highGain: ch.eqHighGain,
           }
         },
@@ -676,10 +679,15 @@ export function createAudioEngine(): AudioEngine {
           chain.eqLow.gain.setValueAtTime(eq.enabled ? eq.lowGain : 0, t)
           chain.eqLow.Q.setValueAtTime(0.707, t)
 
-          chain.eqMid.type = 'peaking'
-          chain.eqMid.frequency.setValueAtTime(eq.midFreq, t)
-          chain.eqMid.gain.setValueAtTime(eq.enabled ? eq.midGain : 0, t)
-          chain.eqMid.Q.setValueAtTime(eq.midQ, t)
+          chain.eqLowMid.type = 'peaking'
+          chain.eqLowMid.frequency.setValueAtTime(eq.lowMidFreq, t)
+          chain.eqLowMid.gain.setValueAtTime(eq.enabled ? eq.lowMidGain : 0, t)
+          chain.eqLowMid.Q.setValueAtTime(eq.midQ, t)
+
+          chain.eqHighMid.type = 'peaking'
+          chain.eqHighMid.frequency.setValueAtTime(eq.highMidFreq, t)
+          chain.eqHighMid.gain.setValueAtTime(eq.enabled ? eq.highMidGain : 0, t)
+          chain.eqHighMid.Q.setValueAtTime(eq.midQ, t)
 
           chain.eqHigh.type = 'highshelf'
           chain.eqHigh.frequency.setValueAtTime(eq.highFreq, t)
@@ -690,9 +698,27 @@ export function createAudioEngine(): AudioEngine {
 
           const targetBand = mapSelectedBandToEqTarget(eq.selectedBand)
           const modeType = mapEqModeToBiquadType(eq.modeIndex)
-          const targetNode = targetBand === 'low' ? chain.eqLow : targetBand === 'mid' ? chain.eqMid : chain.eqHigh
-          const targetFreq = targetBand === 'low' ? eq.lowFreq : targetBand === 'mid' ? eq.midFreq : eq.highFreq
-          const targetGain = targetBand === 'low' ? eq.lowGain : targetBand === 'mid' ? eq.midGain : eq.highGain
+          const targetNode = targetBand === 'low'
+            ? chain.eqLow
+            : targetBand === 'lowMid'
+              ? chain.eqLowMid
+              : targetBand === 'highMid'
+                ? chain.eqHighMid
+                : chain.eqHigh
+          const targetFreq = targetBand === 'low'
+            ? eq.lowFreq
+            : targetBand === 'lowMid'
+              ? eq.lowMidFreq
+              : targetBand === 'highMid'
+                ? eq.highMidFreq
+                : eq.highFreq
+          const targetGain = targetBand === 'low'
+            ? eq.lowGain
+            : targetBand === 'lowMid'
+              ? eq.lowMidGain
+              : targetBand === 'highMid'
+                ? eq.highMidGain
+                : eq.highGain
 
           targetNode.type = modeType
           targetNode.frequency.setValueAtTime(targetFreq, t)
@@ -716,7 +742,9 @@ export function createAudioEngine(): AudioEngine {
             a?.selectedBand === b?.selectedBand &&
             a?.modeIndex === b?.modeIndex &&
             a?.lowFreq === b?.lowFreq && a?.lowGain === b?.lowGain &&
-            a?.midFreq === b?.midFreq && a?.midGain === b?.midGain && a?.midQ === b?.midQ &&
+            a?.lowMidFreq === b?.lowMidFreq && a?.lowMidGain === b?.lowMidGain &&
+            a?.highMidFreq === b?.highMidFreq && a?.highMidGain === b?.highMidGain &&
+            a?.midQ === b?.midQ &&
             a?.highFreq === b?.highFreq && a?.highGain === b?.highGain,
         }
       )

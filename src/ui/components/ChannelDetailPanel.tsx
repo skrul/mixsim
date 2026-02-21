@@ -60,8 +60,10 @@ export function ChannelDetailPanel() {
   const setEqEnabled = useMixerStore((s) => s.setChannelEqEnabled)
   const setEqLowFreq = useMixerStore((s) => s.setChannelEqLowFreq)
   const setEqLowGain = useMixerStore((s) => s.setChannelEqLowGain)
-  const setEqMidFreq = useMixerStore((s) => s.setChannelEqMidFreq)
-  const setEqMidGain = useMixerStore((s) => s.setChannelEqMidGain)
+  const setEqLowMidFreq = useMixerStore((s) => s.setChannelEqLowMidFreq)
+  const setEqLowMidGain = useMixerStore((s) => s.setChannelEqLowMidGain)
+  const setEqHighMidFreq = useMixerStore((s) => s.setChannelEqHighMidFreq)
+  const setEqHighMidGain = useMixerStore((s) => s.setChannelEqHighMidGain)
   const setEqMidQ = useMixerStore((s) => s.setChannelEqMidQ)
   const setEqHighFreq = useMixerStore((s) => s.setChannelEqHighFreq)
   const setEqHighGain = useMixerStore((s) => s.setChannelEqHighGain)
@@ -83,25 +85,41 @@ export function ChannelDetailPanel() {
   const selectedBand = channel.eqSelectedBand
   const selectedBandFreq = selectedBand === 'high'
     ? channel.eqHighFreq
-    : selectedBand === 'low'
+    : selectedBand === 'highMid'
+      ? channel.eqHighMidFreq
+      : selectedBand === 'lowMid'
+        ? channel.eqLowMidFreq
+        : selectedBand === 'low'
       ? channel.eqLowFreq
-      : channel.eqMidFreq
+      : channel.eqHighMidFreq
   const selectedBandGain = selectedBand === 'high'
     ? channel.eqHighGain
-    : selectedBand === 'low'
+    : selectedBand === 'highMid'
+      ? channel.eqHighMidGain
+      : selectedBand === 'lowMid'
+        ? channel.eqLowMidGain
+        : selectedBand === 'low'
       ? channel.eqLowGain
-      : channel.eqMidGain
+      : channel.eqHighMidGain
 
   const setSelectedBandFreq = (value: number) => {
     if (selectedBand === 'high') {
       setEqHighFreq(id, value)
       return
     }
+    if (selectedBand === 'highMid') {
+      setEqHighMidFreq(id, value)
+      return
+    }
+    if (selectedBand === 'lowMid') {
+      setEqLowMidFreq(id, value)
+      return
+    }
     if (selectedBand === 'low') {
       setEqLowFreq(id, value)
       return
     }
-    setEqMidFreq(id, value)
+    setEqHighMidFreq(id, value)
   }
 
   const setSelectedBandGain = (value: number) => {
@@ -109,11 +127,19 @@ export function ChannelDetailPanel() {
       setEqHighGain(id, value)
       return
     }
+    if (selectedBand === 'highMid') {
+      setEqHighMidGain(id, value)
+      return
+    }
+    if (selectedBand === 'lowMid') {
+      setEqLowMidGain(id, value)
+      return
+    }
     if (selectedBand === 'low') {
       setEqLowGain(id, value)
       return
     }
-    setEqMidGain(id, value)
+    setEqHighMidGain(id, value)
   }
 
   return (
@@ -139,9 +165,9 @@ export function ChannelDetailPanel() {
             </div>
             <Knob
               value={channel.hpfFreq}
-              min={20}
-              max={500}
-              defaultValue={80}
+              min={0}
+              max={400}
+              defaultValue={100}
               onChange={(v) => setHpfFreq(id, v)}
               label="Frequency"
               formatValue={(v) => `${Math.round(v)} Hz`}
@@ -258,10 +284,34 @@ export function ChannelDetailPanel() {
           <div className={styles.eqCenter}>
             <div className={styles.eqCenterWrap}>
               <Knob
-                value={selectedBandFreq}
-                min={selectedBand === 'high' ? 2000 : selectedBand === 'low' ? 40 : 200}
-                max={selectedBand === 'high' ? 16000 : selectedBand === 'low' ? 500 : 8000}
-                defaultValue={selectedBand === 'high' ? 5000 : selectedBand === 'low' ? 200 : 1000}
+              value={selectedBandFreq}
+                min={
+                  selectedBand === 'high'
+                    ? 2000
+                    : selectedBand === 'highMid'
+                      ? 800
+                      : selectedBand === 'lowMid'
+                        ? 100
+                        : 40
+                }
+                max={
+                  selectedBand === 'high'
+                    ? 16000
+                    : selectedBand === 'highMid'
+                      ? 10000
+                      : selectedBand === 'lowMid'
+                        ? 3000
+                        : 500
+                }
+                defaultValue={
+                  selectedBand === 'high'
+                    ? 6000
+                    : selectedBand === 'highMid'
+                      ? 3000
+                      : selectedBand === 'lowMid'
+                        ? 400
+                        : 200
+                }
                 onChange={setSelectedBandFreq}
                 label="Freq"
                 formatValue={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${Math.round(v)}`)}

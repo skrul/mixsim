@@ -250,9 +250,9 @@
   display: grid;
   grid-template-columns:
     minmax(0, 1.08fr)
-    minmax(0, 1.45fr)
-    minmax(0, 2.1fr)
-    minmax(0, 1.45fr)
+    minmax(0, 1.3fr)
+    minmax(0, 2.4fr)
+    minmax(0, 1.3fr)
     minmax(0, 0.6fr)
     minmax(0, 0.4fr)
     minmax(0, 0.72fr)
@@ -571,9 +571,77 @@
   background: #7586ac;
 }
 
+.eqTile {
+  overflow: hidden;
+  background: #7586ac;
+}
+
 .dynTile {
   overflow: hidden;
   background: #7586ac;
+}
+
+.eqTileBody {
+  display: grid;
+  grid-template-rows: 72px minmax(0, 1fr);
+  min-height: 0;
+  height: 100%;
+}
+
+.eqGraphWrap {
+  margin: 2px;
+  border: 1px solid #4f5d79;
+  background: #1d2332;
+  overflow: hidden;
+}
+
+.eqGraphGrid {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #171d2b;
+}
+
+.eqGraphSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.eqGridMajor {
+  stroke: rgba(90, 102, 132, 0.68);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.eqGridMinor {
+  stroke: rgba(64, 75, 99, 0.55);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.eqGridZero {
+  stroke: #b8c5df;
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.eqAreaBoost {
+  fill: rgba(240, 204, 86, 0.2);
+}
+
+.eqAreaCut {
+  fill: rgba(118, 170, 230, 0.16);
+}
+
+.eqCurveLine {
+  stroke: #f0d15d;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  vector-effect: non-scaling-stroke;
 }
 
 .gateTileBody {
@@ -1077,39 +1145,66 @@
 
 .busSendsTile {
   overflow: hidden;
+  background: #7586ac;
 }
 
 .busSendsList {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 3px 4px;
+  display: grid;
+  grid-template-rows: repeat(16, minmax(0, 1fr));
+  gap: 1px;
+  padding: 2px;
+  min-height: 0;
+  flex: 1;
   overflow: hidden;
 }
 
 .busSendRow {
   display: grid;
-  grid-template-columns: 12px minmax(0, 1fr);
+  grid-template-columns: 16px minmax(0, 1fr);
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  min-height: 0;
 }
 
-.busSendLabel {
-  font-size: 8px;
-  color: #d8dff0;
-  font-weight: 700;
-  text-align: right;
-}
-
-.sendBar {
-  height: 6px;
-  border: 1px solid #4f5a73;
-  background: #262d3c;
-}
-
-.sendFill {
+.busSendLabelChip {
   height: 100%;
-  background: #ffd14a;
+  min-height: 0;
+  font-size: 8px;
+  line-height: 1;
+  color: #d9e1f1;
+  font-weight: 800;
+  border: 1px solid #7d89a8;
+  background: #5d6886;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1px;
+}
+
+.busSendLabelChipAlt {
+  background: #d0d9eb;
+  color: #5f6e8e;
+  border-color: #9aa8c8;
+}
+
+.busSendTrack {
+  height: 100%;
+  min-height: 0;
+  border: 1px solid #3f4962;
+  background: #1f2533;
+  display: flex;
+  align-items: center;
+  padding: 1px;
+  border-radius: 1px;
+  box-sizing: border-box;
+}
+
+.busSendFill {
+  height: 100%;
+  min-width: 0;
+  background: linear-gradient(180deg, #f4d25d 0%, #e6b942 100%);
+  box-shadow: 0 0 2px rgba(244, 210, 93, 0.4);
+  border-radius: 1px;
 }
 
 .valueList {

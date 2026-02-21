@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { GAIN_MAX, GAIN_MIN, useMixerStore } from '@/state/mixer-store'
+import { GAIN_MAX, GAIN_MIN, useMixerStore, type ChannelState } from '@/state/mixer-store'
 import { dynamicsLevels, meterLevels } from '@/audio/metering'
 import { useSurfaceStore, type SelectedFocus } from '@/state/surface-store'
 import styles from './DisplayHomeScreen.module.css'
@@ -13,6 +13,55 @@ const DISPLAY_TILE_METER_THRESHOLDS = [
   -60, -57, -54, -51, -48, -45, -42, -39, -36, -33, -30,
   -27, -24, -21, -18, -15, -12, -10, -8, -6, -4, 0,
 ]
+const EQ_MIN_FREQ = 20
+const EQ_MAX_FREQ = 20000
+const EQ_MIN_DB = -20
+const EQ_MAX_DB = 20
+const EQ_GRID_MAJOR_FREQS = [20, 40, 60, 100, 200, 300, 400, 500, 600, 800, 1000, 2000, 3000, 4000, 5000, 6000, 8000, 10000, 20000]
+const EQ_GRID_MINOR_FREQS = [30, 50, 70, 150, 250, 700, 1500, 2500, 7000, 12000]
+
+function freqToNorm(freq: number): number {
+  const minL = Math.log10(EQ_MIN_FREQ)
+  const maxL = Math.log10(EQ_MAX_FREQ)
+  return clamp((Math.log10(freq) - minL) / (maxL - minL), 0, 1)
+}
+
+function dbToNorm(db: number): number {
+  return clamp((db - EQ_MIN_DB) / (EQ_MAX_DB - EQ_MIN_DB), 0, 1)
+}
+
+function highPassContributionDb(freq: number, cutoffHz: number): number {
+  if (freq >= cutoffHz) return 0
+  const ratio = Math.max(freq / cutoffHz, 1e-3)
+  return Math.max(-24, 20 * Math.log10(ratio))
+}
+
+function shelfContributionDb(freq: number, cutoffHz: number, gainDb: number, highShelf: boolean): number {
+  const x = Math.log2(Math.max(freq, 1e-3) / Math.max(cutoffHz, 1e-3))
+  const t = 1 / (1 + Math.exp(-x * 3))
+  return highShelf ? gainDb * t : gainDb * (1 - t)
+}
+
+function bellContributionDb(freq: number, centerHz: number, gainDb: number, q: number): number {
+  const x = Math.log2(Math.max(freq, 1e-3) / Math.max(centerHz, 1e-3))
+  const sigma = Math.max(0.15, 1 / Math.max(0.3, q))
+  const shape = Math.exp(-(x * x) / (2 * sigma * sigma))
+  return gainDb * shape
+}
+
+function computeEqResponseDb(freq: number, channel: ChannelState): number {
+  let db = 0
+  if (channel.hpfEnabled) {
+    db += highPassContributionDb(freq, channel.hpfFreq)
+  }
+  if (channel.eqEnabled) {
+    db += shelfContributionDb(freq, channel.eqLowFreq, channel.eqLowGain, false)
+    db += bellContributionDb(freq, channel.eqLowMidFreq, channel.eqLowMidGain, channel.eqMidQ)
+    db += bellContributionDb(freq, channel.eqHighMidFreq, channel.eqHighMidGain, channel.eqMidQ)
+    db += shelfContributionDb(freq, channel.eqHighFreq, channel.eqHighGain, true)
+  }
+  return clamp(db, EQ_MIN_DB, EQ_MAX_DB)
+}
 
 function formatDb(value: number): string {
   if (!Number.isFinite(value)) return '0.0 dB'
@@ -218,6 +267,56 @@ export function DisplayHomeScreen() {
     }
   }, [channels, dcaGroups, mixBuses, target])
 
+  const eqGraph = useMemo(() => {
+    if (!summary || summary.kind !== 'channel') return null
+    const showCurve = summary.channel.hpfEnabled || summary.channel.eqEnabled
+    const pointCount = 90
+    const zeroY = 100 - dbToNorm(0) * 100
+    const points = Array.from({ length: pointCount }, (_, i) => {
+      const normX = i / (pointCount - 1)
+      const freq = EQ_MIN_FREQ * Math.pow(EQ_MAX_FREQ / EQ_MIN_FREQ, normX)
+      const db = computeEqResponseDb(freq, summary.channel)
+      const y = 100 - dbToNorm(db) * 100
+      return {
+        x: normX * 100,
+        y,
+        yPos: Math.min(y, zeroY),
+        yNeg: Math.max(y, zeroY),
+      }
+    })
+
+    const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(3)} ${p.y.toFixed(3)}`).join(' ')
+    const posAreaPath = [
+      `M ${points[0].x.toFixed(3)} ${zeroY.toFixed(3)}`,
+      ...points.map((p) => `L ${p.x.toFixed(3)} ${p.yPos.toFixed(3)}`),
+      `L ${points[points.length - 1].x.toFixed(3)} ${zeroY.toFixed(3)}`,
+      'Z',
+    ].join(' ')
+    const negAreaPath = [
+      `M ${points[0].x.toFixed(3)} ${zeroY.toFixed(3)}`,
+      ...points.map((p) => `L ${p.x.toFixed(3)} ${p.yNeg.toFixed(3)}`),
+      `L ${points[points.length - 1].x.toFixed(3)} ${zeroY.toFixed(3)}`,
+      'Z',
+    ].join(' ')
+
+    const majorX = EQ_GRID_MAJOR_FREQS.map((f) => freqToNorm(f) * 100)
+    const minorX = EQ_GRID_MINOR_FREQS.map((f) => freqToNorm(f) * 100)
+    const majorY = [-20, -10, 0, 10, 20].map((d) => 100 - dbToNorm(d) * 100)
+    const minorY = [-15, -5, 5, 15].map((d) => 100 - dbToNorm(d) * 100)
+
+    return {
+      showCurve,
+      zeroY,
+      linePath,
+      posAreaPath,
+      negAreaPath,
+      majorX,
+      minorX,
+      majorY,
+      minorY,
+    }
+  }, [summary])
+
   if (!summary) {
     return <div className={styles.empty}>No selection</div>
   }
@@ -409,9 +508,41 @@ export function DisplayHomeScreen() {
                   </div>
                 </div>
               </div>
-              <div className={styles.signalCell}>
+              <div className={`${styles.signalCell} ${styles.eqTile}`}>
                 <div className={styles.signalCellHeader}>EQ</div>
-                <div className={styles.signalCellBody} />
+                <div className={styles.eqTileBody}>
+                  <div className={styles.eqGraphWrap}>
+                    <div className={styles.eqGraphGrid}>
+                      <svg className={styles.eqGraphSvg} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                        {eqGraph?.minorX.map((x, i) => (
+                          <line key={`eq-minor-x-${i}`} x1={x} y1={0} x2={x} y2={100} className={styles.eqGridMinor} />
+                        ))}
+                        {eqGraph?.majorX.map((x, i) => (
+                          <line key={`eq-major-x-${i}`} x1={x} y1={0} x2={x} y2={100} className={styles.eqGridMajor} />
+                        ))}
+                        {eqGraph?.minorY.map((y, i) => (
+                          <line key={`eq-minor-y-${i}`} x1={0} y1={y} x2={100} y2={y} className={styles.eqGridMinor} />
+                        ))}
+                        {eqGraph?.majorY.map((y, i) => (
+                          <line
+                            key={`eq-major-y-${i}`}
+                            x1={0}
+                            y1={y}
+                            x2={100}
+                            y2={y}
+                            className={Math.abs(y - (eqGraph?.zeroY ?? y)) < 0.001 ? styles.eqGridZero : styles.eqGridMajor}
+                          />
+                        ))}
+                        {eqGraph?.showCurve ? <path d={eqGraph.negAreaPath} className={styles.eqAreaCut} /> : null}
+                        {eqGraph?.showCurve ? <path d={eqGraph.posAreaPath} className={styles.eqAreaBoost} /> : null}
+                        {eqGraph?.showCurve ? <path d={eqGraph.linePath} className={styles.eqCurveLine} /> : null}
+                      </svg>
+                    </div>
+                  </div>
+                  <div className={styles.tileLower}>
+                    <div className={`${styles.tileBadge} ${summary.channel.eqEnabled ? styles.tileBadgeActive : ''}`}>EQ</div>
+                  </div>
+                </div>
               </div>
               <div className={`${styles.signalCell} ${styles.dynTile}`}>
                 <div className={styles.signalCellHeader}>DYNAMICS</div>
@@ -542,9 +673,27 @@ export function DisplayHomeScreen() {
                   <div className={styles.tileKnobLabel}>PAN</div>
                 </div>
               </div>
-              <div className={styles.signalCell}>
+              <div className={`${styles.signalCell} ${styles.busSendsTile}`}>
                 <div className={styles.signalCellHeader}>BUS SENDS</div>
-                <div className={styles.signalCellBody} />
+                <div className={styles.busSendsList}>
+                  {Array.from({ length: 16 }, (_, i) => {
+                    const send = summary.channel.sends[i]
+                    const sendLevel = send ? send.level : 0
+                    return (
+                      <div key={`bus-send-${i + 1}`} className={styles.busSendRow}>
+                        <div className={`${styles.busSendLabelChip} ${i >= 8 ? styles.busSendLabelChipAlt : ''}`}>
+                          {i + 1}
+                        </div>
+                        <div className={styles.busSendTrack}>
+                          <div
+                            className={styles.busSendFill}
+                            style={{ width: `${Math.round(Math.max(0, Math.min(1, sendLevel)) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </div>

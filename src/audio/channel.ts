@@ -12,7 +12,8 @@ export interface ChannelChain {
   compressor: DynamicsCompressorNode
   hpf: BiquadFilterNode
   eqLow: BiquadFilterNode
-  eqMid: BiquadFilterNode
+  eqLowMid: BiquadFilterNode
+  eqHighMid: BiquadFilterNode
   eqHigh: BiquadFilterNode
   panner: StereoPannerNode
   faderGain: GainNode
@@ -46,7 +47,8 @@ export function createChannelChain(
   const compressor = context.createDynamicsCompressor()
   const hpf = context.createBiquadFilter()
   const eqLow = context.createBiquadFilter()
-  const eqMid = context.createBiquadFilter()
+  const eqLowMid = context.createBiquadFilter()
+  const eqHighMid = context.createBiquadFilter()
   const eqHigh = context.createBiquadFilter()
   const panner = context.createStereoPanner()
   const faderGain = context.createGain()
@@ -77,17 +79,22 @@ export function createChannelChain(
   compressor.knee.value = 6
 
   hpf.type = 'highpass'
-  hpf.frequency.value = initialState.hpfEnabled ? initialState.hpfFreq : 10
+  hpf.frequency.value = initialState.hpfEnabled ? Math.max(10, initialState.hpfFreq) : 10
   hpf.Q.value = 0.707
 
   eqLow.type = 'lowshelf'
   eqLow.frequency.value = initialState.eqLowFreq
   eqLow.gain.value = initialState.eqEnabled ? initialState.eqLowGain : 0
 
-  eqMid.type = 'peaking'
-  eqMid.frequency.value = initialState.eqMidFreq
-  eqMid.gain.value = initialState.eqEnabled ? initialState.eqMidGain : 0
-  eqMid.Q.value = initialState.eqMidQ
+  eqLowMid.type = 'peaking'
+  eqLowMid.frequency.value = initialState.eqLowMidFreq
+  eqLowMid.gain.value = initialState.eqEnabled ? initialState.eqLowMidGain : 0
+  eqLowMid.Q.value = initialState.eqMidQ
+
+  eqHighMid.type = 'peaking'
+  eqHighMid.frequency.value = initialState.eqHighMidFreq
+  eqHighMid.gain.value = initialState.eqEnabled ? initialState.eqHighMidGain : 0
+  eqHighMid.Q.value = initialState.eqMidQ
 
   eqHigh.type = 'highshelf'
   eqHigh.frequency.value = initialState.eqHighFreq
@@ -123,7 +130,8 @@ export function createChannelChain(
     .connect(gateGain)
     .connect(hpf)
     .connect(eqLow)
-    .connect(eqMid)
+    .connect(eqLowMid)
+    .connect(eqHighMid)
     .connect(eqHigh)
     .connect(compressor)
     .connect(panner)
@@ -163,7 +171,8 @@ export function createChannelChain(
     compressor,
     hpf,
     eqLow,
-    eqMid,
+    eqLowMid,
+    eqHighMid,
     eqHigh,
     panner,
     faderGain,

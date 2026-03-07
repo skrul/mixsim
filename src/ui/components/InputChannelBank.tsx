@@ -1,6 +1,6 @@
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
-import { NUM_INPUT_CHANNELS, NUM_AUX_CHANNELS } from '@/state/mixer-model'
+import { NUM_INPUT_CHANNELS } from '@/state/mixer-model'
 import { InputChannel } from './InputChannel'
 import styles from './InputChannelBank.module.css'
 

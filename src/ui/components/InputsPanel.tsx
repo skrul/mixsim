@@ -54,7 +54,7 @@ interface InputsPanelProps {
   compact?: boolean
 }
 
-export function InputsPanel({ compact }: InputsPanelProps) {
+export function InputsPanel({ compact: _compact }: InputsPanelProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [popupRect, setPopupRect] = useState<PopupRect>({
     x: 72,

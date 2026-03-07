@@ -71,6 +71,7 @@ export interface MixerState {
   soloActive: boolean
   availableTracks: { index: number; label: string; songTitle: string; stereo: boolean }[]
   availableLiveDevices: { deviceId: string; label: string }[]
+  liveDeviceChannelCounts: Record<string, number>
   playbackDevice: {
     trackIndex: number | null
     playing: boolean
@@ -80,6 +81,7 @@ export interface MixerState {
   setChannelInputSource: (channelId: number, source: ChannelInputSource) => void
   setAvailableTracks: (tracks: { index: number; label: string; songTitle: string; stereo: boolean }[]) => void
   setAvailableLiveDevices: (devices: { deviceId: string; label: string }[]) => void
+  setLiveDeviceChannelCount: (deviceId: string, count: number) => void
 
   // Channel actions
   setChannelGain: (channelId: number, gainDb: number) => void
@@ -335,6 +337,7 @@ export const useMixerStore = create<MixerState>()(
     soloActive: false,
     availableTracks: [],
     availableLiveDevices: [],
+    liveDeviceChannelCounts: {},
     playbackDevice: { trackIndex: null, playing: false },
 
     // Input source actions
@@ -353,9 +356,14 @@ export const useMixerStore = create<MixerState>()(
           case 'tone':
             label = getToneLabel(source.toneIndex)
             break
-          case 'live':
-            label = state.availableLiveDevices.find((d) => d.deviceId === source.deviceId)?.label
+          case 'live': {
+            const deviceLabel = state.availableLiveDevices.find((d) => d.deviceId === source.deviceId)?.label
+            label = deviceLabel
+            if (label && source.channel !== undefined) {
+              label = `${label} Ch ${source.channel + 1}`
+            }
             break
+          }
           case 'device':
             label = source.channel === 'left' ? 'Player L' : 'Player R'
             break
@@ -372,6 +380,11 @@ export const useMixerStore = create<MixerState>()(
     setAvailableTracks: (tracks) => set({ availableTracks: tracks }),
 
     setAvailableLiveDevices: (devices) => set({ availableLiveDevices: devices }),
+
+    setLiveDeviceChannelCount: (deviceId, count) =>
+      set((state) => ({
+        liveDeviceChannelCounts: { ...state.liveDeviceChannelCounts, [deviceId]: count },
+      })),
 
     // Channel actions
     setChannelGain: (channelId, gainDb) =>
@@ -768,6 +781,7 @@ export const useMixerStore = create<MixerState>()(
         duration: state.duration,
         availableTracks: state.availableTracks,
         availableLiveDevices: state.availableLiveDevices,
+        liveDeviceChannelCounts: state.liveDeviceChannelCounts,
         playbackDevice: state.playbackDevice,
       })),
   }))

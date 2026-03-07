@@ -79,6 +79,7 @@ interface ActiveChannelSource {
   nodes: AudioNode[]           // all nodes to disconnect on teardown
   stopFn?: () => void          // stop oscillators/buffer sources
   stream?: MediaStream         // live input stream to stop tracks
+  liveDeviceId?: string        // deviceId for shared live stream refcounting
 }
 
 // ---- SourceManager ----
@@ -96,6 +97,13 @@ export class SourceManager {
   private deviceRightOutput: GainNode
   private deviceSource: AudioBufferSourceNode | null = null
   private deviceSplitter: ChannelSplitterNode | null = null
+  private liveDevices: Map<string, {
+    stream: MediaStream
+    sourceNode: MediaStreamAudioSourceNode
+    splitter: ChannelSplitterNode
+    channelCount: number
+    refCount: number
+  }> = new Map()
 
   constructor(context: AudioContext, channels: ChannelChain[]) {
     this.context = context
@@ -136,7 +144,7 @@ export class SourceManager {
         }
         break
       case 'live':
-        this.connectLive(index, source.deviceId)
+        this.connectLive(index, source.deviceId, source.channel)
         break
       case 'device': {
         const outputNode = source.channel === 'left' ? this.deviceLeftOutput : this.deviceRightOutput
@@ -228,6 +236,13 @@ export class SourceManager {
     for (let i = 0; i < this.channels.length; i++) {
       this.teardownChannel(i)
     }
+    // Stop any remaining shared live devices
+    for (const entry of this.liveDevices.values()) {
+      entry.splitter.disconnect()
+      entry.sourceNode.disconnect()
+      entry.stream.getTracks().forEach((t) => t.stop())
+    }
+    this.liveDevices.clear()
     this.whiteNoiseBuffer = null
     this.pinkNoiseBuffer = null
     this.trackBuffers = []
@@ -243,7 +258,19 @@ export class SourceManager {
     for (const node of active.nodes) {
       try { node.disconnect() } catch { /* already disconnected */ }
     }
-    if (active.stream) {
+    if (active.liveDeviceId) {
+      // Decrement shared device refcount; tear down source+splitter when no channels use it
+      const entry = this.liveDevices.get(active.liveDeviceId)
+      if (entry) {
+        entry.refCount--
+        if (entry.refCount <= 0) {
+          entry.splitter.disconnect()
+          entry.sourceNode.disconnect()
+          entry.stream.getTracks().forEach((t) => t.stop())
+          this.liveDevices.delete(active.liveDeviceId)
+        }
+      }
+    } else if (active.stream) {
       active.stream.getTracks().forEach((t) => t.stop())
     }
     this.activeSources[index] = null
@@ -335,39 +362,70 @@ export class SourceManager {
     }
   }
 
-  private async connectLive(channelIndex: number, deviceId: string): Promise<void> {
+  private async connectLive(channelIndex: number, deviceId: string, channel?: number): Promise<void> {
     try {
       // Resume AudioContext if suspended (requires prior user gesture)
       if (this.context.state === 'suspended') {
         await this.context.resume()
       }
 
-      // Request the specific device — this also triggers permission prompt if needed.
-      // Use `ideal` instead of `exact` so it falls back to default device if the
-      // pre-permission deviceId doesn't match after permission is granted.
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          deviceId: deviceId ? { ideal: deviceId } : undefined,
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-        },
-      })
+      // Reuse an existing device entry or open a new one.
+      // A single MediaStreamAudioSourceNode + ChannelSplitterNode is shared
+      // across all mixer channels that use the same hardware device.
+      let entry = this.liveDevices.get(deviceId)
+      if (!entry) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: deviceId ? { ideal: deviceId } : undefined,
+            channelCount: { ideal: 32 },
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+        })
 
-      // Re-enumerate with full labels now that we have permission
-      const devices = await navigator.mediaDevices.enumerateDevices()
-      const audioInputs = devices
-        .filter((d) => d.kind === 'audioinput')
-        .map((d) => ({ deviceId: d.deviceId, label: d.label || `Input ${d.deviceId.slice(0, 8)}` }))
-      useMixerStore.getState().setAvailableLiveDevices(audioInputs)
+        // Re-enumerate with full labels now that we have permission
+        const devices = await navigator.mediaDevices.enumerateDevices()
+        const audioInputs = devices
+          .filter((d) => d.kind === 'audioinput')
+          .map((d) => ({ deviceId: d.deviceId, label: d.label || `Input ${d.deviceId.slice(0, 8)}` }))
+        useMixerStore.getState().setAvailableLiveDevices(audioInputs)
 
-      const mediaSource = this.context.createMediaStreamSource(stream)
-      mediaSource.connect(this.channels[channelIndex].inputNode)
+        const channelCount = stream.getAudioTracks()[0]?.getSettings()?.channelCount ?? 1
+        const sourceNode = this.context.createMediaStreamSource(stream)
+        const splitter = this.context.createChannelSplitter(channelCount)
+        sourceNode.connect(splitter)
+
+        entry = { stream, sourceNode, splitter, channelCount, refCount: 0 }
+        this.liveDevices.set(deviceId, entry)
+      }
+
+      const store = useMixerStore.getState()
+      store.setLiveDeviceChannelCount(deviceId, entry.channelCount)
+
+      if (entry.channelCount > 1 && channel === undefined) {
+        // Auto-select channel 0 for multi-channel devices.
+        // This updates the store which will re-trigger connectLive with channel=0.
+        store.setChannelInputSource(channelIndex, { type: 'live', deviceId, channel: 0 })
+        return
+      }
+
+      entry.refCount++
+      const selectedChannel = channel ?? 0
+
+      // Per-channel gain node taps into the shared splitter output
+      const gain = this.context.createGain()
+      const { splitter } = entry
+      splitter.connect(gain, selectedChannel)
+      gain.connect(this.channels[channelIndex].inputNode)
 
       this.activeSources[channelIndex] = {
         type: 'live',
-        nodes: [mediaSource],
-        stream,
+        nodes: [gain],
+        liveDeviceId: deviceId,
+        stopFn: () => {
+          try { splitter.disconnect(gain, selectedChannel) } catch { /* */ }
+        },
       }
     } catch (err) {
       console.warn(`Failed to open live input ${deviceId}:`, err)

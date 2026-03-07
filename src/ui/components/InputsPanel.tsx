@@ -68,6 +68,7 @@ export function InputsPanel({ compact: _compact }: InputsPanelProps) {
   const channels = useMixerStore((s) => s.channels)
   const availableTracks = useMixerStore((s) => s.availableTracks)
   const availableLiveDevices = useMixerStore((s) => s.availableLiveDevices)
+  const liveDeviceChannelCounts = useMixerStore((s) => s.liveDeviceChannelCounts)
   const setChannelInputSource = useMixerStore((s) => s.setChannelInputSource)
 
   // Drag/resize handling
@@ -131,7 +132,14 @@ export function InputsPanel({ compact: _compact }: InputsPanelProps) {
   }
 
   const handleSourceChange = (channelId: number, value: string) => {
-    setChannelInputSource(channelId, valueToSource(value))
+    const source = valueToSource(value)
+    // When switching to a live device, preserve no channel selection initially
+    setChannelInputSource(channelId, source)
+    saveSessionSnapshotToLocalStorage()
+  }
+
+  const handleLiveChannelChange = (channelId: number, deviceId: string, value: string) => {
+    setChannelInputSource(channelId, { type: 'live', deviceId, channel: parseInt(value, 10) })
     saveSessionSnapshotToLocalStorage()
   }
 
@@ -151,76 +159,94 @@ export function InputsPanel({ compact: _compact }: InputsPanelProps) {
     saveSessionSnapshotToLocalStorage()
   }
 
-  const renderSourceRow = (key: string, label: string, ch: typeof channels[number]) => (
-    <div key={key} className={styles.inputRow}>
-      <span className={styles.channelLabel}>{label}</span>
-      <select
-        className={styles.inputSelect}
-        value={sourceToValue(ch.inputSource)}
-        onChange={(e) => handleSourceChange(ch.id, e.target.value)}
-      >
-        <option value="none">None</option>
-        {availableTracks.length > 0 && (() => {
-          const songGroups: { title: string; tracks: typeof availableTracks }[] = []
-          for (const t of availableTracks) {
-            const last = songGroups[songGroups.length - 1]
-            if (last && last.title === t.songTitle) {
-              last.tracks.push(t)
-            } else {
-              songGroups.push({ title: t.songTitle, tracks: [t] })
+  const renderSourceRow = (key: string, label: string, ch: typeof channels[number]) => {
+    const isLive = ch.inputSource.type === 'live'
+    const liveDeviceId = isLive ? ch.inputSource.deviceId : null
+    const liveChannel = isLive ? ch.inputSource.channel : undefined
+    const channelCount = liveDeviceId ? liveDeviceChannelCounts[liveDeviceId] : undefined
+
+    return (
+      <div key={key} className={styles.inputRow}>
+        <span className={styles.channelLabel}>{label}</span>
+        <select
+          className={styles.inputSelect}
+          value={sourceToValue(ch.inputSource)}
+          onChange={(e) => handleSourceChange(ch.id, e.target.value)}
+        >
+          <option value="none">None</option>
+          {availableTracks.length > 0 && (() => {
+            const songGroups: { title: string; tracks: typeof availableTracks }[] = []
+            for (const t of availableTracks) {
+              const last = songGroups[songGroups.length - 1]
+              if (last && last.title === t.songTitle) {
+                last.tracks.push(t)
+              } else {
+                songGroups.push({ title: t.songTitle, tracks: [t] })
+              }
             }
-          }
-          return (
-            <optgroup label="Tracks">
-              {songGroups.map((group) => (
-                <>
-                  <option key={`song-header:${group.title}`} disabled>
-                    {'— ' + group.title}
-                  </option>
-                  {group.tracks.map((t) =>
-                    t.stereo ? (
-                      <React.Fragment key={`track:${t.index}`}>
-                        <option value={`track:${t.index}:left`}>
-                          {'  ' + truncateLabel(t.label) + ' L'}
+            return (
+              <optgroup label="Tracks">
+                {songGroups.map((group) => (
+                  <>
+                    <option key={`song-header:${group.title}`} disabled>
+                      {'— ' + group.title}
+                    </option>
+                    {group.tracks.map((t) =>
+                      t.stereo ? (
+                        <React.Fragment key={`track:${t.index}`}>
+                          <option value={`track:${t.index}:left`}>
+                            {'  ' + truncateLabel(t.label) + ' L'}
+                          </option>
+                          <option value={`track:${t.index}:right`}>
+                            {'  ' + truncateLabel(t.label) + ' R'}
+                          </option>
+                        </React.Fragment>
+                      ) : (
+                        <option key={`track:${t.index}`} value={`track:${t.index}`}>
+                          {'  ' + truncateLabel(t.label)}
                         </option>
-                        <option value={`track:${t.index}:right`}>
-                          {'  ' + truncateLabel(t.label) + ' R'}
-                        </option>
-                      </React.Fragment>
-                    ) : (
-                      <option key={`track:${t.index}`} value={`track:${t.index}`}>
-                        {'  ' + truncateLabel(t.label)}
-                      </option>
-                    )
-                  )}
-                </>
-              ))}
-            </optgroup>
-          )
-        })()}
-        <optgroup label="Player">
-          <option value="device:left">Player L</option>
-          <option value="device:right">Player R</option>
-        </optgroup>
-        <optgroup label="Tones">
-          {Array.from({ length: NUM_TONE_SLOTS }, (_, j) => (
-            <option key={`tone:${j}`} value={`tone:${j}`}>
-              {getToneLabel(j)}
-            </option>
-          ))}
-        </optgroup>
-        {availableLiveDevices.length > 0 && (
-          <optgroup label="Hardware">
-            {availableLiveDevices.map((d) => (
-              <option key={`live:${d.deviceId}`} value={`live:${d.deviceId}`}>
-                {truncateLabel(d.label)}
+                      )
+                    )}
+                  </>
+                ))}
+              </optgroup>
+            )
+          })()}
+          <optgroup label="Player">
+            <option value="device:left">Player L</option>
+            <option value="device:right">Player R</option>
+          </optgroup>
+          <optgroup label="Tones">
+            {Array.from({ length: NUM_TONE_SLOTS }, (_, j) => (
+              <option key={`tone:${j}`} value={`tone:${j}`}>
+                {getToneLabel(j)}
               </option>
             ))}
           </optgroup>
+          {availableLiveDevices.length > 0 && (
+            <optgroup label="Hardware">
+              {availableLiveDevices.map((d) => (
+                <option key={`live:${d.deviceId}`} value={`live:${d.deviceId}`}>
+                  {truncateLabel(d.label)}
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+        {isLive && liveDeviceId && channelCount != null && channelCount > 1 && (
+          <select
+            className={styles.channelSelect}
+            value={liveChannel !== undefined ? String(liveChannel) : '0'}
+            onChange={(e) => handleLiveChannelChange(ch.id, liveDeviceId, e.target.value)}
+          >
+            {Array.from({ length: channelCount }, (_, i) => (
+              <option key={i} value={String(i)}>Ch {i + 1}</option>
+            ))}
+          </select>
         )}
-      </select>
-    </div>
-  )
+      </div>
+    )
+  }
 
   return (
     <>

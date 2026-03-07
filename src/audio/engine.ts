@@ -241,18 +241,15 @@ export function createAudioEngine(): AudioEngine {
   const fxDisposers: (() => void)[] = []
   const unsubscribers: (() => void)[] = []
 
-  function applyMonitorTaps(source: MonitorSource, soloActive: boolean): void {
+  function applyMonitorTaps(source: MonitorSource): void {
     if (!context) return
     const t = context.currentTime
 
-    // Solo overrides user selection
-    const effectiveSource = soloActive ? 'solo' : source
-
-    monitorTapMain!.gain.setValueAtTime(effectiveSource === 'main' ? 1 : 0, t)
-    monitorTapMono!.gain.setValueAtTime(effectiveSource === 'mono' ? 1 : 0, t)
-    monitorTapSolo!.gain.setValueAtTime(effectiveSource === 'solo' ? 1 : 0, t)
+    monitorTapMain!.gain.setValueAtTime(source === 'main' ? 1 : 0, t)
+    monitorTapMono!.gain.setValueAtTime(source === 'mono' ? 1 : 0, t)
+    monitorTapSolo!.gain.setValueAtTime(source === 'solo' ? 1 : 0, t)
     for (let i = 0; i < monitorTapBuses.length; i++) {
-      monitorTapBuses[i].gain.setValueAtTime(effectiveSource === `bus-${i}` ? 1 : 0, t)
+      monitorTapBuses[i].gain.setValueAtTime(source === `bus-${i}` ? 1 : 0, t)
     }
   }
 
@@ -381,7 +378,7 @@ export function createAudioEngine(): AudioEngine {
 
     // Set initial monitor state
     monitorLevel.gain.value = store.monitor.level
-    applyMonitorTaps(store.monitor.source, store.soloActive)
+    applyMonitorTaps(store.monitor.source)
 
     masterGain.gain.value = faderPositionToGain(store.master.faderPosition)
 
@@ -894,21 +891,20 @@ export function createAudioEngine(): AudioEngine {
     )
     unsubscribers.push(unsubSoloChannels)
 
-    // Monitor source + solo override (combined subscription)
+    // Monitor source + level subscription
     const unsubMonitor = store.subscribe(
       (state) => ({
         source: state.monitor.source,
         level: state.monitor.level,
-        soloActive: state.soloActive,
       }),
-      ({ source, level, soloActive }) => {
+      ({ source, level }) => {
         if (!context) return
         monitorLevel!.gain.setValueAtTime(level, context.currentTime)
-        applyMonitorTaps(source, soloActive)
+        applyMonitorTaps(source)
       },
       {
         equalityFn: (a, b) =>
-          a.source === b.source && a.level === b.level && a.soloActive === b.soloActive,
+          a.source === b.source && a.level === b.level,
       }
     )
     unsubscribers.push(unsubMonitor)

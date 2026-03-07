@@ -57,12 +57,9 @@
   border-color: #886600;
 }
 
-.soloIndicator {
-  font-size: 10px;
-  font-weight: 700;
-  color: #ffcc00;
-  background: #443300;
-  padding: 2px 8px;
-  border-radius: 2px;
-  border: 1px solid #cc9900;
+.busGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  width: 100%;
 }

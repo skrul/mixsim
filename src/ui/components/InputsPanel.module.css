@@ -50,6 +50,12 @@
   text-transform: uppercase;
 }
 
+.popupHeaderButtons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
 .popupClose {
   height: 22px;
   width: auto !important;
@@ -127,4 +133,15 @@
 .inputSelect:focus {
   outline: none;
   border-color: #6b86b5;
+}
+
+.sectionDivider {
+  font-size: 9px;
+  font-weight: 700;
+  color: #6b7a94;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 4px 4px;
+  border-top: 1px solid #2e3548;
+  margin-top: 4px;
 }

@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import type { InputType } from '@/audio/transport'
-import { GAIN_DEFAULT, NUM_INPUT_CHANNELS, NUM_MIX_BUSES, NUM_DCA_GROUPS, type SendState, type MixBusState, type DcaGroupState, type MonitorState, type MonitorSource, type ChannelInputSource } from '@/state/mixer-model'
+import { GAIN_DEFAULT, NUM_INPUT_CHANNELS, NUM_AUX_CHANNELS, NUM_MIX_BUSES, NUM_DCA_GROUPS, type SendState, type MixBusState, type DcaGroupState, type MonitorState, type MonitorSource, type ChannelInputSource } from '@/state/mixer-model'
 import { getToneLabel } from '@/audio/source-manager'
 
 // Re-export constants from mixer-model for existing consumers
 export { GAIN_MIN, GAIN_MAX, GAIN_DEFAULT, INPUT_TYPE_CONFIG } from '@/state/mixer-model'
+
+const AUX_LABELS = ['Aux 1', 'Aux 2', 'Aux 3', 'Aux 4', 'Aux 5', 'Aux 6', 'USB L', 'USB R']
 
 // ---- Types ----
 
@@ -277,9 +279,14 @@ function updateChannel(
 
 export const useMixerStore = create<MixerState>()(
   subscribeWithSelector((set) => ({
-    channels: Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
-      createDefaultChannel(i, `Ch ${i + 1}`)
-    ),
+    channels: [
+      ...Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
+        createDefaultChannel(i, `Ch ${i + 1}`)
+      ),
+      ...Array.from({ length: NUM_AUX_CHANNELS }, (_, i) =>
+        createDefaultChannel(NUM_INPUT_CHANNELS + i, AUX_LABELS[i], 'line')
+      ),
+    ],
     mixBuses: Array.from({ length: NUM_MIX_BUSES }, (_, i) => createDefaultMixBus(i)),
     dcaGroups: Array.from({ length: NUM_DCA_GROUPS }, (_, i) => createDefaultDcaGroup(i)),
     master: { faderPosition: 0, solo: false },
@@ -601,24 +608,41 @@ export const useMixerStore = create<MixerState>()(
 
     initChannels: (_count, labels, inputTypes) =>
       set({
-        channels: Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
-          createDefaultChannel(i, labels[i] ?? `Ch ${i + 1}`, inputTypes?.[i] ?? 'direct')
-        ),
+        channels: [
+          ...Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
+            createDefaultChannel(i, labels[i] ?? `Ch ${i + 1}`, inputTypes?.[i] ?? 'direct')
+          ),
+          ...Array.from({ length: NUM_AUX_CHANNELS }, (_, i) =>
+            createDefaultChannel(NUM_INPUT_CHANNELS + i, AUX_LABELS[i], 'line')
+          ),
+        ],
       }),
 
     resetBoard: () =>
       set((state) => ({
-        channels: Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) => {
-          const prev = state.channels[i]
-          const base = createDefaultChannel(i, prev?.label ?? `Ch ${i + 1}`, prev?.inputType ?? 'direct')
-          return {
-            ...base,
-            // Zero board should not wipe source patching.
-            inputSource: prev?.inputSource ?? { type: 'none' as const },
-            label: prev?.label ?? base.label,
-            inputType: prev?.inputType ?? base.inputType,
-          }
-        }),
+        channels: [
+          ...Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) => {
+            const prev = state.channels[i]
+            const base = createDefaultChannel(i, prev?.label ?? `Ch ${i + 1}`, prev?.inputType ?? 'direct')
+            return {
+              ...base,
+              inputSource: prev?.inputSource ?? { type: 'none' as const },
+              label: prev?.label ?? base.label,
+              inputType: prev?.inputType ?? base.inputType,
+            }
+          }),
+          ...Array.from({ length: NUM_AUX_CHANNELS }, (_, i) => {
+            const id = NUM_INPUT_CHANNELS + i
+            const prev = state.channels[id]
+            const base = createDefaultChannel(id, prev?.label ?? AUX_LABELS[i], prev?.inputType ?? 'line')
+            return {
+              ...base,
+              inputSource: prev?.inputSource ?? { type: 'none' as const },
+              label: prev?.label ?? base.label,
+              inputType: prev?.inputType ?? base.inputType,
+            }
+          }),
+        ],
         mixBuses: Array.from({ length: NUM_MIX_BUSES }, (_, i) => createDefaultMixBus(i)),
         dcaGroups: Array.from({ length: NUM_DCA_GROUPS }, (_, i) => createDefaultDcaGroup(i)),
         master: { faderPosition: 0, solo: false },

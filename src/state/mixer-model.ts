@@ -15,6 +15,7 @@ export const INPUT_TYPE_CONFIG = {
 // ---- Channel / bus / send constants ----
 
 export const NUM_INPUT_CHANNELS = 32
+export const NUM_AUX_CHANNELS = 8
 export const NUM_MIX_BUSES = 16
 export const NUM_DCA_GROUPS = 8
 

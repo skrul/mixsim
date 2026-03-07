@@ -1,11 +1,13 @@
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
-import { NUM_INPUT_CHANNELS } from '@/state/mixer-model'
+import { NUM_INPUT_CHANNELS, NUM_AUX_CHANNELS } from '@/state/mixer-model'
 import { InputChannel } from './InputChannel'
 import styles from './InputChannelBank.module.css'
 
 const CHANNELS_PER_LAYER = 8
 const NUM_LAYERS = NUM_INPUT_CHANNELS / CHANNELS_PER_LAYER // 4
+const AUX_IN_LAYER = 4
+const AUX_IN_LABELS = ['Aux 1', 'Aux 2', 'Aux 3', 'Aux 4', 'Aux 5', 'Aux 6', 'USB L', 'USB R'] as const
 const EFFECTS_RETURNS_LAYER = 5
 const EFFECTS_RETURN_LABELS = ['FX1L', 'FX1R', 'FX2L', 'FX2R', 'FX3L', 'FX3R', 'FX4L', 'FX4R'] as const
 
@@ -18,6 +20,9 @@ const LAYER_LABELS = Array.from({ length: NUM_LAYERS }, (_, i) => {
 function getLayerChannelIndex(activeLayer: number, slotIndex: number): number {
   if (activeLayer >= 0 && activeLayer < NUM_LAYERS) {
     return activeLayer * CHANNELS_PER_LAYER + slotIndex
+  }
+  if (activeLayer === AUX_IN_LAYER) {
+    return NUM_INPUT_CHANNELS + slotIndex
   }
   if (activeLayer === EFFECTS_RETURNS_LAYER) {
     // Temporary mapping: use channels 25-32 as backing strips for FX returns.
@@ -48,7 +53,12 @@ export function InputChannelBank() {
             <span className={styles.layerButtonLabel}>{label}</span>
           </button>
         ))}
-        <button className={`${styles.layerButton}`} disabled>
+        <button
+          className={`${styles.layerButton} ${activeInputLayer === AUX_IN_LAYER ? styles.activeLayer : ''}`}
+          onClick={() => setActiveInputLayer(AUX_IN_LAYER)}
+          onMouseEnter={() => setHelpText('Show auxiliary input channels Aux 1-6 and USB L/R on the input fader bank.')}
+          onMouseLeave={() => setHelpText('')}
+        >
           <div className={styles.pad} />
           <span className={styles.layerButtonLabel}>
             <span>AUX IN 1-6</span>
@@ -87,6 +97,8 @@ export function InputChannelBank() {
           const idx = getLayerChannelIndex(activeInputLayer, slotIdx)
           const scribbleLabel = activeInputLayer === EFFECTS_RETURNS_LAYER
             ? EFFECTS_RETURN_LABELS[slotIdx]
+            : activeInputLayer === AUX_IN_LAYER
+            ? AUX_IN_LABELS[slotIdx]
             : undefined
           const stripType = activeInputLayer === EFFECTS_RETURNS_LAYER ? 'fxReturn' : 'input'
           return idx >= 0 && idx < channelCount ? (

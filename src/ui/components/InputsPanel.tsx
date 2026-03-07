@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
-import { NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
+import { NUM_INPUT_CHANNELS, NUM_AUX_CHANNELS, NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
 import { getToneLabel } from '@/audio/source-manager'
 import { saveSessionSnapshotToLocalStorage } from '@/state/session-persistence'
 import styles from './InputsPanel.module.css'
 
 const NUM_ROWS = 16
+const AUX_ROW_LABELS = ['Aux 1', 'Aux 2', 'Aux 3', 'Aux 4', 'Aux 5', 'Aux 6', 'USB L', 'USB R']
 
 interface PopupRect {
   x: number
@@ -141,8 +142,85 @@ export function InputsPanel({ compact }: InputsPanelProps) {
         setChannelInputSource(ch.id, { type: 'none' })
       }
     }
+    for (let i = 0; i < NUM_AUX_CHANNELS; i++) {
+      const ch = channels[NUM_INPUT_CHANNELS + i]
+      if (ch && ch.inputSource.type !== 'none') {
+        setChannelInputSource(ch.id, { type: 'none' })
+      }
+    }
     saveSessionSnapshotToLocalStorage()
   }
+
+  const renderSourceRow = (key: string, label: string, ch: typeof channels[number]) => (
+    <div key={key} className={styles.inputRow}>
+      <span className={styles.channelLabel}>{label}</span>
+      <select
+        className={styles.inputSelect}
+        value={sourceToValue(ch.inputSource)}
+        onChange={(e) => handleSourceChange(ch.id, e.target.value)}
+      >
+        <option value="none">None</option>
+        {availableTracks.length > 0 && (() => {
+          const songGroups: { title: string; tracks: typeof availableTracks }[] = []
+          for (const t of availableTracks) {
+            const last = songGroups[songGroups.length - 1]
+            if (last && last.title === t.songTitle) {
+              last.tracks.push(t)
+            } else {
+              songGroups.push({ title: t.songTitle, tracks: [t] })
+            }
+          }
+          return (
+            <optgroup label="Tracks">
+              {songGroups.map((group) => (
+                <>
+                  <option key={`song-header:${group.title}`} disabled>
+                    {'— ' + group.title}
+                  </option>
+                  {group.tracks.map((t) =>
+                    t.stereo ? (
+                      <React.Fragment key={`track:${t.index}`}>
+                        <option value={`track:${t.index}:left`}>
+                          {'  ' + truncateLabel(t.label) + ' L'}
+                        </option>
+                        <option value={`track:${t.index}:right`}>
+                          {'  ' + truncateLabel(t.label) + ' R'}
+                        </option>
+                      </React.Fragment>
+                    ) : (
+                      <option key={`track:${t.index}`} value={`track:${t.index}`}>
+                        {'  ' + truncateLabel(t.label)}
+                      </option>
+                    )
+                  )}
+                </>
+              ))}
+            </optgroup>
+          )
+        })()}
+        <optgroup label="Player">
+          <option value="device:left">Player L</option>
+          <option value="device:right">Player R</option>
+        </optgroup>
+        <optgroup label="Tones">
+          {Array.from({ length: NUM_TONE_SLOTS }, (_, j) => (
+            <option key={`tone:${j}`} value={`tone:${j}`}>
+              {getToneLabel(j)}
+            </option>
+          ))}
+        </optgroup>
+        {availableLiveDevices.length > 0 && (
+          <optgroup label="Hardware">
+            {availableLiveDevices.map((d) => (
+              <option key={`live:${d.deviceId}`} value={`live:${d.deviceId}`}>
+                {truncateLabel(d.label)}
+              </option>
+            ))}
+          </optgroup>
+        )}
+      </select>
+    </div>
+  )
 
   return (
     <>
@@ -189,76 +267,13 @@ export function InputsPanel({ compact }: InputsPanelProps) {
             {Array.from({ length: NUM_ROWS }, (_, i) => {
               const ch = channels[i]
               if (!ch) return null
-              return (
-                <div key={i} className={styles.inputRow}>
-                  <span className={styles.channelLabel}>CH {i + 1}</span>
-                  <select
-                    className={styles.inputSelect}
-                    value={sourceToValue(ch.inputSource)}
-                    onChange={(e) => handleSourceChange(ch.id, e.target.value)}
-                  >
-                    <option value="none">None</option>
-                    {availableTracks.length > 0 && (() => {
-                      const songGroups: { title: string; tracks: typeof availableTracks }[] = []
-                      for (const t of availableTracks) {
-                        const last = songGroups[songGroups.length - 1]
-                        if (last && last.title === t.songTitle) {
-                          last.tracks.push(t)
-                        } else {
-                          songGroups.push({ title: t.songTitle, tracks: [t] })
-                        }
-                      }
-                      return (
-                        <optgroup label="Tracks">
-                          {songGroups.map((group) => (
-                            <>
-                              <option key={`song-header:${group.title}`} disabled>
-                                {'— ' + group.title}
-                              </option>
-                              {group.tracks.map((t) =>
-                                t.stereo ? (
-                                  <React.Fragment key={`track:${t.index}`}>
-                                    <option value={`track:${t.index}:left`}>
-                                      {'  ' + truncateLabel(t.label) + ' L'}
-                                    </option>
-                                    <option value={`track:${t.index}:right`}>
-                                      {'  ' + truncateLabel(t.label) + ' R'}
-                                    </option>
-                                  </React.Fragment>
-                                ) : (
-                                  <option key={`track:${t.index}`} value={`track:${t.index}`}>
-                                    {'  ' + truncateLabel(t.label)}
-                                  </option>
-                                )
-                              )}
-                            </>
-                          ))}
-                        </optgroup>
-                      )
-                    })()}
-                    <optgroup label="Player">
-                      <option value="device:left">Player L</option>
-                      <option value="device:right">Player R</option>
-                    </optgroup>
-                    <optgroup label="Tones">
-                      {Array.from({ length: NUM_TONE_SLOTS }, (_, j) => (
-                        <option key={`tone:${j}`} value={`tone:${j}`}>
-                          {getToneLabel(j)}
-                        </option>
-                      ))}
-                    </optgroup>
-                    {availableLiveDevices.length > 0 && (
-                      <optgroup label="Hardware">
-                        {availableLiveDevices.map((d) => (
-                          <option key={`live:${d.deviceId}`} value={`live:${d.deviceId}`}>
-                            {truncateLabel(d.label)}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                  </select>
-                </div>
-              )
+              return renderSourceRow(`ch-${i}`, `CH ${i + 1}`, ch)
+            })}
+            <div className={styles.sectionDivider}>Aux In / USB</div>
+            {Array.from({ length: NUM_AUX_CHANNELS }, (_, i) => {
+              const ch = channels[NUM_INPUT_CHANNELS + i]
+              if (!ch) return null
+              return renderSourceRow(`aux-${i}`, AUX_ROW_LABELS[i], ch)
             })}
           </div>
           <div className={styles.popupResizeHandle} onMouseDown={startResize} />

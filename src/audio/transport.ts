@@ -2,25 +2,25 @@ import { useMixerStore } from '@/state/mixer-store'
 
 export type InputType = 'mic' | 'line' | 'direct'
 
-export interface StemConfig {
+export interface TrackConfig {
   url: string
   label: string
   inputType?: InputType
+  stereo?: boolean
 }
 
-export interface StemManifest {
-  title: string
-  stems: StemConfig[]
+export interface TrackManifest {
+  songs: { title: string; tracks: TrackConfig[] }[]
 }
 
-interface StemData {
+interface TrackData {
   buffer: AudioBuffer
   label: string
 }
 
 export class TransportManager {
   private context: AudioContext
-  private stems: StemData[] = []
+  private tracks: TrackData[] = []
   private isPlaying = false
   private startedAt = 0
   private pausedAt = 0
@@ -31,36 +31,37 @@ export class TransportManager {
     this.context = context
   }
 
-  async loadStems(manifest: StemManifest): Promise<void> {
+  async loadTracks(manifest: TrackManifest): Promise<void> {
     const store = useMixerStore.getState()
 
     try {
-      const loadPromises = manifest.stems.map(async (stem) => {
-        const response = await fetch(stem.url)
-        if (!response.ok) throw new Error(`Failed to load ${stem.url}: ${response.status}`)
+      const allTracks = manifest.songs.flatMap((s) => s.tracks)
+      const loadPromises = allTracks.map(async (track) => {
+        const response = await fetch(track.url)
+        if (!response.ok) throw new Error(`Failed to load ${track.url}: ${response.status}`)
         const arrayBuffer = await response.arrayBuffer()
         const audioBuffer = await this.context.decodeAudioData(arrayBuffer)
-        return { buffer: audioBuffer, label: stem.label }
+        return { buffer: audioBuffer, label: track.label }
       })
 
-      this.stems = await Promise.all(loadPromises)
+      this.tracks = await Promise.all(loadPromises)
 
-      this.duration = Math.max(...this.stems.map((s) => s.buffer.duration))
+      this.duration = Math.max(...this.tracks.map((s) => s.buffer.duration))
       store.setDuration(this.duration)
-      store.setStemsLoaded(true)
+      store.setTracksLoaded(true)
     } catch (error) {
       store.setLoadingError(
-        error instanceof Error ? error.message : 'Failed to load stems'
+        error instanceof Error ? error.message : 'Failed to load tracks'
       )
     }
   }
 
-  /** Get loaded stem audio buffers for SourceManager to use. */
-  getStemBuffers(): AudioBuffer[] {
-    return this.stems.map((s) => s.buffer)
+  /** Get loaded track audio buffers for SourceManager to use. */
+  getTrackBuffers(): AudioBuffer[] {
+    return this.tracks.map((s) => s.buffer)
   }
 
-  /** Get the current playback offset (for starting stem sources). */
+  /** Get the current playback offset (for starting track sources). */
   getOffset(): number {
     return this.pausedAt
   }
@@ -115,7 +116,7 @@ export class TransportManager {
 
   dispose(): void {
     this.stopTimeUpdates()
-    this.stems = []
+    this.tracks = []
   }
 
   private startTimeUpdates(): void {

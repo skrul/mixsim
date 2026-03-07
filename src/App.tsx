@@ -48,7 +48,7 @@ function App() {
   }
 
   if (!isReady) {
-    return <div className={styles.loading}>Loading stems...</div>
+    return <div className={styles.loading}>Loading tracks...</div>
   }
 
   return (

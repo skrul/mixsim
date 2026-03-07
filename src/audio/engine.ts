@@ -791,13 +791,13 @@ export function createAudioEngine(): AudioEngine {
           sourceManager.setChannelSource(i, inputSource)
 
           // Adjust sourceAttenuation based on input type:
-          // - Stems use the channel's configured inputType attenuation (simulates mic/line level)
+          // - Tracks use the channel's configured inputType attenuation (simulates mic/line level)
           // - Tones have their own level control, so no attenuation needed
           // - Live inputs are real mic-level signals, so no attenuation needed
           // - None: reset to channel's configured inputType
           const ch = useMixerStore.getState().channels[i]
           let attenuationDb: number
-          if (inputSource.type === 'stem' || inputSource.type === 'none') {
+          if (inputSource.type === 'track' || inputSource.type === 'none') {
             attenuationDb = INPUT_TYPE_CONFIG[ch?.inputType ?? 'direct'].attenuation
           } else {
             attenuationDb = 0

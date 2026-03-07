@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { createAudioEngine, type AudioEngine } from '@/audio/engine'
-import type { StemManifest } from '@/audio/transport'
+import type { TrackManifest } from '@/audio/transport'
 import { useMixerStore } from '@/state/mixer-store'
 import { NUM_INPUT_CHANNELS } from '@/state/mixer-model'
 import { loadSessionSnapshotFromLocalStorage } from '@/state/session-persistence'
-import { ensureActiveSourceModeConsistency, initSourceModeFromProfiles } from '@/state/source-profiles'
 
 export function useAudioEngine() {
   const engineRef = useRef<AudioEngine | null>(null)
@@ -21,23 +20,27 @@ export function useAudioEngine() {
     async function start() {
       try {
         const restoredFromLocalSession = loadSessionSnapshotFromLocalStorage().ok
-        initSourceModeFromProfiles()
 
-        // Load stem manifest
-        const manifestResponse = await fetch('/stems.config.json')
+        // Load track manifest
+        const manifestResponse = await fetch('/tracks.config.json')
         if (!manifestResponse.ok) {
-          throw new Error('Could not load stems.config.json. Place stem files in public/stems/ and create public/stems.config.json')
+          throw new Error('Could not load tracks.config.json. Place track files in public/stems/ and create public/tracks.config.json')
         }
-        const manifest: StemManifest = await manifestResponse.json()
+        const manifest: TrackManifest = await manifestResponse.json()
 
-        // Initialize all 32 channels — stems fill the first N, rest get defaults
-        const stemLabels = manifest.stems.map((s) => s.label)
-        const stemInputTypes = manifest.stems.map((s) => s.inputType ?? 'direct')
+        // Flatten all songs into a single track list with song metadata
+        const flatTracks = manifest.songs.flatMap((song) =>
+          song.tracks.map((t) => ({ ...t, songTitle: song.title }))
+        )
+
+        // Initialize all 32 channels — tracks fill the first N, rest get defaults
+        const trackLabels = flatTracks.map((s) => s.label)
+        const trackInputTypes = flatTracks.map((s) => s.inputType ?? 'direct')
         const labels = Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
-          stemLabels[i] ?? `Ch ${i + 1}`
+          trackLabels[i] ?? `Ch ${i + 1}`
         )
         const inputTypes = Array.from({ length: NUM_INPUT_CHANNELS }, (_, i) =>
-          stemInputTypes[i] ?? 'direct'
+          trackInputTypes[i] ?? 'direct'
         )
         if (!restoredFromLocalSession) {
           useMixerStore.getState().initChannels(NUM_INPUT_CHANNELS, labels, inputTypes)
@@ -48,36 +51,21 @@ export function useAudioEngine() {
         await engine.init()
         setAudioSuspended(engine.getAudioState() === 'suspended')
 
-        // Load stems
-        await engine.getTransport()!.loadStems(manifest)
+        // Load tracks
+        await engine.getTransport()!.loadTracks(manifest)
 
-        // Feed stem buffers to SourceManager
+        // Feed track buffers to SourceManager
         const sm = engine.getSourceManager()!
-        sm.setStemBuffers(engine.getTransport()!.getStemBuffers())
+        sm.setTrackBuffers(engine.getTransport()!.getTrackBuffers())
 
-        // Populate available stems in store and apply stems preset as default
+        // Populate available tracks in store
         const store = useMixerStore.getState()
-        store.setAvailableStems(
-          manifest.stems.map((s, i) => ({ index: i, label: s.label }))
+        store.setAvailableTracks(
+          flatTracks.map((t, i) => ({ index: i, label: t.label, songTitle: t.songTitle, stereo: t.stereo ?? false }))
         )
-        if (!restoredFromLocalSession) {
-          store.applyPresetStems()
-        }
 
-        // Ensure source nodes are live after refresh/session restore.
-        // This re-applies persisted channel patching (tones/stems/live/none)
-        // in case browser reload order skipped initial source activation.
+        // Re-bind channel sources from store (handles restored sessions + fresh start)
         store.channels.forEach((ch, i) => {
-          sm.setChannelSource(i, ch.inputSource)
-        })
-
-        // If active source mode and restored inputs are inconsistent,
-        // recover by resetting that mode to its defaults.
-        ensureActiveSourceModeConsistency()
-
-        // Final re-bind pass after any mode recovery to guarantee that
-        // active source nodes (especially tones) are attached post-refresh.
-        useMixerStore.getState().channels.forEach((ch, i) => {
           sm.setChannelSource(i, ch.inputSource)
         })
 
@@ -116,17 +104,17 @@ export function useAudioEngine() {
             const transport = engine.getTransport()
             if (!transport) return
             const channelSources = useMixerStore.getState().channels.map((ch) => ch.inputSource)
-            const hasStemChannels = channelSources.some((s) => s.type === 'stem')
+            const hasTrackChannels = channelSources.some((s) => s.type === 'track')
             if (transportState === 'playing') {
-              if (hasStemChannels) {
+              if (hasTrackChannels) {
                 transport.play()
-                sm.startStemSources(transport.getOffset(), channelSources)
+                sm.startTrackSources(transport.getOffset(), channelSources)
               }
             } else {
               if (transport.getIsPlaying()) {
                 transport.stop()
               }
-              sm.stopStemSources()
+              sm.stopTrackSources()
             }
           }
         )
@@ -146,7 +134,7 @@ export function useAudioEngine() {
         )
 
         // Seek/scrub handling: if currentTime is externally changed away from the
-        // transport clock, retime transport and stem sources.
+        // transport clock, retime transport and track sources.
         const unsubSeek = useMixerStore.subscribe(
           (state) => state.currentTime,
           (currentTime) => {
@@ -162,11 +150,11 @@ export function useAudioEngine() {
             if (state.transportState !== 'playing') return
 
             const channelSources = state.channels.map((ch) => ch.inputSource)
-            const hasStemChannels = channelSources.some((s) => s.type === 'stem')
-            if (!hasStemChannels) return
+            const hasTrackChannels = channelSources.some((s) => s.type === 'track')
+            if (!hasTrackChannels) return
 
-            sm.stopStemSources()
-            sm.startStemSources(transport.getOffset(), channelSources)
+            sm.stopTrackSources()
+            sm.startTrackSources(transport.getOffset(), channelSources)
           }
         )
 

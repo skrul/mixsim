@@ -89,9 +89,9 @@ export class SourceManager {
   private activeSources: (ActiveChannelSource | null)[]
   private whiteNoiseBuffer: AudioBuffer | null = null
   private pinkNoiseBuffer: AudioBuffer | null = null
-  private stemBuffers: AudioBuffer[] = []
-  private stemPlaying = false
-  private stemOffset = 0
+  private trackBuffers: AudioBuffer[] = []
+  private trackPlaying = false
+  private trackOffset = 0
 
   constructor(context: AudioContext, channels: ChannelChain[]) {
     this.context = context
@@ -99,8 +99,8 @@ export class SourceManager {
     this.activeSources = new Array(channels.length).fill(null)
   }
 
-  setStemBuffers(buffers: AudioBuffer[]): void {
-    this.stemBuffers = buffers
+  setTrackBuffers(buffers: AudioBuffer[]): void {
+    this.trackBuffers = buffers
   }
 
   /** Connect/disconnect the source for a single channel. */
@@ -120,13 +120,13 @@ export class SourceManager {
       case 'tone':
         this.connectTone(index, source.toneIndex)
         break
-      case 'stem':
-        // Stem sources are only created during transport playback.
-        // Record the assignment so startStemSources knows about it.
-        this.activeSources[index] = { type: 'stem', nodes: [] }
-        // If transport is already playing, start this stem immediately
-        if (this.stemPlaying) {
-          this.startSingleStem(index, source.stemIndex)
+      case 'track':
+        // Track sources are only created during transport playback.
+        // Record the assignment so startTrackSources knows about it.
+        this.activeSources[index] = { type: 'track', nodes: [] }
+        // If transport is already playing, start this track immediately
+        if (this.trackPlaying) {
+          this.startSingleTrack(index, source.trackIndex, source.channel)
         }
         break
       case 'live':
@@ -138,29 +138,29 @@ export class SourceManager {
     }
   }
 
-  /** Start all stem-assigned channels at the given offset. Called by transport play. */
-  startStemSources(offset: number, channelSources: ChannelInputSource[]): void {
+  /** Start all track-assigned channels at the given offset. Called by transport play. */
+  startTrackSources(offset: number, channelSources: ChannelInputSource[]): void {
     if (this.context.state === 'suspended') {
       this.context.resume()
     }
 
-    this.stemPlaying = true
-    this.stemOffset = offset
+    this.trackPlaying = true
+    this.trackOffset = offset
 
     for (let i = 0; i < this.channels.length; i++) {
       const src = channelSources[i]
-      if (src?.type === 'stem') {
-        this.startSingleStem(i, src.stemIndex)
+      if (src?.type === 'track') {
+        this.startSingleTrack(i, src.trackIndex, src.channel)
       }
     }
   }
 
-  /** Stop all stem-assigned channels. Called by transport stop. */
-  stopStemSources(): void {
-    this.stemPlaying = false
+  /** Stop all track-assigned channels. Called by transport stop. */
+  stopTrackSources(): void {
+    this.trackPlaying = false
     for (let i = 0; i < this.activeSources.length; i++) {
       const active = this.activeSources[i]
-      if (active?.type === 'stem' && active.nodes.length > 0) {
+      if (active?.type === 'track' && active.nodes.length > 0) {
         active.stopFn?.()
         for (const node of active.nodes) node.disconnect()
         active.nodes = []
@@ -175,7 +175,7 @@ export class SourceManager {
     }
     this.whiteNoiseBuffer = null
     this.pinkNoiseBuffer = null
-    this.stemBuffers = []
+    this.trackBuffers = []
   }
 
   // ---- Private ----
@@ -239,13 +239,13 @@ export class SourceManager {
     }
   }
 
-  private startSingleStem(channelIndex: number, stemIndex: number): void {
-    const buffer = this.stemBuffers[stemIndex]
+  private startSingleTrack(channelIndex: number, trackIndex: number, channel?: 'left' | 'right'): void {
+    const buffer = this.trackBuffers[trackIndex]
     if (!buffer) return
 
-    // Tear down any existing stem nodes for this channel (but keep the assignment)
+    // Tear down any existing track nodes for this channel (but keep the assignment)
     const active = this.activeSources[channelIndex]
-    if (active?.type === 'stem' && active.nodes.length > 0) {
+    if (active?.type === 'track' && active.nodes.length > 0) {
       active.stopFn?.()
       for (const node of active.nodes) node.disconnect()
       active.nodes = []
@@ -254,13 +254,27 @@ export class SourceManager {
 
     const source = this.context.createBufferSource()
     source.buffer = buffer
-    source.connect(this.channels[channelIndex].inputNode)
-    source.start(this.context.currentTime, this.stemOffset)
 
-    if (!this.activeSources[channelIndex]) {
-      this.activeSources[channelIndex] = { type: 'stem', nodes: [] }
+    if (channel && buffer.numberOfChannels >= 2) {
+      const splitter = this.context.createChannelSplitter(2)
+      source.connect(splitter)
+      const outputIndex = channel === 'left' ? 0 : 1
+      splitter.connect(this.channels[channelIndex].inputNode, outputIndex)
+
+      if (!this.activeSources[channelIndex]) {
+        this.activeSources[channelIndex] = { type: 'track', nodes: [] }
+      }
+      this.activeSources[channelIndex]!.nodes = [source, splitter]
+    } else {
+      source.connect(this.channels[channelIndex].inputNode)
+
+      if (!this.activeSources[channelIndex]) {
+        this.activeSources[channelIndex] = { type: 'track', nodes: [] }
+      }
+      this.activeSources[channelIndex]!.nodes = [source]
     }
-    this.activeSources[channelIndex]!.nodes = [source]
+
+    source.start(this.context.currentTime, this.trackOffset)
     this.activeSources[channelIndex]!.stopFn = () => {
       try { source.stop() } catch { /* */ }
     }

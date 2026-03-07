@@ -3,7 +3,7 @@ import { create } from 'zustand'
 export type OutputBankLayer = 'dcas' | 'buses'
 export type SendsOnFaderMode = 'bus' | 'channel'
 export type SelectedFocus = 'input' | 'output'
-export type SourceMode = 'stems' | 'tones' | 'custom' | 'demo'
+export type SourceMode = 'normal' | 'demo'
 
 export interface SurfaceState {
   selectedFocus: SelectedFocus
@@ -48,7 +48,7 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   sendsOnFaderMode: 'bus',
   sendTargetBus: 0,
   selectedOutputIndex: -1,
-  sourceMode: 'custom',
+  sourceMode: 'normal',
   helpText: '',
 
   setSelectedChannel: (channelId) => set({ selectedFocus: 'input', selectedChannel: channelId, selectedOutputIndex: -1 }),

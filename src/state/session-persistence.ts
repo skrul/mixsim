@@ -88,6 +88,15 @@ function inferSelectedFocus(surface: SavedSurfaceState): SelectedFocus {
   return surface.selectedOutputIndex >= 0 ? 'output' : 'input'
 }
 
+function migrateInputSource(source: ChannelState['inputSource']): ChannelState['inputSource'] {
+  // Migrate old 'stem' type to 'track'
+  const s = source as { type: string; stemIndex?: number; trackIndex?: number; toneIndex?: number; deviceId?: string }
+  if (s.type === 'stem' && typeof s.stemIndex === 'number') {
+    return { type: 'track', trackIndex: s.stemIndex }
+  }
+  return source
+}
+
 function normalizeSavedChannels(channels: ChannelState[]): ChannelState[] {
   const defaults = useMixerStore.getState().channels
   return defaults.map((base, i) => {
@@ -96,6 +105,7 @@ function normalizeSavedChannels(channels: ChannelState[]): ChannelState[] {
     return {
       ...base,
       ...saved,
+      inputSource: migrateInputSource(saved.inputSource),
       sends: saved.sends ?? base.sends,
       dcaGroups: saved.dcaGroups ?? base.dcaGroups,
     }
@@ -127,7 +137,7 @@ export function applySnapshot(snapshot: SessionSnapshot): void {
     sendsOnFaderMode: surface.sendsOnFaderMode,
     sendTargetBus: surface.sendTargetBus,
     selectedOutputIndex: surface.selectedOutputIndex,
-    sourceMode: surface.sourceMode ?? 'custom',
+    sourceMode: surface.sourceMode === 'demo' ? 'demo' : 'normal',
     dcaAssignArmedId: null,
     busAssignArmedId: null,
     helpText: '',

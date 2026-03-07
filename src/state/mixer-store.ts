@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import type { InputType } from '@/audio/transport'
-import { GAIN_DEFAULT, NUM_INPUT_CHANNELS, NUM_MIX_BUSES, NUM_DCA_GROUPS, NUM_TONE_SLOTS, type SendState, type MixBusState, type DcaGroupState, type MonitorState, type MonitorSource, type ChannelInputSource } from '@/state/mixer-model'
+import { GAIN_DEFAULT, NUM_INPUT_CHANNELS, NUM_MIX_BUSES, NUM_DCA_GROUPS, type SendState, type MixBusState, type DcaGroupState, type MonitorState, type MonitorSource, type ChannelInputSource } from '@/state/mixer-model'
 import { getToneLabel } from '@/audio/source-manager'
 
 // Re-export constants from mixer-model for existing consumers
@@ -63,19 +63,16 @@ export interface MixerState {
   transportState: TransportState
   currentTime: number
   duration: number
-  stemsLoaded: boolean
+  tracksLoaded: boolean
   loadingError: string | null
   soloActive: boolean
-  availableStems: { index: number; label: string }[]
+  availableTracks: { index: number; label: string; songTitle: string; stereo: boolean }[]
   availableLiveDevices: { deviceId: string; label: string }[]
 
   // Input source actions
   setChannelInputSource: (channelId: number, source: ChannelInputSource) => void
-  setAvailableStems: (stems: { index: number; label: string }[]) => void
+  setAvailableTracks: (tracks: { index: number; label: string; songTitle: string; stereo: boolean }[]) => void
   setAvailableLiveDevices: (devices: { deviceId: string; label: string }[]) => void
-  applyPresetStems: () => void
-  applyPresetTones: () => void
-  applyPresetNone: () => void
 
   // Channel actions
   setChannelGain: (channelId: number, gainDb: number) => void
@@ -142,7 +139,7 @@ export interface MixerState {
   setDuration: (duration: number) => void
 
   // Loading actions
-  setStemsLoaded: (loaded: boolean) => void
+  setTracksLoaded: (loaded: boolean) => void
   setLoadingError: (error: string | null) => void
 
   // Init
@@ -280,10 +277,10 @@ export const useMixerStore = create<MixerState>()(
     transportState: 'stopped',
     currentTime: 0,
     duration: 0,
-    stemsLoaded: false,
+    tracksLoaded: false,
     loadingError: null,
     soloActive: false,
-    availableStems: [],
+    availableTracks: [],
     availableLiveDevices: [],
 
     // Input source actions
@@ -291,9 +288,14 @@ export const useMixerStore = create<MixerState>()(
       set((state) => {
         let label: string | undefined
         switch (source.type) {
-          case 'stem':
-            label = state.availableStems[source.stemIndex]?.label
+          case 'track': {
+            const t = state.availableTracks.find((t) => t.index === source.trackIndex)
+            if (t) {
+              const suffix = source.channel === 'left' ? ' L' : source.channel === 'right' ? ' R' : ''
+              label = t.label + suffix
+            }
             break
+          }
           case 'tone':
             label = getToneLabel(source.toneIndex)
             break
@@ -310,44 +312,9 @@ export const useMixerStore = create<MixerState>()(
         })
       }),
 
-    setAvailableStems: (stems) => set({ availableStems: stems }),
+    setAvailableTracks: (tracks) => set({ availableTracks: tracks }),
 
     setAvailableLiveDevices: (devices) => set({ availableLiveDevices: devices }),
-
-    applyPresetStems: () =>
-      set((state) => ({
-        channels: state.channels.map((ch, i) => ({
-          ...ch,
-          inputSource: i < state.availableStems.length
-            ? { type: 'stem' as const, stemIndex: i }
-            : { type: 'none' as const },
-          label: i < state.availableStems.length
-            ? state.availableStems[i].label
-            : ch.label,
-        })),
-      })),
-
-    applyPresetTones: () =>
-      set((state) => ({
-        channels: state.channels.map((ch, i) => ({
-          ...ch,
-          inputSource: i < NUM_TONE_SLOTS
-            ? { type: 'tone' as const, toneIndex: i }
-            : { type: 'none' as const },
-          label: i < NUM_TONE_SLOTS
-            ? getToneLabel(i)
-            : '',
-        })),
-      })),
-
-    applyPresetNone: () =>
-      set((state) => ({
-        channels: state.channels.map((ch, i) => ({
-          ...ch,
-          inputSource: { type: 'none' as const },
-          label: `Ch ${i + 1}`,
-        })),
-      })),
 
     // Channel actions
     setChannelGain: (channelId, gainDb) =>
@@ -605,7 +572,7 @@ export const useMixerStore = create<MixerState>()(
     rewind: () => set({ transportState: 'stopped', currentTime: 0 }),
     setCurrentTime: (time) => set({ currentTime: time }),
     setDuration: (duration) => set({ duration }),
-    setStemsLoaded: (loaded) => set({ stemsLoaded: loaded }),
+    setTracksLoaded: (loaded) => set({ tracksLoaded: loaded }),
     setLoadingError: (error) => set({ loadingError: error }),
 
     initChannels: (_count, labels, inputTypes) =>
@@ -636,10 +603,10 @@ export const useMixerStore = create<MixerState>()(
         currentTime: 0,
         soloActive: false,
         loadingError: null,
-        // Keep discovered devices/stems and loaded duration metadata.
-        stemsLoaded: state.stemsLoaded,
+        // Keep discovered devices/tracks and loaded duration metadata.
+        tracksLoaded: state.tracksLoaded,
         duration: state.duration,
-        availableStems: state.availableStems,
+        availableTracks: state.availableTracks,
         availableLiveDevices: state.availableLiveDevices,
       })),
   }))

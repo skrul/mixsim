@@ -21,7 +21,7 @@ export const NUM_DCA_GROUPS = 8
 // ---- Channel input source ----
 
 export type ChannelInputSource =
-  | { type: 'stem'; stemIndex: number }
+  | { type: 'track'; trackIndex: number; channel?: 'left' | 'right' }
   | { type: 'tone'; toneIndex: number }
   | { type: 'live'; deviceId: string }
   | { type: 'none' }

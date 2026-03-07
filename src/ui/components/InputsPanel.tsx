@@ -160,9 +160,9 @@ export function InputsPanel({ compact: _compact }: InputsPanelProps) {
   }
 
   const renderSourceRow = (key: string, label: string, ch: typeof channels[number]) => {
-    const isLive = ch.inputSource.type === 'live'
-    const liveDeviceId = isLive ? ch.inputSource.deviceId : null
-    const liveChannel = isLive ? ch.inputSource.channel : undefined
+    const liveSrc = ch.inputSource.type === 'live' ? ch.inputSource : null
+    const liveDeviceId = liveSrc?.deviceId ?? null
+    const liveChannel = liveSrc?.channel
     const channelCount = liveDeviceId ? liveDeviceChannelCounts[liveDeviceId] : undefined
 
     return (
@@ -233,7 +233,7 @@ export function InputsPanel({ compact: _compact }: InputsPanelProps) {
             </optgroup>
           )}
         </select>
-        {isLive && liveDeviceId && channelCount != null && channelCount > 1 && (
+        {liveSrc && liveDeviceId && channelCount != null && channelCount > 1 && (
           <select
             className={styles.channelSelect}
             value={liveChannel !== undefined ? String(liveChannel) : '0'}

@@ -16,6 +16,12 @@
         { "url": "/stems/GeometriaChicken_Chasque_Full/11_ElecGtr4.mp3", "label": "Gtr 4", "inputType": "mic" },
         { "url": "/stems/GeometriaChicken_Chasque_Full/12_LeadVox.mp3", "label": "Lead Vox", "inputType": "mic" }
       ]
+    },
+    {
+      "title": "Background Tracks",
+      "tracks": [
+        { "url": "/background/sonican-fashion-house-fashion-music-490765.mp3", "label": "Fashion House - Sonican", "inputType": "mic" , "stereo": true }
+      ]
     }
   ]
 }

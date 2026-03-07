@@ -31,11 +31,9 @@ export function MonitorSection() {
         max={1}
         defaultValue={0.75}
         onChange={(v) => setMonitorLevel(v)}
-        label="Level"
-        formatValue={(v) => `${Math.round(v * 100)}%`}
+        showValue={false}
         helpText="Adjust the headphone monitor volume. This controls only what you hear in the headphones, not the main output or any bus outputs."
       />
-      <div className={styles.sourceLabel}>SOURCE</div>
       <div className={styles.sourceButtons}>
         {MONITOR_SOURCES.map(({ source, label }) => (
           <button

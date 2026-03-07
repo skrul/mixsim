@@ -797,7 +797,7 @@ export function createAudioEngine(): AudioEngine {
           // - None: reset to channel's configured inputType
           const ch = useMixerStore.getState().channels[i]
           let attenuationDb: number
-          if (inputSource.type === 'track' || inputSource.type === 'none') {
+          if (inputSource.type === 'track' || inputSource.type === 'device' || inputSource.type === 'none') {
             attenuationDb = INPUT_TYPE_CONFIG[ch?.inputType ?? 'direct'].attenuation
           } else {
             attenuationDb = 0

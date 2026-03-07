@@ -68,6 +68,10 @@ export interface MixerState {
   soloActive: boolean
   availableTracks: { index: number; label: string; songTitle: string; stereo: boolean }[]
   availableLiveDevices: { deviceId: string; label: string }[]
+  playbackDevice: {
+    trackIndex: number | null
+    playing: boolean
+  }
 
   // Input source actions
   setChannelInputSource: (channelId: number, source: ChannelInputSource) => void
@@ -137,6 +141,12 @@ export interface MixerState {
   rewind: () => void
   setCurrentTime: (time: number) => void
   setDuration: (duration: number) => void
+
+  // Playback device actions
+  setPlaybackDeviceTrack: (trackIndex: number | null) => void
+  playbackDevicePlay: () => void
+  playbackDeviceStop: () => void
+  playbackDeviceToggle: () => void
 
   // Loading actions
   setTracksLoaded: (loaded: boolean) => void
@@ -282,6 +292,7 @@ export const useMixerStore = create<MixerState>()(
     soloActive: false,
     availableTracks: [],
     availableLiveDevices: [],
+    playbackDevice: { trackIndex: null, playing: false },
 
     // Input source actions
     setChannelInputSource: (channelId, source) =>
@@ -301,6 +312,9 @@ export const useMixerStore = create<MixerState>()(
             break
           case 'live':
             label = state.availableLiveDevices.find((d) => d.deviceId === source.deviceId)?.label
+            break
+          case 'device':
+            label = source.channel === 'left' ? 'Player L' : 'Player R'
             break
           case 'none':
             label = ''
@@ -566,6 +580,16 @@ export const useMixerStore = create<MixerState>()(
         }
       }),
 
+    // Playback device
+    setPlaybackDeviceTrack: (trackIndex) =>
+      set((state) => ({ playbackDevice: { ...state.playbackDevice, trackIndex } })),
+    playbackDevicePlay: () =>
+      set((state) => ({ playbackDevice: { ...state.playbackDevice, playing: true } })),
+    playbackDeviceStop: () =>
+      set((state) => ({ playbackDevice: { ...state.playbackDevice, playing: false } })),
+    playbackDeviceToggle: () =>
+      set((state) => ({ playbackDevice: { ...state.playbackDevice, playing: !state.playbackDevice.playing } })),
+
     // Transport
     play: () => set({ transportState: 'playing' }),
     stop: () => set({ transportState: 'stopped' }),
@@ -608,6 +632,7 @@ export const useMixerStore = create<MixerState>()(
         duration: state.duration,
         availableTracks: state.availableTracks,
         availableLiveDevices: state.availableLiveDevices,
+        playbackDevice: state.playbackDevice,
       })),
   }))
 )

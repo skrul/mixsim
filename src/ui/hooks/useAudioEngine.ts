@@ -158,6 +158,30 @@ export function useAudioEngine() {
           }
         )
 
+        // Subscribe to playback device state changes
+        const unsubPlaybackDevice = useMixerStore.subscribe(
+          (state) => ({
+            trackIndex: state.playbackDevice.trackIndex,
+            playing: state.playbackDevice.playing,
+          }),
+          ({ trackIndex, playing }, prev) => {
+            if (playing && trackIndex !== null) {
+              // Start or restart if track changed while playing
+              if (!prev.playing || trackIndex !== prev.trackIndex) {
+                sm.startDevice(trackIndex)
+              }
+            } else {
+              // Stop if was playing
+              if (prev.playing) {
+                sm.stopDevice()
+              }
+            }
+          },
+          {
+            equalityFn: (a, b) => a.trackIndex === b.trackIndex && a.playing === b.playing,
+          }
+        )
+
         setIsReady(true)
 
         // Store unsubscribers for cleanup
@@ -167,6 +191,7 @@ export function useAudioEngine() {
             unsubTransport()
             unsubRewind()
             unsubSeek()
+            unsubPlaybackDevice()
             window.removeEventListener('pointerdown', resumeOnGesture)
             window.removeEventListener('keydown', resumeOnGesture)
             window.clearInterval(suspendedPoll)

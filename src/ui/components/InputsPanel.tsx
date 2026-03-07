@@ -27,6 +27,7 @@ function sourceToValue(source: ChannelInputSource): string {
     case 'track': return source.channel ? `track:${source.trackIndex}:${source.channel}` : `track:${source.trackIndex}`
     case 'tone': return `tone:${source.toneIndex}`
     case 'live': return `live:${source.deviceId}`
+    case 'device': return `device:${source.channel}`
     case 'none': return 'none'
   }
 }
@@ -38,6 +39,7 @@ function valueToSource(value: string): ChannelInputSource {
     case 'track': return { type: 'track', trackIndex: parseInt(indexStr, 10), ...(chan ? { channel: chan as 'left' | 'right' } : {}) }
     case 'tone': return { type: 'tone', toneIndex: parseInt(indexStr, 10) }
     case 'live': return { type: 'live', deviceId: value.slice(5) }
+    case 'device': return { type: 'device', channel: indexStr as 'left' | 'right' }
     default: return { type: 'none' }
   }
 }
@@ -132,6 +134,16 @@ export function InputsPanel({ compact }: InputsPanelProps) {
     saveSessionSnapshotToLocalStorage()
   }
 
+  const handleResetAll = () => {
+    for (let i = 0; i < NUM_ROWS; i++) {
+      const ch = channels[i]
+      if (ch && ch.inputSource.type !== 'none') {
+        setChannelInputSource(ch.id, { type: 'none' })
+      }
+    }
+    saveSessionSnapshotToLocalStorage()
+  }
+
   return (
     <>
       <button
@@ -155,15 +167,23 @@ export function InputsPanel({ compact }: InputsPanelProps) {
         >
           <div className={styles.popupHeader} onMouseDown={startDrag}>
             <div className={styles.popupTitle}>Inputs</div>
-            <button
-              className={styles.popupClose}
-              onClick={() => {
-                setIsOpen(false)
-                interactionRef.current = null
-              }}
-            >
-              Close
-            </button>
+            <div className={styles.popupHeaderButtons}>
+              <button
+                className={styles.popupClose}
+                onClick={handleResetAll}
+              >
+                Reset All
+              </button>
+              <button
+                className={styles.popupClose}
+                onClick={() => {
+                  setIsOpen(false)
+                  interactionRef.current = null
+                }}
+              >
+                Close
+              </button>
+            </div>
           </div>
           <div className={styles.popupBody}>
             {Array.from({ length: NUM_ROWS }, (_, i) => {
@@ -216,6 +236,10 @@ export function InputsPanel({ compact }: InputsPanelProps) {
                         </optgroup>
                       )
                     })()}
+                    <optgroup label="Player">
+                      <option value="device:left">Player L</option>
+                      <option value="device:right">Player R</option>
+                    </optgroup>
                     <optgroup label="Tones">
                       {Array.from({ length: NUM_TONE_SLOTS }, (_, j) => (
                         <option key={`tone:${j}`} value={`tone:${j}`}>

@@ -24,6 +24,7 @@ export type ChannelInputSource =
   | { type: 'track'; trackIndex: number; channel?: 'left' | 'right' }
   | { type: 'tone'; toneIndex: number }
   | { type: 'live'; deviceId: string }
+  | { type: 'device'; channel: 'left' | 'right' }
   | { type: 'none' }
 
 export const NUM_TONE_SLOTS = 8

@@ -19,6 +19,11 @@ interface TransportBarProps {
 
 export function TransportBar({ compact = false }: TransportBarProps) {
   const resetSurfaceState = useSurfaceStore((s) => s.resetSurfaceState)
+  const availableTracks = useMixerStore((s) => s.availableTracks)
+  const playbackDevice = useMixerStore((s) => s.playbackDevice)
+  const setPlaybackDeviceTrack = useMixerStore((s) => s.setPlaybackDeviceTrack)
+  const playbackDeviceToggle = useMixerStore((s) => s.playbackDeviceToggle)
+  const playbackDeviceStop = useMixerStore((s) => s.playbackDeviceStop)
   const transportState = useMixerStore((s) => s.transportState)
   const currentTime = useMixerStore((s) => s.currentTime)
   const duration = useMixerStore((s) => s.duration)
@@ -111,85 +116,134 @@ export function TransportBar({ compact = false }: TransportBarProps) {
   }
 
   return (
-    <div className={`${styles.transportBar} ${compact ? styles.compact : ''}`}>
+    <div className={compact ? styles.compactWrapper : `${styles.transportBar}`}>
       {compact ? (
         <>
-          <div className={styles.compactHeader}>TOOLS</div>
-          <div className={styles.compactGrid}>
-            <InputsPanel compact />
-            <button
-              className={`${styles.sourceModeButton} ${useSurfaceStore.getState().sourceMode === 'demo' ? styles.sourceModeButtonActive : ''}`}
-              onClick={handleDemoClick}
-              onMouseEnter={() => setHelpText('Load the preconfigured demo mix and start playback.')}
+          <div className={styles.compact}>
+            <div className={styles.compactHeader}>TOOLS</div>
+            <div className={styles.compactGrid}>
+              <InputsPanel compact />
+              <button
+                className={`${styles.sourceModeButton} ${useSurfaceStore.getState().sourceMode === 'demo' ? styles.sourceModeButtonActive : ''}`}
+                onClick={handleDemoClick}
+                onMouseEnter={() => setHelpText('Load the preconfigured demo mix and start playback.')}
+                onMouseLeave={() => setHelpText('')}
+              >
+                Demo
+              </button>
+              <button
+                className={styles.sessionButton}
+                onClick={saveSession}
+                onMouseEnter={() => setHelpText('Save the full mixer + control surface state to a JSON file.')}
+                onMouseLeave={() => setHelpText('')}
+              >
+                Save File
+              </button>
+              <button
+                className={styles.sessionButton}
+                onClick={() => sessionFileInputRef.current?.click()}
+                onMouseEnter={() => setHelpText('Load mixer + control surface state from a saved JSON file.')}
+                onMouseLeave={() => setHelpText('')}
+              >
+                Load File
+              </button>
+              <button
+                className={styles.dangerButton}
+                onClick={handleZeroBoard}
+                onMouseEnter={() => setHelpText('Reset the mixer and control surface to default zero state.')}
+                onMouseLeave={() => setHelpText('')}
+              >
+                Zero Board
+              </button>
+              <button
+                onClick={transportState === 'playing' ? stop : play}
+                disabled={!tracksLoaded}
+                className={`${styles.transportToggleButton} ${transportState !== 'playing' ? styles.playButton : ''}`}
+                onMouseEnter={() => setHelpText("Start or pause playback of track-assigned channels.")}
+                onMouseLeave={() => setHelpText('')}
+              >
+                {transportState === 'playing' ? '⏸ Pause' : '▶ Play'}
+              </button>
+            </div>
+            <div
+              className={styles.seekRow}
+              onMouseEnter={() => setHelpText('Drag to scrub through the loaded tracks.')}
               onMouseLeave={() => setHelpText('')}
             >
-              Demo
-            </button>
-            <button
-              className={styles.sessionButton}
-              onClick={saveSession}
-              onMouseEnter={() => setHelpText('Save the full mixer + control surface state to a JSON file.')}
-              onMouseLeave={() => setHelpText('')}
-            >
-              Save File
-            </button>
-            <button
-              className={styles.sessionButton}
-              onClick={() => sessionFileInputRef.current?.click()}
-              onMouseEnter={() => setHelpText('Load mixer + control surface state from a saved JSON file.')}
-              onMouseLeave={() => setHelpText('')}
-            >
-              Load File
-            </button>
-            <button
-              className={styles.dangerButton}
-              onClick={handleZeroBoard}
-              onMouseEnter={() => setHelpText('Reset the mixer and control surface to default zero state.')}
-              onMouseLeave={() => setHelpText('')}
-            >
-              Zero Board
-            </button>
-            <button
-              onClick={transportState === 'playing' ? stop : play}
-              disabled={!tracksLoaded}
-              className={`${styles.transportToggleButton} ${transportState !== 'playing' ? styles.playButton : ''}`}
-              onMouseEnter={() => setHelpText("Start or pause playback of track-assigned channels.")}
-              onMouseLeave={() => setHelpText('')}
-            >
-              {transportState === 'playing' ? '⏸ Pause' : '▶ Play'}
-            </button>
+              <input
+                type="range"
+                min={0}
+                max={Math.max(duration, 0.001)}
+                step={0.01}
+                value={Math.max(0, Math.min(isScrubbing ? scrubTime : currentTime, duration || 0))}
+                onChange={(e) => {
+                  if (!isScrubbing) commitSeek(e.target.value)
+                }}
+                onInput={handleSeekInput}
+                onPointerDown={() => setIsScrubbing(true)}
+                onPointerUp={(e) => {
+                  setIsScrubbing(false)
+                  commitSeek(e.currentTarget.value)
+                }}
+                onPointerCancel={(e) => {
+                  setIsScrubbing(false)
+                  commitSeek(e.currentTarget.value)
+                }}
+                disabled={!tracksLoaded || duration <= 0}
+                className={styles.seekBar}
+                aria-label="Playback position"
+              />
+            </div>
+            <div className={styles.timeDisplay}>
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </div>
           </div>
-          <div
-            className={styles.seekRow}
-            onMouseEnter={() => setHelpText('Drag to scrub through the loaded tracks.')}
-            onMouseLeave={() => setHelpText('')}
-          >
-            <input
-              type="range"
-              min={0}
-              max={Math.max(duration, 0.001)}
-              step={0.01}
-              value={Math.max(0, Math.min(isScrubbing ? scrubTime : currentTime, duration || 0))}
+          <div className={styles.compact}>
+            <div className={styles.compactHeader}>PLAYER</div>
+            <select
+              className={styles.playerSelect}
+              value={playbackDevice.trackIndex ?? ''}
               onChange={(e) => {
-                if (!isScrubbing) commitSeek(e.target.value)
+                const val = e.target.value
+                if (val === '') {
+                  playbackDeviceStop()
+                  setPlaybackDeviceTrack(null)
+                } else {
+                  setPlaybackDeviceTrack(parseInt(val, 10))
+                }
               }}
-              onInput={handleSeekInput}
-              onPointerDown={() => setIsScrubbing(true)}
-              onPointerUp={(e) => {
-                setIsScrubbing(false)
-                commitSeek(e.currentTarget.value)
-              }}
-              onPointerCancel={(e) => {
-                setIsScrubbing(false)
-                commitSeek(e.currentTarget.value)
-              }}
-              disabled={!tracksLoaded || duration <= 0}
-              className={styles.seekBar}
-              aria-label="Playback position"
-            />
-          </div>
-          <div className={styles.timeDisplay}>
-            {formatTime(currentTime)} / {formatTime(duration)}
+            >
+              <option value="">Select track...</option>
+              {(() => {
+                const songGroups: { title: string; tracks: typeof availableTracks }[] = []
+                for (const t of availableTracks) {
+                  const last = songGroups[songGroups.length - 1]
+                  if (last && last.title === t.songTitle) {
+                    last.tracks.push(t)
+                  } else {
+                    songGroups.push({ title: t.songTitle, tracks: [t] })
+                  }
+                }
+                return songGroups.map((group) => (
+                  <optgroup key={group.title} label={group.title}>
+                    {group.tracks.map((t) => (
+                      <option key={t.index} value={t.index}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              })()}
+            </select>
+            <button
+              className={`${styles.transportToggleButton} ${!playbackDevice.playing ? styles.playButton : ''}`}
+              disabled={playbackDevice.trackIndex === null}
+              onClick={playbackDeviceToggle}
+              onMouseEnter={() => setHelpText('Start or stop the aux player. Independent from the main transport.')}
+              onMouseLeave={() => setHelpText('')}
+            >
+              {playbackDevice.playing ? '⏹ Stop' : '▶ Play'}
+            </button>
           </div>
         </>
       ) : (

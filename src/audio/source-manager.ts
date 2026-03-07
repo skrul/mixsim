@@ -92,11 +92,17 @@ export class SourceManager {
   private trackBuffers: AudioBuffer[] = []
   private trackPlaying = false
   private trackOffset = 0
+  private deviceLeftOutput: GainNode
+  private deviceRightOutput: GainNode
+  private deviceSource: AudioBufferSourceNode | null = null
+  private deviceSplitter: ChannelSplitterNode | null = null
 
   constructor(context: AudioContext, channels: ChannelChain[]) {
     this.context = context
     this.channels = channels
     this.activeSources = new Array(channels.length).fill(null)
+    this.deviceLeftOutput = context.createGain()
+    this.deviceRightOutput = context.createGain()
   }
 
   setTrackBuffers(buffers: AudioBuffer[]): void {
@@ -132,6 +138,19 @@ export class SourceManager {
       case 'live':
         this.connectLive(index, source.deviceId)
         break
+      case 'device': {
+        const outputNode = source.channel === 'left' ? this.deviceLeftOutput : this.deviceRightOutput
+        const inputNode = this.channels[index].inputNode
+        outputNode.connect(inputNode)
+        this.activeSources[index] = {
+          type: 'device',
+          nodes: [],
+          stopFn: () => {
+            try { outputNode.disconnect(inputNode) } catch { /* already disconnected */ }
+          },
+        }
+        break
+      }
       case 'none':
         // Already torn down
         break
@@ -169,7 +188,43 @@ export class SourceManager {
     }
   }
 
+  startDevice(trackIndex: number): void {
+    this.stopDevice()
+    const buffer = this.trackBuffers[trackIndex]
+    if (!buffer) return
+
+    if (this.context.state === 'suspended') {
+      this.context.resume()
+    }
+
+    const source = this.context.createBufferSource()
+    source.buffer = buffer
+    source.loop = true
+
+    const splitter = this.context.createChannelSplitter(2)
+    source.connect(splitter)
+    splitter.connect(this.deviceLeftOutput, 0)
+    splitter.connect(this.deviceRightOutput, 1)
+
+    source.start()
+    this.deviceSource = source
+    this.deviceSplitter = splitter
+  }
+
+  stopDevice(): void {
+    if (this.deviceSource) {
+      try { this.deviceSource.stop() } catch { /* */ }
+      this.deviceSource.disconnect()
+      this.deviceSource = null
+    }
+    if (this.deviceSplitter) {
+      this.deviceSplitter.disconnect()
+      this.deviceSplitter = null
+    }
+  }
+
   dispose(): void {
+    this.stopDevice()
     for (let i = 0; i < this.channels.length; i++) {
       this.teardownChannel(i)
     }

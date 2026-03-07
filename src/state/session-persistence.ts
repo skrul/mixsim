@@ -11,6 +11,10 @@ interface SavedMixerState {
   dcaGroups: DcaGroupState[]
   master: MasterState
   monitor: MonitorState
+  playbackDevice?: {
+    trackIndex: number | null
+    playing: boolean
+  }
 }
 
 interface SavedSurfaceState {
@@ -54,6 +58,7 @@ export function createSnapshot(): SessionSnapshot {
       dcaGroups: mixer.dcaGroups,
       master: mixer.master,
       monitor: mixer.monitor,
+      playbackDevice: { trackIndex: mixer.playbackDevice.trackIndex, playing: false },
     },
     surface: {
       selectedFocus: surface.selectedFocus,
@@ -125,6 +130,7 @@ export function applySnapshot(snapshot: SessionSnapshot): void {
     monitor: mixer.monitor,
     transportState: 'stopped',
     soloActive: computeSoloActive({ ...mixer, channels: normalizedChannels }),
+    playbackDevice: mixer.playbackDevice ?? { trackIndex: null, playing: false },
   } as Partial<MixerState>)
 
   useSurfaceStore.setState({

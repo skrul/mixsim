@@ -20,18 +20,19 @@ export function MasterSection() {
         variant="select"
         square
       />
-      <div
-        className={styles.clearSoloWrapper}
-        onMouseEnter={() => setHelpText('Clear all active solos. Returns monitor to normal listening.')}
-        onMouseLeave={() => setHelpText('')}
-      >
-        <button
-          className={styles.clearSoloButton}
-          onClick={clearAllSolos}
-        />
-        <span className={styles.clearSoloLabel}>CLEAR SOLO</span>
+      <div className={styles.meterBox}>
+        <div
+          className={styles.clearSoloWrapper}
+          onMouseEnter={() => setHelpText('Clear all active solos. Returns monitor to normal listening.')}
+          onMouseLeave={() => setHelpText('')}
+        >
+          <button
+            className={styles.clearSoloButton}
+            onClick={clearAllSolos}
+          />
+          <span className={styles.clearSoloLabel}>CLEAR SOLO</span>
+        </div>
       </div>
-      <div className={styles.meterBox} />
       <ToggleButton
         active={master.solo}
         onClick={toggleMasterSolo}

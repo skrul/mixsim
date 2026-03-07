@@ -140,7 +140,7 @@
   height: 304px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 14px;
 }
 
 .sideMenu {
@@ -169,14 +169,13 @@
 }
 
 .displayBottom {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  width: var(--display-screen-width);
+  display: grid;
+  grid-template-columns: var(--display-screen-width) calc(626px - var(--display-screen-width));
+  align-items: center;
 }
 
 .encoders {
-  width: 100%;
+  flex: 0 0 var(--display-screen-width);
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 2px;
@@ -198,6 +197,15 @@
   cursor: not-allowed;
 }
 
+.encoderClickable {
+  cursor: pointer;
+}
+
+.encoderClickable:hover {
+  border-color: #e8ebf1;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.18);
+}
+
 .encoderCap {
   width: 11px;
   height: 11px;
@@ -209,12 +217,13 @@
 .navCluster {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 6px;
+  gap: 14px;
   align-items: start;
   margin-top: auto;
 }
 
 .inlinePopoutButton {
+  justify-self: center;
   height: 22px;
   border: 1px solid #6d7486;
   border-radius: 6px;
@@ -263,6 +272,20 @@
   gap: 3px;
 }
 
+.pageButtonWithLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.pageButtonLabel {
+  font-size: 7px;
+  font-weight: 700;
+  color: #9a9fb0;
+  letter-spacing: 0.3px;
+}
+
 .navButton {
   width: 28px;
   height: 22px;
@@ -273,6 +296,15 @@
   font-size: 12px;
   font-weight: 700;
   cursor: not-allowed;
+}
+
+.navButton:not(:disabled) {
+  cursor: pointer;
+}
+
+.navButton:not(:disabled):hover {
+  border-color: #a0a7b8;
+  background: #2e3342;
 }
 
 .notImplementedScreen {

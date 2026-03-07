@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { meterLevels } from '@/audio/metering'
 import { useMixerStore } from '@/state/mixer-store'
+import { useSurfaceStore } from '@/state/surface-store'
 import { DisplayHomeScreen } from './DisplayHomeScreen'
 import styles from './ControlPanel.module.css'
 
@@ -97,8 +98,42 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value))
 }
 
+function getLinkPair(channelId: number): [number, number] {
+  const oddId = channelId & ~1
+  return [oddId, oddId + 1]
+}
+
 export function ControlPanel() {
   const soloActive = useMixerStore((state) => state.soloActive)
+  const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
+  const linkDialog = useSurfaceStore((s) => s.linkDialog)
+  const showLinkDialog = useSurfaceStore((s) => s.showLinkDialog)
+  const dismissLinkDialog = useSurfaceStore((s) => s.dismissLinkDialog)
+  const channels = useMixerStore((s) => s.channels)
+  const linkChannels = useMixerStore((s) => s.linkChannels)
+  const unlinkChannel = useMixerStore((s) => s.unlinkChannel)
+
+  const handleLinkEncoderClick = () => {
+    const channel = channels[selectedChannel]
+    if (!channel) return
+    if (channel.linkedTo !== null) {
+      unlinkChannel(selectedChannel)
+    } else {
+      const [oddId, evenId] = getLinkPair(selectedChannel)
+      showLinkDialog(oddId, evenId)
+    }
+  }
+
+  const handlePageLeft = () => {
+    if (linkDialog.showing) dismissLinkDialog()
+  }
+
+  const handlePageRight = () => {
+    if (linkDialog.showing) {
+      linkChannels(linkDialog.channelA, linkDialog.channelB)
+      dismissLinkDialog()
+    }
+  }
   const [activePage, setActivePage] = useState<DisplayMenuKey>('HOME')
   const [displayPopupOpen, setDisplayPopupOpen] = useState(false)
   const [popupRect, setPopupRect] = useState<PopupRect>({
@@ -338,17 +373,26 @@ export function ControlPanel() {
             <div className={styles.navBlock}>
               <div className={styles.navLabel}>PAGE SELECT</div>
               <div className={styles.pageButtons}>
-                <button className={styles.navButton} disabled aria-label="Page left">◀</button>
-                <button className={styles.navButton} disabled aria-label="Page right">▶</button>
+                <div className={styles.pageButtonWithLabel}>
+                  <button
+                    className={styles.navButton}
+                    disabled={!linkDialog.showing}
+                    aria-label="Page left"
+                    onClick={handlePageLeft}
+                  >◀</button>
+                  <div className={styles.pageButtonLabel}>NO</div>
+                </div>
+                <div className={styles.pageButtonWithLabel}>
+                  <button
+                    className={styles.navButton}
+                    disabled={!linkDialog.showing}
+                    aria-label="Page right"
+                    onClick={handlePageRight}
+                  >▶</button>
+                  <div className={styles.pageButtonLabel}>YES</div>
+                </div>
               </div>
             </div>
-            <button
-              className={styles.inlinePopoutButton}
-              onClick={openDisplayPopup}
-              disabled={displayPopupOpen}
-            >
-              POP OUT
-            </button>
           </div>
         </div>
       </div>
@@ -356,11 +400,24 @@ export function ControlPanel() {
       <div className={styles.displayBottom}>
         <div className={styles.encoders}>
           {Array.from({ length: 6 }, (_, i) => (
-            <button key={i} className={styles.encoder} disabled aria-label={`Encoder ${i + 1}`}>
+            <button
+              key={i}
+              className={`${styles.encoder} ${i === 0 ? styles.encoderClickable : ''}`}
+              disabled={i !== 0}
+              aria-label={i === 0 ? 'Link' : `Encoder ${i + 1}`}
+              onClick={i === 0 ? handleLinkEncoderClick : undefined}
+            >
               <span className={styles.encoderCap} />
             </button>
           ))}
         </div>
+        <button
+          className={styles.inlinePopoutButton}
+          onClick={openDisplayPopup}
+          disabled={displayPopupOpen}
+        >
+          POP OUT
+        </button>
       </div>
     </div>
   )

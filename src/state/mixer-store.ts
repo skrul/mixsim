@@ -47,6 +47,7 @@ export interface ChannelState {
   inputSource: ChannelInputSource
   sends: SendState[]     // One per mix bus, length === NUM_MIX_BUSES
   dcaGroups: number[]    // Which DCA group IDs this channel belongs to
+  linkedTo: number | null // Partner channel ID when linked (odd+even pairs)
 }
 
 export type TransportState = 'stopped' | 'playing'
@@ -154,6 +155,10 @@ export interface MixerState {
   setTracksLoaded: (loaded: boolean) => void
   setLoadingError: (error: string | null) => void
 
+  // Link actions
+  linkChannels: (oddId: number, evenId: number) => void
+  unlinkChannel: (channelId: number) => void
+
   // Init
   initChannels: (count: number, labels: string[], inputTypes?: InputType[]) => void
   resetBoard: () => void
@@ -205,6 +210,7 @@ function createDefaultChannel(id: number, label: string, inputType: InputType = 
     inputSource: { type: 'none' },
     sends: Array.from({ length: NUM_MIX_BUSES }, () => ({ level: 0, preFader: true })),
     dcaGroups: [],
+    linkedTo: null,
   }
 }
 
@@ -263,15 +269,45 @@ function updateMixBus(
   }
 }
 
+const LINK_SYNCED_FIELDS = new Set<keyof ChannelState>([
+  'faderPosition', 'mute', 'gain', 'phantom48V', 'phaseInvert',
+  'hpfEnabled', 'hpfFreq', 'eqEnabled', 'eqLowFreq', 'eqLowGain',
+  'eqLowMidFreq', 'eqLowMidGain', 'eqHighMidFreq', 'eqHighMidGain',
+  'eqMidQ', 'eqHighFreq', 'eqHighGain', 'eqSelectedBand', 'eqModeIndex',
+  'gateEnabled', 'gateThreshold', 'compEnabled', 'compThreshold',
+  'sends', 'monoBus', 'monoLevel', 'mainLrBus', 'dcaGroups',
+])
+
 function updateChannel(
   state: MixerState,
   channelId: number,
   patch: Partial<ChannelState>
 ): Partial<MixerState> {
+  const source = state.channels.find((ch) => ch.id === channelId)
+  if (!source) return {}
+  const partnerId = source.linkedTo
+  let partnerPatch: Partial<ChannelState> | null = null
+  if (partnerId !== null) {
+    partnerPatch = {}
+    for (const key of Object.keys(patch) as (keyof ChannelState)[]) {
+      if (key === 'pan') {
+        partnerPatch.pan = -(patch.pan as number)
+      } else if (key === 'sends') {
+        partnerPatch.sends = (patch.sends as SendState[]).map((s) => ({ ...s }))
+      } else if (key === 'dcaGroups') {
+        partnerPatch.dcaGroups = [...(patch.dcaGroups as number[])]
+      } else if (LINK_SYNCED_FIELDS.has(key)) {
+        ;(partnerPatch as Record<string, unknown>)[key] = (patch as Record<string, unknown>)[key]
+      }
+    }
+    if (Object.keys(partnerPatch).length === 0) partnerPatch = null
+  }
   return {
-    channels: state.channels.map((ch) =>
-      ch.id === channelId ? { ...ch, ...patch } : ch
-    ),
+    channels: state.channels.map((ch) => {
+      if (ch.id === channelId) return { ...ch, ...patch }
+      if (partnerPatch && ch.id === partnerId) return { ...ch, ...partnerPatch }
+      return ch
+    }),
   }
 }
 
@@ -549,11 +585,26 @@ export const useMixerStore = create<MixerState>()(
         if (!ch || ch.dcaGroups.includes(dcaId)) return {}
         const dca = state.dcaGroups[dcaId]
         if (!dca) return {}
+        const channelIds = [channelId]
+        if (ch.linkedTo !== null) {
+          const partner = state.channels.find((c) => c.id === ch.linkedTo)
+          if (partner && !partner.dcaGroups.includes(dcaId)) channelIds.push(ch.linkedTo)
+        }
         return {
-          ...updateChannel(state, channelId, { dcaGroups: [...ch.dcaGroups, dcaId] }),
-          dcaGroups: state.dcaGroups.map((d, i) =>
-            i === dcaId ? { ...d, assignedChannels: [...d.assignedChannels, channelId] } : d
-          ),
+          channels: state.channels.map((c) => {
+            if (channelIds.includes(c.id) && !c.dcaGroups.includes(dcaId)) {
+              return { ...c, dcaGroups: [...c.dcaGroups, dcaId] }
+            }
+            return c
+          }),
+          dcaGroups: state.dcaGroups.map((d, i) => {
+            if (i !== dcaId) return d
+            const newAssigned = [...d.assignedChannels]
+            for (const id of channelIds) {
+              if (!newAssigned.includes(id)) newAssigned.push(id)
+            }
+            return { ...d, assignedChannels: newAssigned }
+          }),
         }
       }),
 
@@ -561,11 +612,19 @@ export const useMixerStore = create<MixerState>()(
       set((state) => {
         const ch = state.channels.find((c) => c.id === channelId)
         if (!ch) return {}
+        const channelIds = [channelId]
+        if (ch.linkedTo !== null) channelIds.push(ch.linkedTo)
         return {
-          ...updateChannel(state, channelId, { dcaGroups: ch.dcaGroups.filter((id) => id !== dcaId) }),
-          dcaGroups: state.dcaGroups.map((d, i) =>
-            i === dcaId ? { ...d, assignedChannels: d.assignedChannels.filter((id) => id !== channelId) } : d
-          ),
+          channels: state.channels.map((c) => {
+            if (channelIds.includes(c.id)) {
+              return { ...c, dcaGroups: c.dcaGroups.filter((id) => id !== dcaId) }
+            }
+            return c
+          }),
+          dcaGroups: state.dcaGroups.map((d, i) => {
+            if (i !== dcaId) return d
+            return { ...d, assignedChannels: d.assignedChannels.filter((id) => !channelIds.includes(id)) }
+          }),
         }
       }),
 
@@ -605,6 +664,59 @@ export const useMixerStore = create<MixerState>()(
     setDuration: (duration) => set({ duration }),
     setTracksLoaded: (loaded) => set({ tracksLoaded: loaded }),
     setLoadingError: (error) => set({ loadingError: error }),
+
+    // Link actions
+    linkChannels: (oddId, evenId) =>
+      set((state) => {
+        const odd = state.channels.find((c) => c.id === oddId)
+        const even = state.channels.find((c) => c.id === evenId)
+        if (!odd || !even) return {}
+        // Copy synced fields from odd to even, mirror pan
+        const syncedPatch: Partial<ChannelState> = { linkedTo: oddId }
+        for (const key of LINK_SYNCED_FIELDS) {
+          if (key === 'sends') {
+            syncedPatch.sends = odd.sends.map((s) => ({ ...s }))
+          } else if (key === 'dcaGroups') {
+            syncedPatch.dcaGroups = [...odd.dcaGroups]
+          } else {
+            ;(syncedPatch as Record<string, unknown>)[key] = odd[key]
+          }
+        }
+        syncedPatch.pan = -odd.pan // mirror pan
+        // Ensure DCA assignedChannels include both
+        const dcaGroups = state.dcaGroups.map((dca) => {
+          const hasOdd = dca.assignedChannels.includes(oddId)
+          const hasEven = dca.assignedChannels.includes(evenId)
+          if (hasOdd && !hasEven) {
+            return { ...dca, assignedChannels: [...dca.assignedChannels, evenId] }
+          }
+          if (hasEven && !hasOdd) {
+            return { ...dca, assignedChannels: [...dca.assignedChannels, oddId] }
+          }
+          return dca
+        })
+        return {
+          channels: state.channels.map((ch) => {
+            if (ch.id === oddId) return { ...ch, linkedTo: evenId }
+            if (ch.id === evenId) return { ...ch, ...syncedPatch }
+            return ch
+          }),
+          dcaGroups,
+        }
+      }),
+
+    unlinkChannel: (channelId) =>
+      set((state) => {
+        const ch = state.channels.find((c) => c.id === channelId)
+        if (!ch || ch.linkedTo === null) return {}
+        const partnerId = ch.linkedTo
+        return {
+          channels: state.channels.map((c) => {
+            if (c.id === channelId || c.id === partnerId) return { ...c, linkedTo: null }
+            return c
+          }),
+        }
+      }),
 
     initChannels: (_count, labels, inputTypes) =>
       set({

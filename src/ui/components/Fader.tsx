@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback, useLayoutEffect, useState } from 'react'
 import { faderPositionToDb } from '@/audio/fader-taper'
 import { useSurfaceStore } from '@/state/surface-store'
 import styles from './Fader.module.css'
@@ -17,6 +17,27 @@ export function Fader({ value, onChange, label, showDb = false, helpText }: Fade
   const isDragging = useRef(false)
   const dragOffset = useRef(0)
   const [dragging, setDragging] = useState(false)
+  const lastChangeTimeRef = useRef(0)
+  const followingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Detect rapid external value changes and disable transitions so the
+  // fader snaps to the new position instead of lagging behind.
+  useLayoutEffect(() => {
+    if (isDragging.current) return
+    const track = trackRef.current
+    if (!track) return
+    const now = performance.now()
+    const dt = now - lastChangeTimeRef.current
+    lastChangeTimeRef.current = now
+    if (dt < 160) {
+      track.classList.add(styles.following)
+    }
+    if (followingTimerRef.current !== null) clearTimeout(followingTimerRef.current)
+    followingTimerRef.current = setTimeout(() => {
+      track?.classList.remove(styles.following)
+      followingTimerRef.current = null
+    }, 250)
+  }, [value])
 
   const positionToValue = useCallback(
     (clientY: number): number => {

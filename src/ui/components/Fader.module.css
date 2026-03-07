@@ -49,7 +49,8 @@
   transition: height 0.15s ease-out;
 }
 
-.dragging .trackFill {
+.dragging .trackFill,
+.following .trackFill {
   transition: none;
 }
 
@@ -85,7 +86,8 @@
   transition: bottom 0.15s ease-out;
 }
 
-.dragging .thumb {
+.dragging .thumb,
+.following .thumb {
   transition: none;
 }
 

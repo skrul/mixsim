@@ -118,6 +118,7 @@ export function DisplayHomeScreen() {
   const outputBankLayer = useSurfaceStore((s) => s.outputBankLayer)
   const selectedOutputIndex = useSurfaceStore((s) => s.selectedOutputIndex)
   const selectedChannel = useSurfaceStore((s) => s.selectedChannel)
+  const linkDialog = useSurfaceStore((s) => s.linkDialog)
   const [clockText, setClockText] = useState({ hm: '12:00', sec: '00', ampm: 'AM' })
   const [inMeterLit, setInMeterLit] = useState(0)
   const [outMeterLit, setOutMeterLit] = useState(0)
@@ -433,7 +434,7 @@ export function DisplayHomeScreen() {
                     </div>
                   </div>
                   <div className={styles.tileLower}>
-                    <div className={`${styles.tileBadge} ${styles.tileBadgeOff}`}>LINK</div>
+                    <div className={`${styles.tileBadge} ${summary.channel.linkedTo !== null ? styles.tileBadgeActive : styles.tileBadgeOff}`}>LINK</div>
                     <div className={styles.tileValueBadge}>
                       {summary.channel.gain >= 0 ? '+' : ''}{summary.channel.gain.toFixed(1)}
                     </div>
@@ -742,7 +743,7 @@ export function DisplayHomeScreen() {
                   </div>
                 </div>
               </div>
-              <div className={styles.encoderBottom}>LINK</div>
+              <div className={`${styles.encoderBottom} ${summary.channel.linkedTo !== null ? styles.encoderBottomActive : ''}`}>LINK</div>
             </div>
 
             <div className={styles.encoderCell}>
@@ -852,6 +853,21 @@ export function DisplayHomeScreen() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {linkDialog.showing && (
+        <div className={styles.linkDialogOverlay}>
+          <div className={styles.linkDialogBox}>
+            <div className={styles.linkDialogTitle}>LINK</div>
+            <div className={styles.linkDialogMessage}>
+              Do you want to LINK Channel {linkDialog.channelA + 1} and Channel {linkDialog.channelB + 1}?
+            </div>
+            <div className={styles.linkDialogHint}>
+              <span>◀ NO</span>
+              <span>YES ▶</span>
             </div>
           </div>
         </div>

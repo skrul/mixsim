@@ -5,6 +5,12 @@ export type SendsOnFaderMode = 'bus' | 'channel'
 export type SelectedFocus = 'input' | 'output'
 export type SourceMode = 'normal' | 'demo'
 
+export interface LinkDialogState {
+  showing: boolean
+  channelA: number
+  channelB: number
+}
+
 export interface SurfaceState {
   selectedFocus: SelectedFocus
   selectedChannel: number
@@ -19,6 +25,7 @@ export interface SurfaceState {
   selectedOutputIndex: number
   sourceMode: SourceMode
   helpText: string
+  linkDialog: LinkDialogState
 
   setSelectedChannel: (channelId: number) => void
   setDcaAssignArmedId: (dcaId: number | null) => void
@@ -34,6 +41,8 @@ export interface SurfaceState {
   setSourceMode: (mode: SourceMode) => void
   resetSurfaceState: () => void
   setHelpText: (text: string) => void
+  showLinkDialog: (channelA: number, channelB: number) => void
+  dismissLinkDialog: () => void
 }
 
 export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
@@ -50,6 +59,7 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
   selectedOutputIndex: -1,
   sourceMode: 'normal',
   helpText: '',
+  linkDialog: { showing: false, channelA: 0, channelB: 1 },
 
   setSelectedChannel: (channelId) => set({ selectedFocus: 'input', selectedChannel: channelId, selectedOutputIndex: -1 }),
   setDcaAssignArmedId: (dcaId) => set({ dcaAssignArmedId: dcaId, busAssignArmedId: null }),
@@ -138,6 +148,11 @@ export const useSurfaceStore = create<SurfaceState>()((set, get) => ({
       selectedOutputIndex: -1,
       sourceMode: state.sourceMode,
       helpText: '',
+      linkDialog: { showing: false, channelA: 0, channelB: 1 },
     })),
   setHelpText: (text) => set({ helpText: text }),
+  showLinkDialog: (channelA, channelB) =>
+    set({ linkDialog: { showing: true, channelA, channelB } }),
+  dismissLinkDialog: () =>
+    set((state) => ({ linkDialog: { ...state.linkDialog, showing: false } })),
 }))

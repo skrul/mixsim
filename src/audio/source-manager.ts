@@ -376,7 +376,7 @@ export class SourceManager {
       if (!entry) {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            deviceId: deviceId ? { ideal: deviceId } : undefined,
+            deviceId: deviceId ? { exact: deviceId } : undefined,
             channelCount: { ideal: 32 },
             echoCancellation: false,
             noiseSuppression: false,

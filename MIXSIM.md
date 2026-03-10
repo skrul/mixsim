@@ -142,7 +142,7 @@ Process the main stereo output to simulate listening through a PA system in a re
 
 ## Build Phases
 
-### Phase 1a — Minimal Vertical Slice
+### Phase 1a — Minimal Vertical Slice ✅
 **Goal:** Audio playing through a basic mixer in the browser. Prove the core architecture works end-to-end before adding features.
 
 Deliverables:
@@ -155,7 +155,7 @@ Deliverables:
 - Basic peak metering using AnalyserNode (per-channel and master) with direct DOM updates (not React state)
 - Simple functional UI layout — no skinning yet, just usable controls in a row. Keep the UI/engine separation clean (state store as contract) but don't formalize a skin interface yet
 
-### Phase 1b — Input Channel Banks + Selected Channel Strip
+### Phase 1b — Input Channel Banks + Selected Channel Strip ✅
 **Goal:** Introduce the fundamental digital mixer paradigm: input channels are minimal (fader, mute, solo, select), and all detailed editing happens on a single shared channel strip that reflects whichever channel is currently selected. This is the defining UX pattern of the X32 and most digital mixers.
 
 Refer to the X32 Compact manual (`manuals/behringer_x32c_manual.pdf`) for the physical layout reference — particularly pages 5–8 which cover the operational overview, channel strip sections, input channel banks, and group/bus channel banks.
@@ -227,7 +227,7 @@ Deliverables:
 - Mix bus metering in MeteringManager
 - Meter component updated with `mixBus` source type
 
-### Phase 3 — X32 Visual Polish
+### Phase 3 — X32 Visual Polish ✅
 **Goal:** The mixer looks and feels like an X32, not just a functional prototype.
 
 Deliverables:
@@ -240,26 +240,28 @@ Deliverables:
 - Responsive layout that works well on a laptop screen
 - Performance profiling checkpoint
 
-### Phase 4 — Full Channel Strip Processing
-**Goal:** The selected channel strip matches X32 processing depth.
+### Phase 4 — Full Dynamics Processing
+**Goal:** The gate and compressor match X32 processing depth so students can learn what each control does.
+
+Currently the gate and compressor only expose threshold. All other parameters (ratio, attack, release, knee, range, hold) are hardcoded. Students can't learn dynamics processing without adjustable controls.
 
 Deliverables:
-- Upgrade EQ to 4-band parametric with interactive frequency response curve
-- Custom AudioWorklet: Gate with full controls and gain reduction metering
-- Custom AudioWorklet: Compressor with full controls and gain reduction metering
-- Drag-and-drop stem loading
-- MIDI controller support via Web MIDI API
-- **Input patching / configuration UI:** A setup screen where users can assign stems to input channels and configure per-channel input type (mic/line/direct)
+- **Full compressor controls:** Expose ratio, attack, release, knee via the native DynamicsCompressorNode AudioParams (all already supported by the node, just hardcoded today). Add a makeup gain GainNode after the compressor in the channel chain.
+- **Full gate controls:** Enhance the existing software gate (rAF-based peak detection + gain envelope) with attack, hold, release, and range parameters. Range controls the closed-gate attenuation level (-80 dB = fully closed, 0 dB = gate effectively off).
+- **Dynamics UI:** Expand the gate and compressor sections in ChannelDetailPanel with full knob layouts for all parameters. Update DisplayHomeScreen dynamics tiles with parameter readouts.
+- **Gain reduction metering:** Already partially implemented; ensure GR meters respond to all parameter changes.
 
-### Phase 5 — Virtual Venue
-**Goal:** Headphone monitoring that simulates a real room.
+### Phase 5 — Sound Check Simulation
+**Goal:** Give students a guided exercise that simulates the sound check workflow — the most common real-world mixing task.
+
+In a real sound check, the engineer goes through each input one at a time ("kick drum please"), sets gain and basic processing, then has the full band play to build the mix. This phase replicates that workflow using the existing solo/monitor infrastructure.
 
 Deliverables:
-- HRTF binaural processing on main output
-- ConvolverNode venue simulation with IR presets
-- Venue selector and room controls
-- Custom IR loading
-- A/B toggle for venue on/off
+- **Sound check panel:** A guided UI (popup panel, same pattern as InputsPanel) with step-by-step line check workflow
+- **Line check mode:** Automatically solos each channel in sequence. For each step, displays the channel name and a prompt (e.g., "Kick drum please"). Student adjusts gain, HPF, and basic EQ while hearing the isolated input. Back/Next navigation between steps.
+- **Full band mode:** After line check, clears all solos so the student can build the full mix
+- **Transport integration:** Auto-starts playback when line check begins; switches monitor to solo bus during line check, restores to main for full band
+- **Content:** Works with whatever stems are loaded (reads channel labels and input assignments). Dedicated sound check recordings (isolated instrument hits, vocal checks) can be sourced later for more realism.
 
 ### Phase 6 — Advanced Features
 **Goal:** Full training tool with session management.
@@ -267,39 +269,21 @@ Deliverables:
 Deliverables:
 - Scene/snapshot save and recall (save full mixer state to JSON)
 - Bus groups / subgroups
-- Matrix buses
-- Effects rack (at least: reverb send, delay send, chorus)
+- Effects rack parameter UI (reverb time, delay feedback, chorus rate — currently hardcoded)
 - Undo/redo for all mixer changes
-- Guided tutorials / challenges (e.g., "EQ this vocal to sit in the mix")
 - Export mix to WAV
 
-### Phase 7 — Live Show Simulation
-**Goal:** Simulate the full workflow of mixing a live performance, from load-in to the last song.
+## Deprioritized
 
-Deliverables:
-- **Scenario manifest format:** Extend stems.config.json (or a new format) to define a multi-phase scenario with timed events, multiple audio segments, and scripted problems
-- **Line check phase:** Pre-recorded one-at-a-time instrument hits and vocal "check check" per channel. Student practices gain staging each input individually before anything else plays.
-- **Sound check phase:** Musicians play together (a jam or run-through). Student dials in EQ, sets rough mix, configures monitors.
-- **Performance phase:** Full song(s) play with ambient crowd noise mixed in. Student maintains the mix in real time.
-- **Scripted problems:** Timed events that introduce realistic issues the student must diagnose and fix:
-  - Feedback buildup on a vocal mic (injected resonance on a channel)
-  - Mic cable failure (signal drops to silence or intermittent crackling)
-  - Vocalist moving off-axis (level/EQ change over time)
-  - Guitar amp volume creeping up (stem level gradually increases)
-  - Monitor bleed / stage volume issues
-  - Wireless mic dropout
-- **Scoring / feedback:** Optional post-show report
-- **Crowd noise ambience:** Background crowd audio that can vary
+The following items from the original plan are not on the near-term roadmap. They can be revisited as the project matures or curriculum needs change.
 
-### Phase 8 — Additional Console Skins
-**Goal:** Demonstrate the multi-console architecture and broaden the audience.
-
-Deliverables:
-- Refine the skin interface/contract based on lessons learned from the X32 skin
-- Build a second skin (Allen & Heath SQ or Yamaha TF are the strongest candidates)
-- Console selector in the app — switch between skins without reloading
-- Ensure all skins share the same underlying mixer state and audio engine
-- Document the skin API so others could contribute new skins
+- **Virtual Venue / Binaural (original Phase 5):** HRTF processing, convolution room simulation, venue IR presets. Complex to implement and marginal educational value compared to core mixing skills.
+- **Live Show Simulation (original Phase 7):** Full scripted scenario system with timed events, scripted problems (feedback, cable failures, etc.), scoring, and multi-phase performances. The sound check portion has been extracted into Phase 5 above. The full simulation system remains a future possibility.
+- **Additional Console Skins (original Phase 8):** Architecture supports multiple skins but there's no near-term need. Students use X32s in the classroom.
+- **MIDI controller support:** Students practice on laptops with mouse/trackpad. Physical MIDI controllers are an edge case for the target audience.
+- **Drag-and-drop stem loading:** Useful for instructors preparing custom content, but not critical while bundled demos suffice.
+- **Matrix buses:** The X32 has 6 matrix outputs for zone routing (lobby speakers, delay towers, etc.). Not yet part of the curriculum; can be added when needed.
+- **Guided tutorials / challenges:** Structured tasks like "EQ this vocal to sit in the mix" with success criteria. Valuable but requires significant content design work beyond the sound check simulation.
 
 ## Key Design Principles
 

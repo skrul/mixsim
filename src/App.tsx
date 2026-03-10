@@ -34,10 +34,20 @@ function App() {
     const unsubscribeMixer = useMixerStore.subscribe(scheduleSave)
     const unsubscribeSurface = useSurfaceStore.subscribe(scheduleSave)
 
+    const flushOnUnload = () => {
+      if (saveTimer !== null) {
+        window.clearTimeout(saveTimer)
+        saveTimer = null
+      }
+      saveSessionSnapshotToLocalStorage()
+    }
+    window.addEventListener('beforeunload', flushOnUnload)
+
     return () => {
       if (saveTimer !== null) {
         window.clearTimeout(saveTimer)
       }
+      window.removeEventListener('beforeunload', flushOnUnload)
       unsubscribeMixer()
       unsubscribeSurface()
     }

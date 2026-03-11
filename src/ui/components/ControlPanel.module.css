@@ -137,7 +137,6 @@
 
 .sideColumn {
   width: 76px;
-  height: 304px;
   display: flex;
   flex-direction: column;
   gap: 14px;

@@ -10,7 +10,7 @@ export interface TrackConfig {
 }
 
 export interface TrackManifest {
-  songs: { title: string; tracks: TrackConfig[] }[]
+  songs: { title: string; tracks: TrackConfig[]; snapshot?: string }[]
 }
 
 interface TrackData {

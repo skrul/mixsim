@@ -2,6 +2,7 @@
   "songs": [
     {
       "title": "Geometria Chicken - Chasque",
+      "snapshot": "/snapshots/chasque.json",
       "tracks": [
         { "url": "/stems/GeometriaChicken_Chasque_Full/01_Kick.mp3", "label": "Kick", "inputType": "mic" },
         { "url": "/stems/GeometriaChicken_Chasque_Full/02_SnareUp.mp3", "label": "Snare Up", "inputType": "mic" },
@@ -15,6 +16,37 @@
         { "url": "/stems/GeometriaChicken_Chasque_Full/10_ElecGtr3.mp3", "label": "Gtr 3", "inputType": "mic" },
         { "url": "/stems/GeometriaChicken_Chasque_Full/11_ElecGtr4.mp3", "label": "Gtr 4", "inputType": "mic" },
         { "url": "/stems/GeometriaChicken_Chasque_Full/12_LeadVox.mp3", "label": "Lead Vox", "inputType": "mic" }
+      ]
+    },
+    {
+      "title": "Melt - Fake Romantic",
+      "snapshot": "/snapshots/melt.json",
+      "tracks": [
+        { "url": "/stems/Melt - Fake Romantic/01_drums Kick In_M82.mp3", "label": "Kick In", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/02_drums Kick Out_TF51.mp3", "label": "Kick Out", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/03_drums Snare Top_M80sh.mp3", "label": "Snare Top", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/04_drums Snare Bottom_M81.mp3", "label": "Snare Btm", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/05_drums Hats_M60hyper.mp3", "label": "Hats", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/06_drums Rack Tom_M81sh.mp3", "label": "Rack Tom", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/07_drums Floor Tom_M81sh.mp3", "label": "Floor Tom", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/08_drums Ride_M60hyper.mp3", "label": "Ride", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/09_drums Crotch_M60.mp3", "label": "Crotch", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/10_drums OH_C12_L.mp3", "label": "OH L", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/10_drums OH_C12_R.mp3", "label": "OH R", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/11_Bass Amp_M82.mp3", "label": "Bass Amp", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/12_Bass DI_TDA-1.mp3", "label": "Bass DI", "inputType": "line" },
+        { "url": "/stems/Melt - Fake Romantic/13_E GTR a_M80.mp3", "label": "E Gtr A", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/14_E GTR b_TF11.mp3", "label": "E Gtr B", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/15_Nord_TDP-2_L.mp3", "label": "Nord L", "inputType": "line" },
+        { "url": "/stems/Melt - Fake Romantic/15_Nord_TDP-2_R.mp3", "label": "Nord R", "inputType": "line" },
+        { "url": "/stems/Melt - Fake Romantic/16_Vox Center_M81.mp3", "label": "Vox Center", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/17_Vox Left_M80.mp3", "label": "Vox Left", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/18_Vox Right_M80.mp3", "label": "Vox Right", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/19_Room M_U47.mp3", "label": "Room M", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/20_Room S_U48_L.mp3", "label": "Room S L", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/20_Room S_U48_R.mp3", "label": "Room S R", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/21_Rooms_251E_L.mp3", "label": "Rooms L", "inputType": "mic" },
+        { "url": "/stems/Melt - Fake Romantic/21_Rooms_251E_R.mp3", "label": "Rooms R", "inputType": "mic" }
       ]
     },
     {

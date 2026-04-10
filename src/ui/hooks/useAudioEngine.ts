@@ -64,6 +64,13 @@ export function useAudioEngine() {
           flatTracks.map((t, i) => ({ index: i, label: t.label, songTitle: t.songTitle, stereo: t.stereo ?? false }))
         )
 
+        // Populate song snapshots for songs that have a snapshot field
+        store.setSongSnapshots(
+          manifest.songs
+            .filter((s) => s.snapshot)
+            .map((s) => ({ title: s.title, snapshotUrl: s.snapshot! }))
+        )
+
         // Re-bind channel sources from store (handles restored sessions + fresh start)
         store.channels.forEach((ch, i) => {
           sm.setChannelSource(i, ch.inputSource)

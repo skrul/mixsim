@@ -76,6 +76,10 @@ export interface MixerState {
     trackIndex: number | null
     playing: boolean
   }
+  songSnapshots: { title: string; snapshotUrl: string }[]
+
+  // Song snapshot actions
+  setSongSnapshots: (snapshots: { title: string; snapshotUrl: string }[]) => void
 
   // Input source actions
   setChannelInputSource: (channelId: number, source: ChannelInputSource) => void
@@ -339,6 +343,10 @@ export const useMixerStore = create<MixerState>()(
     availableLiveDevices: [],
     liveDeviceChannelCounts: {},
     playbackDevice: { trackIndex: null, playing: false },
+    songSnapshots: [],
+
+    // Song snapshot actions
+    setSongSnapshots: (snapshots) => set({ songSnapshots: snapshots }),
 
     // Input source actions
     setChannelInputSource: (channelId, source) =>

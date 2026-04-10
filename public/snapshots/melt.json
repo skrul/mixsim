@@ -1,0 +1,4437 @@
+{
+  "version": 1,
+  "savedAt": "2026-04-10T05:42:06.450Z",
+  "mixer": {
+    "channels": [
+      {
+        "id": 0,
+        "label": "Kick In",
+        "color": "#ff4444",
+        "inputType": "direct",
+        "gain": -3.6767578124999996,
+        "faderPosition": 0.7859555885139867,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 12
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 1,
+        "label": "Kick Out",
+        "color": "#ff8800",
+        "inputType": "direct",
+        "gain": -4.2638671875,
+        "faderPosition": 0.7717422650681828,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 13
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 2,
+        "label": "Snare Top",
+        "color": "#ffcc00",
+        "inputType": "direct",
+        "gain": -4.3394531249999995,
+        "faderPosition": 0.7586000906356858,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 14
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 3,
+        "label": "Snare Btm",
+        "color": "#44cc44",
+        "inputType": "direct",
+        "gain": -5.6296874999999975,
+        "faderPosition": 0.7364767437069996,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 15
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 4,
+        "label": "Hats",
+        "color": "#44cccc",
+        "inputType": "direct",
+        "gain": -4.205859374999995,
+        "faderPosition": 0.7501544926461501,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 16
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 5,
+        "label": "Rack Tom",
+        "color": "#4488ff",
+        "inputType": "direct",
+        "gain": -5.016210937499998,
+        "faderPosition": 0.7760886581798706,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 17
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 6,
+        "label": "Floor Tom",
+        "color": "#cc44ff",
+        "inputType": "direct",
+        "gain": -4.938867187499999,
+        "faderPosition": 0.7406995427017674,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 18
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 7,
+        "label": "Ride",
+        "color": "#ff44cc",
+        "inputType": "direct",
+        "gain": -6.179882812499998,
+        "faderPosition": 0.7440365838586083,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 19
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 8,
+        "label": "Crotch",
+        "color": "#ff4444",
+        "inputType": "direct",
+        "gain": -5.286914062500002,
+        "faderPosition": 0.7121904997322128,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 20
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 9,
+        "label": "OH L",
+        "color": "#ff8800",
+        "inputType": "direct",
+        "gain": -6.4541015625,
+        "faderPosition": 0.7212540683063486,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 21
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 10,
+        "label": "OH R",
+        "color": "#ffcc00",
+        "inputType": "direct",
+        "gain": -4.4414062500000036,
+        "faderPosition": 0.7008816380340296,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 22
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 11,
+        "label": "Bass Amp",
+        "color": "#44cc44",
+        "inputType": "direct",
+        "gain": -6.188671874999996,
+        "faderPosition": 0.7057224076133977,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 23
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 12,
+        "label": "Bass DI",
+        "color": "#44cccc",
+        "inputType": "direct",
+        "gain": -3.7681640625000017,
+        "faderPosition": 0.7377126848761999,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 24
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 13,
+        "label": "E Gtr A",
+        "color": "#4488ff",
+        "inputType": "direct",
+        "gain": -5.188476562500002,
+        "faderPosition": 0.75033988382153,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 25
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 14,
+        "label": "E Gtr B",
+        "color": "#cc44ff",
+        "inputType": "direct",
+        "gain": -4.450195312499998,
+        "faderPosition": 0.7555308367321716,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 26
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 15,
+        "label": "Nord L",
+        "color": "#ff44cc",
+        "inputType": "direct",
+        "gain": -5.571679687500002,
+        "faderPosition": 0.7107691673876324,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 27
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 16,
+        "label": "Nord R",
+        "color": "#ff4444",
+        "inputType": "direct",
+        "gain": -4.7349609375,
+        "faderPosition": 0.7747909199522103,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 28
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 17,
+        "label": "Vox Center",
+        "color": "#ff8800",
+        "inputType": "direct",
+        "gain": -4.645312499999999,
+        "faderPosition": 0.7459728916903555,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 29
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 18,
+        "label": "Vox Left",
+        "color": "#ffcc00",
+        "inputType": "direct",
+        "gain": -5.689453125000002,
+        "faderPosition": 0.767952045482635,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 30
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 19,
+        "label": "Vox Right",
+        "color": "#44cc44",
+        "inputType": "direct",
+        "gain": -4.4396484375,
+        "faderPosition": 0.758085115148519,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 31
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 20,
+        "label": "Room M",
+        "color": "#44cccc",
+        "inputType": "direct",
+        "gain": -4.68046875,
+        "faderPosition": 0.7148477732459935,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 32
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 21,
+        "label": "Room S L",
+        "color": "#4488ff",
+        "inputType": "direct",
+        "gain": -5.253515624999998,
+        "faderPosition": 0.746570263255469,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 33
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 22,
+        "label": "Room S R",
+        "color": "#cc44ff",
+        "inputType": "direct",
+        "gain": -5.318554687500002,
+        "faderPosition": 0.7614839533638199,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 34
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 23,
+        "label": "Rooms L",
+        "color": "#ff44cc",
+        "inputType": "direct",
+        "gain": -6.329296874999997,
+        "faderPosition": 0.704877847814444,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 35
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 24,
+        "label": "Rooms R",
+        "color": "#ff4444",
+        "inputType": "direct",
+        "gain": -5.571679687499997,
+        "faderPosition": 0.7311003996209781,
+        "pan": -1,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "track",
+          "trackIndex": 36
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 25,
+        "label": "",
+        "color": "#ff8800",
+        "inputType": "direct",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 1,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 26,
+        "label": "",
+        "color": "#ffcc00",
+        "inputType": "direct",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": -1,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 27,
+        "label": "",
+        "color": "#44cc44",
+        "inputType": "direct",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 1,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 28,
+        "label": "",
+        "color": "#44cccc",
+        "inputType": "direct",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": -1,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 29,
+        "label": "",
+        "color": "#4488ff",
+        "inputType": "direct",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 1,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 30,
+        "label": "",
+        "color": "#cc44ff",
+        "inputType": "direct",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": -1,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 31,
+        "label": "",
+        "color": "#ff44cc",
+        "inputType": "direct",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 1,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 32,
+        "label": "",
+        "color": "#ff4444",
+        "inputType": "line",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 33,
+        "label": "",
+        "color": "#ff8800",
+        "inputType": "line",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 34,
+        "label": "Aux 3",
+        "color": "#ffcc00",
+        "inputType": "line",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 35,
+        "label": "Aux 4",
+        "color": "#44cc44",
+        "inputType": "line",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 36,
+        "label": "Aux 5",
+        "color": "#44cccc",
+        "inputType": "line",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 37,
+        "label": "Aux 6",
+        "color": "#4488ff",
+        "inputType": "line",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 38,
+        "label": "USB L",
+        "color": "#cc44ff",
+        "inputType": "line",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      },
+      {
+        "id": 39,
+        "label": "USB R",
+        "color": "#ff44cc",
+        "inputType": "line",
+        "gain": -12,
+        "faderPosition": 0,
+        "pan": 0,
+        "mute": false,
+        "solo": false,
+        "gateEnabled": false,
+        "gateThreshold": -58,
+        "compEnabled": false,
+        "compThreshold": -25.5,
+        "phantom48V": false,
+        "phaseInvert": false,
+        "hpfEnabled": false,
+        "hpfFreq": 100,
+        "eqEnabled": false,
+        "eqLowFreq": 200,
+        "eqLowGain": 0,
+        "eqLowMidFreq": 400,
+        "eqLowMidGain": 0,
+        "eqHighMidFreq": 3000,
+        "eqHighMidGain": 0,
+        "eqMidQ": 1,
+        "eqHighFreq": 6000,
+        "eqHighGain": 0,
+        "eqSelectedBand": "highMid",
+        "eqModeIndex": 0,
+        "monoBus": false,
+        "monoLevel": 0.75,
+        "mainLrBus": true,
+        "inputSource": {
+          "type": "none"
+        },
+        "sends": [
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          },
+          {
+            "level": 0,
+            "preFader": true
+          }
+        ],
+        "dcaGroups": [],
+        "linkedTo": null
+      }
+    ],
+    "mixBuses": [
+      {
+        "id": 0,
+        "label": "Mix 1",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 1,
+        "label": "Mix 2",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 2,
+        "label": "Mix 3",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 3,
+        "label": "Mix 4",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 4,
+        "label": "Mix 5",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 5,
+        "label": "Mix 6",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 6,
+        "label": "Mix 7",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 7,
+        "label": "Mix 8",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 8,
+        "label": "Mix 9",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 9,
+        "label": "Mix 10",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 10,
+        "label": "Mix 11",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 11,
+        "label": "Mix 12",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 12,
+        "label": "FX 1",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 13,
+        "label": "FX 2",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 14,
+        "label": "FX 3",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      },
+      {
+        "id": 15,
+        "label": "FX 4",
+        "faderPosition": 0,
+        "mute": false,
+        "solo": false
+      }
+    ],
+    "dcaGroups": [
+      {
+        "id": 0,
+        "label": "DCA 1",
+        "faderPosition": 0.75,
+        "mute": false,
+        "solo": false,
+        "assignedChannels": []
+      },
+      {
+        "id": 1,
+        "label": "DCA 2",
+        "faderPosition": 0.75,
+        "mute": false,
+        "solo": false,
+        "assignedChannels": []
+      },
+      {
+        "id": 2,
+        "label": "DCA 3",
+        "faderPosition": 0.75,
+        "mute": false,
+        "solo": false,
+        "assignedChannels": []
+      },
+      {
+        "id": 3,
+        "label": "DCA 4",
+        "faderPosition": 0.75,
+        "mute": false,
+        "solo": false,
+        "assignedChannels": []
+      },
+      {
+        "id": 4,
+        "label": "DCA 5",
+        "faderPosition": 0.75,
+        "mute": false,
+        "solo": false,
+        "assignedChannels": []
+      },
+      {
+        "id": 5,
+        "label": "DCA 6",
+        "faderPosition": 0.75,
+        "mute": false,
+        "solo": false,
+        "assignedChannels": []
+      },
+      {
+        "id": 6,
+        "label": "DCA 7",
+        "faderPosition": 0.75,
+        "mute": false,
+        "solo": false,
+        "assignedChannels": []
+      },
+      {
+        "id": 7,
+        "label": "DCA 8",
+        "faderPosition": 0.75,
+        "mute": false,
+        "solo": false,
+        "assignedChannels": []
+      }
+    ],
+    "master": {
+      "faderPosition": 0.769084991554402,
+      "solo": false
+    },
+    "monitor": {
+      "source": "main",
+      "level": 0.75
+    },
+    "playbackDevice": {
+      "trackIndex": null,
+      "playing": false
+    }
+  },
+  "surface": {
+    "selectedFocus": "input",
+    "selectedChannel": 0,
+    "activeInputLayer": 0,
+    "outputBankLayer": "buses",
+    "activeBusLayer": 0,
+    "sendsOnFader": false,
+    "sendsOnFaderMode": "bus",
+    "sendTargetBus": 0,
+    "selectedOutputIndex": -1,
+    "sourceMode": "demo"
+  }
+}

@@ -5,8 +5,6 @@ import { exportSessionSnapshot, importSessionSnapshot } from '@/state/session-pe
 import { InputsPanel } from './InputsPanel'
 import styles from './TransportBar.module.css'
 
-const DEMO_SNAPSHOT_URL = '/demo-session.json'
-
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
@@ -28,6 +26,7 @@ export function TransportBar({ compact = false }: TransportBarProps) {
   const currentTime = useMixerStore((s) => s.currentTime)
   const duration = useMixerStore((s) => s.duration)
   const tracksLoaded = useMixerStore((s) => s.tracksLoaded)
+  const songSnapshots = useMixerStore((s) => s.songSnapshots)
   const resetBoard = useMixerStore((s) => s.resetBoard)
   const play = useMixerStore((s) => s.play)
   const stop = useMixerStore((s) => s.stop)
@@ -101,17 +100,17 @@ export function TransportBar({ compact = false }: TransportBarProps) {
     return true
   }
 
-  const handleDemoClick = async () => {
+  const handleLoadSong = async (snapshotUrl: string) => {
     try {
-      const response = await fetch(DEMO_SNAPSHOT_URL, { cache: 'no-store' })
+      const response = await fetch(snapshotUrl, { cache: 'no-store' })
       if (!response.ok) {
-        setHelpText('Demo file not found. Add /public/demo-session.json to the repo.')
+        setHelpText('Snapshot file not found.')
         return
       }
       const raw = await response.text()
       activateDemoSnapshot(raw)
     } catch {
-      setHelpText('Failed to load demo-session.json.')
+      setHelpText('Failed to load song snapshot.')
     }
   }
 
@@ -123,14 +122,6 @@ export function TransportBar({ compact = false }: TransportBarProps) {
             <div className={styles.compactHeader}>TOOLS</div>
             <div className={styles.compactGrid}>
               <InputsPanel compact />
-              <button
-                className={`${styles.sourceModeButton} ${useSurfaceStore.getState().sourceMode === 'demo' ? styles.sourceModeButtonActive : ''}`}
-                onClick={handleDemoClick}
-                onMouseEnter={() => setHelpText('Load the preconfigured demo mix and start playback.')}
-                onMouseLeave={() => setHelpText('')}
-              >
-                Demo
-              </button>
               <button
                 className={styles.sessionButton}
                 onClick={saveSession}
@@ -165,6 +156,23 @@ export function TransportBar({ compact = false }: TransportBarProps) {
                 {transportState === 'playing' ? '⏸ Pause' : '▶ Play'}
               </button>
             </div>
+            {songSnapshots.length > 0 && (
+              <select
+                className={styles.loadSongSelect}
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) handleLoadSong(e.target.value)
+                  e.target.value = ''
+                }}
+                onMouseEnter={() => setHelpText('Load a preconfigured mix for a song and enter demo mode.')}
+                onMouseLeave={() => setHelpText('')}
+              >
+                <option value="" disabled>Load Song…</option>
+                {songSnapshots.map((s) => (
+                  <option key={s.title} value={s.snapshotUrl}>{s.title}</option>
+                ))}
+              </select>
+            )}
             <div
               className={styles.seekRow}
               onMouseEnter={() => setHelpText('Drag to scrub through the loaded tracks.')}
@@ -249,14 +257,23 @@ export function TransportBar({ compact = false }: TransportBarProps) {
       ) : (
         <>
           <InputsPanel />
-          <button
-            className={`${styles.sourceModeButton} ${useSurfaceStore.getState().sourceMode === 'demo' ? styles.sourceModeButtonActive : ''}`}
-            onClick={handleDemoClick}
-            onMouseEnter={() => setHelpText('Load the preconfigured demo mix and start playback.')}
-            onMouseLeave={() => setHelpText('')}
-          >
-            Demo
-          </button>
+          {songSnapshots.length > 0 && (
+            <select
+              className={styles.loadSongSelect}
+              value=""
+              onChange={(e) => {
+                if (e.target.value) handleLoadSong(e.target.value)
+                e.target.value = ''
+              }}
+              onMouseEnter={() => setHelpText('Load a preconfigured mix for a song and enter demo mode.')}
+              onMouseLeave={() => setHelpText('')}
+            >
+              <option value="" disabled>Load Song…</option>
+              {songSnapshots.map((s) => (
+                <option key={s.title} value={s.snapshotUrl}>{s.title}</option>
+              ))}
+            </select>
+          )}
           <div className={styles.separator} />
           <button
             className={styles.sessionButton}

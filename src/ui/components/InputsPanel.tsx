@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
+import { Fragment, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { useMixerStore } from '@/state/mixer-store'
 import { useSurfaceStore } from '@/state/surface-store'
 import { NUM_INPUT_CHANNELS, NUM_AUX_CHANNELS, NUM_TONE_SLOTS, type ChannelInputSource } from '@/state/mixer-model'
@@ -6,7 +6,7 @@ import { getToneLabel } from '@/audio/source-manager'
 import { saveSessionSnapshotToLocalStorage } from '@/state/session-persistence'
 import styles from './InputsPanel.module.css'
 
-const NUM_ROWS = 16
+const NUM_ROWS = NUM_INPUT_CHANNELS
 const AUX_ROW_LABELS = ['Aux 1', 'Aux 2', 'Aux 3', 'Aux 4', 'Aux 5', 'Aux 6', 'USB L', 'USB R']
 
 interface PopupRect {
@@ -59,7 +59,7 @@ export function InputsPanel({ compact: _compact }: InputsPanelProps) {
   const [popupRect, setPopupRect] = useState<PopupRect>({
     x: 72,
     y: 72,
-    width: 360,
+    width: 440,
     height: 520,
   })
   const interactionRef = useRef<PopupInteraction | null>(null)
@@ -193,14 +193,14 @@ export function InputsPanel({ compact: _compact }: InputsPanelProps) {
                     </option>
                     {group.tracks.map((t) =>
                       t.stereo ? (
-                        <React.Fragment key={`track:${t.index}`}>
+                        <Fragment key={`track:${t.index}`}>
                           <option value={`track:${t.index}:left`}>
                             {'  ' + truncateLabel(t.label) + ' L'}
                           </option>
                           <option value={`track:${t.index}:right`}>
                             {'  ' + truncateLabel(t.label) + ' R'}
                           </option>
-                        </React.Fragment>
+                        </Fragment>
                       ) : (
                         <option key={`track:${t.index}`} value={`track:${t.index}`}>
                           {'  ' + truncateLabel(t.label)}
